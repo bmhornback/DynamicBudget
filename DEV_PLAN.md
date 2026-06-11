@@ -2,6 +2,7 @@
 
 > **App:** MoveMath (repo: DynamicBudget)
 > **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind CSS 4
+> **Deployment target:** Static web app — fully self-hosted in the browser, no server required. `npm run build` outputs to `out/` and can be served via GitHub Pages, any static host, or opened directly as a local file. Follows the same pattern as [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
 > **Purpose:** A client-side personal finance tool that takes an annual salary, estimates taxes, ensures savings, and lets the user dynamically budget every remaining dollar.
 
 ---
@@ -70,7 +71,7 @@
 
 **Medium-term (v1.5 — "Grow It"):** Add visualization, multi-scenario comparison, export, and light sharing capabilities so it is useful to share with others.
 
-**Long-term (v2.0 — "Platform"):** Optional cloud sync, user accounts, and a public landing page/marketing presence.
+**Long-term (v2.0 — "Platform"):** Optional BaaS-powered cloud sync (Supabase/Firebase), a public landing page, and marketing presence. Because the app is fully static, any cloud features must use third-party BaaS — there is no custom backend server.
 
 ---
 
@@ -115,6 +116,13 @@ inputs → calculateBudgetBreakdown → calculateBudgetHealthScore
 
 All calculation functions are pure and side-effect-free, which makes them trivially unit-testable.
 
+**Static export:** `next.config.ts` sets `output: "export"`. Running `npm run build` produces an `out/` directory of plain HTML, CSS, and JS — no Node server required at runtime. The app can be:
+- Hosted on **GitHub Pages** (free, zero-config with a `gh-pages` branch or `docs/` folder)
+- Deployed to any static CDN (Netlify, Vercel static, S3 + CloudFront)
+- Opened directly from the local filesystem
+
+This matches the self-hosted browser pattern used by [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
+
 ---
 
 ## 4. Epic Index
@@ -128,7 +136,7 @@ All calculation functions are pure and side-effect-free, which makes them trivia
 | 5 | Advanced Budget Features | 🟡 Medium | v1.5 |
 | 6 | UX Polish & Accessibility | 🟠 High | v1.0 |
 | 7 | Export & Sharing | 🟡 Medium | v1.5 |
-| 8 | Backend & Cloud Sync | 🟢 Low | v2.0 |
+| 8 | Backend & Cloud Sync (BaaS, optional) | 🟢 Low | v2.0 |
 | 9 | Growth & Discovery | 🟢 Low | v2.0 |
 
 ---
@@ -178,6 +186,12 @@ All calculation functions are pure and side-effect-free, which makes them trivia
 - Steps: install, lint, build, test
 - Run on every push and pull request
 - Cache `node_modules` and Next.js build cache
+
+### E1-T7b · GitHub Pages deployment workflow
+- Create `.github/workflows/deploy.yml` triggered on push to `main`
+- Steps: install → `npm run build` → deploy `out/` to GitHub Pages
+- Use the official `actions/deploy-pages` action
+- Enables zero-infrastructure hosting: the repo itself serves the app
 
 ### E1-T8 · ESLint & strict TypeScript tightening
 - Enable `"strict": true` in `tsconfig.json` (already `"strict": true` — verify no violations)
@@ -453,25 +467,27 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ---
 
-## Epic 8 — Backend & Cloud Sync (Phase 2)
+## Epic 8 — Backend & Cloud Sync (BaaS, optional)
 
-**Goal:** Optional user accounts for cross-device sync and budget history.
+**Goal:** Optional cross-device sync and budget history via a third-party BaaS — no custom server.
 
-> **Note:** This epic is Phase 2 and should not be started until v1.0 core features are solid. Consider using a BaaS (Supabase, Firebase, Clerk + PlanetScale) to avoid building auth from scratch.
+> **Static-first constraint:** The app is a fully static web app (see Architecture section). There are no Next.js API routes and no custom backend server. Any cloud features in this epic must be implemented using a client-side BaaS SDK (Supabase JS client, Firebase SDK, etc.) that the static bundle calls directly.
+>
+> **Note:** This epic is Phase 2 and should not be started until v1.0 core features are solid.
 
 ### E8-T1 · Authentication
-- Implement sign-in with GitHub OAuth and/or Google OAuth via Clerk or NextAuth.js
+- Implement sign-in with GitHub OAuth and/or Google OAuth via Supabase Auth or Firebase Auth
 - Unauthenticated users keep full local functionality (localStorage)
 - "Sign in to sync" CTA in the header
 
-### E8-T2 · Cloud budget storage API
-- Next.js API routes (`/api/budgets`) backed by Postgres (Supabase) or Firestore
+### E8-T2 · Cloud budget storage
+- Use Supabase (Postgres + Row Level Security) or Firestore as the client-side data store
 - CRUD: create, read, update, delete named budgets
-- User's budgets are private by default
+- User's budgets are private by default (enforced by BaaS RLS rules)
 
 ### E8-T3 · Real-time sync
 - Optimistic updates on budget change
-- Debounced auto-save to backend (3s idle)
+- Debounced auto-save to BaaS (3s idle)
 - Conflict resolution: "last write wins" for MVP
 
 ### E8-T4 · Budget history / versions
