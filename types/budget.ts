@@ -2,7 +2,14 @@
 
 export type FilingStatus = 'single' | 'married_jointly' | 'head_of_household';
 
-export type StateOfResidence = 'CA' | 'GA' | 'no_state_tax' | string;
+export type StateOfResidence =
+  | 'AL' | 'AK' | 'AZ' | 'AR' | 'CA' | 'CO' | 'CT' | 'DE' | 'DC'
+  | 'FL' | 'GA' | 'HI' | 'ID' | 'IL' | 'IN' | 'IA' | 'KS' | 'KY'
+  | 'LA' | 'ME' | 'MD' | 'MA' | 'MI' | 'MN' | 'MS' | 'MO' | 'MT'
+  | 'NE' | 'NV' | 'NH' | 'NJ' | 'NM' | 'NY' | 'NC' | 'ND' | 'OH'
+  | 'OK' | 'OR' | 'PA' | 'RI' | 'SC' | 'SD' | 'TN' | 'TX' | 'UT'
+  | 'VT' | 'VA' | 'WA' | 'WV' | 'WI' | 'WY'
+  | 'no_state_tax';
 
 export type CarSituation = 'owned_outright' | 'car_loan' | 'car_lease' | 'no_car';
 
