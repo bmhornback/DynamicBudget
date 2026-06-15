@@ -577,14 +577,14 @@ export function stateIncomeTaxEstimate(
   if (!config || config.type === 'none') return 0;
 
   if (config.type === 'flat') {
-    return taxableIncome * config.rate!;
+    return taxableIncome * (config.rate ?? 0);
   }
 
   // bracket
   const brackets =
     filingStatus === 'married_jointly' && config.bracketsMFJ
       ? config.bracketsMFJ
-      : config.bracketsSingle!;
+      : (config.bracketsSingle ?? []);
   return applyBrackets(taxableIncome, brackets);
 }
 
