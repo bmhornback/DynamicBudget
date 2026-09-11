@@ -61,7 +61,41 @@ export default function MoveMathPage() {
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleChange = useCallback((updates: Partial<BudgetInputs>) => {
     setInputs((prev) => {
-      const next = { ...prev, ...updates };
+      let next = { ...prev, ...updates };
+      
+      // Auto-lock individual savings fields when entering percentage mode
+      // to prevent confusion about which fields are actually used
+      if (updates.isSavingsByPercentage === true && !prev.isSavingsByPercentage) {
+        const savingsFields = [
+          'emergencyFundContribution',
+          'houseDownPaymentContribution',
+          'taxableInvestments',
+          'generalCashSavings',
+          'extraDebtPayoff',
+        ];
+        const newLockedFields = { ...next.lockedFields };
+        savingsFields.forEach(field => {
+          newLockedFields[field] = true;
+        });
+        next = { ...next, lockedFields: newLockedFields };
+      }
+      
+      // Auto-unlock individual savings fields when exiting percentage mode
+      if (updates.isSavingsByPercentage === false && prev.isSavingsByPercentage) {
+        const savingsFields = [
+          'emergencyFundContribution',
+          'houseDownPaymentContribution',
+          'taxableInvestments',
+          'generalCashSavings',
+          'extraDebtPayoff',
+        ];
+        const newLockedFields = { ...next.lockedFields };
+        savingsFields.forEach(field => {
+          delete newLockedFields[field];
+        });
+        next = { ...next, lockedFields: newLockedFields };
+      }
+      
       if (prev.budgetMode === 'auto') {
         const result = rebalanceBudget(next, next.rebalanceStrategy, next.surplusAllocation);
         setRebalanceResult(result);
