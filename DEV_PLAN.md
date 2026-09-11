@@ -35,7 +35,7 @@
 | Area | Status |
 |---|---|
 | Single-page Next.js app (`/`) | ✅ Done |
-| Income & tax estimation (federal 2026 + CA 2026 + GA + no-tax states) | ✅ Done |
+| Income & tax estimation (federal 2026 + all 50 states + DC) | ✅ Done |
 | Full expense input form (housing, utilities, transport, pets, food, health, lifestyle) | ✅ Done |
 | Savings & investing fields (fixed amounts OR percentage-based) | ✅ Done |
 | Auto/Manual budget modes | ✅ Done |
@@ -52,15 +52,22 @@
 | Export / import JSON | ✅ Done |
 | Test suite | ✅ Jest (73 tests passing) |
 | CI/CD | ❌ None |
-| Additional tax states (all 50) | ❌ Only CA, GA, no-state-tax |
+| Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ❌ Not differentiated |
 | HSA / FSA | ❌ Not modeled |
 | Multi-scenario comparison | ❌ Not available |
 | Debt amortization | ❌ Only flat extra-payment field |
 
-### New in This Release (v0.9.3)
+### New in This Release (v1.0.0)
 
-✨ **2026 Tax Tables & Percentage-Based Savings**
+✨ **Complete Tax Coverage for All 50 US States + DC**
+- Full tax bracket and rate tables for all 50 states plus District of Columbia (51 jurisdictions total)
+- 2026 Federal tax brackets with IRS inflation adjustments
+- State-specific progressive brackets, flat rates, or no-income-tax configurations
+- Accurate tax modeling for relocation scenarios across any US state
+- Zero estimation gaps — no "simplified assumptions" or defaults
+
+✨ **2026 Tax Tables & Percentage-Based Savings** (v0.9.3 features)
 - 2026 Federal tax brackets updated with inflation adjustments
 - 2026 California state tax brackets updated
 - Georgia confirmed at 5.49% flat tax
@@ -75,7 +82,7 @@
 - Scenario preset matching in `page.tsx` uses fragile field-comparison heuristics instead of preset ID lookup.
 - No error boundaries — a bad input can throw unhandled.
 - 2027 tax brackets not yet published by IRS (typically available late 2026).
-- Only CA and GA have state-specific tax calculations; other states use simplified flat/bracket estimates from 2024.
+- County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
 
 ---
 
@@ -606,4 +613,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-11 — 2026 tax tables, percentage-based savings feature, test suite completion.*
+*Last updated: 2026-09-11 — v1.0.0 release: All 50 states + DC tax tables, 2026 tax brackets, percentage-based savings feature.*

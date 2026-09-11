@@ -7,7 +7,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ## Features
 
 ### Core Capabilities
-- 📊 **Real-world tax modeling** — 2026 Federal, state (CA, GA, no-tax states), payroll, and bonus taxation
+- 📊 **Real-world tax modeling** — 2026 Federal, state (all 50 US states + DC), payroll, and bonus taxation
 - 💰 **Comprehensive expense tracking** — Housing, utilities, transport, pets, food, health, lifestyle, and more
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
@@ -27,11 +27,11 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 ### Upcoming Features
-- 🌎 Support for 10+ US states
-- 💳 Roth vs. Traditional IRA distinction, HSA support
+- 💳 Roth vs. Traditional IRA distinction, HSA/FSA support
 - 📤 Export to PDF/CSV, share budgets via link
 - 📋 Multi-scenario comparison
 - 🏠 Debt amortization and homeowner modes
+- 🌐 Support for 2027 tax year (once IRS publishes brackets)
 
 ## Getting Started
 
