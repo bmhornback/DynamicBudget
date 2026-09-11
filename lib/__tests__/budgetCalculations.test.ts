@@ -1,6 +1,5 @@
 import { calculateBudgetBreakdown, BUDGET_THRESHOLDS } from '../budgetCalculations';
 import { DEFAULT_INPUTS } from '../defaultScenarios';
-import type { BudgetInputs } from '@/types/budget';
 
 describe('budgetCalculations', () => {
   describe('calculateBudgetBreakdown', () => {

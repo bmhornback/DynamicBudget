@@ -60,7 +60,7 @@ npm run build
 - **Styling**: Tailwind CSS 4
 - **Deployment**: Static export (no server required) — runs fully in the browser
 - **State**: React hooks (useState, useCallback, useMemo) — no external state manager
-- **Testing**: Jest with ts-jest (in progress)
+- **Testing**: Jest with ts-jest
 
 ## Architecture
 
@@ -144,7 +144,7 @@ We welcome contributions! Please:
 
 ## License
 
-[Add your license here — e.g., MIT]
+MIT
 
 ## Support
 

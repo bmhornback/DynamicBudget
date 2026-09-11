@@ -14,7 +14,7 @@ const config: Config = {
     '!**/dist/**',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'json-summary'],
+  coverageReporters: ['text', 'lcov', 'json', 'json-summary'],
   moduleNameMapper: {
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
     '^@/types/(.*)$': '<rootDir>/types/$1',

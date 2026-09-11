@@ -5,7 +5,6 @@ import {
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
   ANNUAL_401K_LIMIT,
-  ANNUAL_IRA_LIMIT,
 } from '../taxCalculations';
 
 describe('taxCalculations', () => {

@@ -5,6 +5,9 @@ on:
     branches:
       - main
       - master
+    paths-ignore:
+      - 'package.json'
+      - 'package-lock.json'
 
 permissions:
   contents: write
