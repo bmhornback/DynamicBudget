@@ -241,7 +241,20 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
       {/* ── Housing ──────────────────────────────────────────────────── */}
       <BudgetSection title="Housing" icon="🏠">
-        {field('rent', 'Monthly Rent')}
+        <BudgetFieldInput
+          id="rent"
+          label="Monthly Rent"
+          value={inputs.rent}
+          isLocked={inputs.lockedFields['rent'] === true}
+          onChange={(v) => onChange({ rent: v })}
+          onToggleLock={onToggleLock}
+          validate={(v) => {
+            const grossMonthly = inputs.annualSalary / 12;
+            return v > grossMonthly * 0.5
+              ? `Rent is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
+              : null;
+          }}
+        />
         {field('petRent', 'Pet Rent')}
         {field('rentersInsurance', 'Renters Insurance')}
         {field('parkingFee', 'Parking Fee')}

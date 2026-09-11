@@ -57,6 +57,13 @@
 | Roth vs Traditional IRA | ✅ Done |
 | HSA / FSA | ✅ HSA modeled |
 | Multi-scenario comparison | ✅ Basic side-by-side comparison |
+| Named budget slots (save / load / delete by name) | ✅ Done |
+| Custom scenario presets (save current state as preset) | ✅ Done |
+| Dark mode (system + manual toggle, persisted) | ✅ Done |
+| Onboarding card (first-time user walkthrough) | ✅ Done |
+| Mobile `inputMode="decimal"` on number inputs | ✅ Done |
+| Section collapse/expand animation | ✅ Done |
+| Inline field validation (rent warning) | ✅ Done |
 | Debt amortization | ❌ Only flat extra-payment field |
 
 ### New in This Release (v1.0.0)
@@ -153,12 +160,12 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 
 | # | Epic | Priority | Phase |
 |---|---|---|---|
-| 1 | Developer Experience & Quality | 🔴 Critical | v1.0 closeout |
-| 2 | Persistence & User Data | 🟠 High | v1.0 closeout |
+| 1 | Developer Experience & Quality | ✅ Shipped | v1.0 closeout |
+| 2 | Persistence & User Data | ✅ Shipped | Complete for current release |
 | 3 | Enhanced Tax Engine | ✅ Shipped | Complete for current release |
 | 4 | Data Visualization | ✅ Shipped | Complete for current release |
 | 5 | Advanced Budget Features | 🟡 Medium | v1.5 |
-| 6 | UX Polish & Accessibility | 🔴 Critical | v1.0 closeout |
+| 6 | UX Polish & Accessibility | 🟡 Partial | v1.0 closeout → v1.5 |
 | 7 | Export & Sharing | 🟡 Medium | v1.5 |
 | 8 | Backend & Cloud Sync (BaaS, optional) | 🟢 Low | v2.0 (deferred) |
 | 9 | Growth & Discovery | 🟢 Low | v2.0 (deferred) |
@@ -251,16 +258,18 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - On load, if the persisted version doesn't match, fall back to `DEFAULT_INPUTS` and log a warning
 - Lay groundwork for a migration function in future
 
-### E2-T3 · Save/load named budgets
+### E2-T3 · Save/load named budgets ✅ Done
 - Allow the user to save the current budget under a custom name (stored in `localStorage` as an array of named snapshots)
 - Display a "My Budgets" dropdown in the header to load any saved budget
 - Allow deleting a saved budget
+- **Implemented:** `NamedBudget` type in `budget.ts`; `saveNamedBudget`, `loadNamedBudgets`, `deleteNamedBudget` in `storage.ts`; `components/MyBudgets.tsx` header panel
 
-### E2-T4 · Custom scenario preset creation
+### E2-T4 · Custom scenario preset creation ✅ Done
 - Allow users to save the current state as a new preset (extends the built-in presets list)
 - Store custom presets in `localStorage`
 - Custom presets are visually differentiated from built-in ones in the `ScenarioPresets` bar
 - Allow deleting custom presets
+- **Implemented:** `CustomPreset` type in `budget.ts`; `saveCustomPreset`, `loadCustomPresets`, `deleteCustomPreset` in `storage.ts`; updated `ScenarioPresets.tsx` with ⭐ badge + inline delete
 
 ### E2-T5 · Import / export JSON
 - "Export as JSON" button: downloads `movemath-budget-YYYY-MM-DD.json`
@@ -432,17 +441,17 @@ States to add (in priority order based on population and no-income-tax interest)
 - Ensure all text meets WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text)
 - Fix any amber/yellow text on white backgrounds
 
-### E6-T4 · Mobile form UX improvements
-- Numeric keyboard for all dollar-amount inputs (`inputMode="decimal"`)
-- Sticky "Dashboard" button when scrolled into the form on mobile
-- Collapse/expand sections in the form with smooth animation
-- Swipe gesture to toggle between form and dashboard on mobile
+### E6-T4 · Mobile form UX improvements ✅ Partial
+- Numeric keyboard for all dollar-amount inputs (`inputMode="decimal"`) ✅ Done
+- Sticky "Dashboard" button when scrolled into the form on mobile (existing — top-0 header button)
+- Collapse/expand sections in the form with smooth animation ✅ Done (CSS transition in `BudgetSection.tsx`)
+- Swipe gesture to toggle between form and dashboard on mobile (deferred to v1.5)
 
-### E6-T5 · Form input improvements
-- Currency formatting in inputs (display `$3,000` not `3000`)
-- Slider support for high-frequency-adjusted fields (e.g., retirement %)
-- Inline field validation (e.g., warn if rent > annual salary / 12)
-- `Tab` key increments numeric inputs by $50 or user-configurable step
+### E6-T5 · Form input improvements ✅ Partial
+- Currency formatting in inputs (deferred)
+- Slider support for high-frequency-adjusted fields (deferred)
+- Inline field validation (e.g., warn if rent > monthly income) ✅ Done — rent warns at >50% of gross monthly
+- `Tab` key increments numeric inputs (deferred)
 
 ### E6-T6 · Animations and transitions
 - Smooth number transitions when values change (count-up animation)
@@ -450,19 +459,20 @@ States to add (in priority order based on population and no-income-tax interest)
 - Rebalance result fade-in
 - Health score gauge animation
 
-### E6-T7 · Dark mode
-- Respect `prefers-color-scheme` system preference
-- Add a manual dark/light toggle in the header
-- All Tailwind colors tested in dark mode
+### E6-T7 · Dark mode ✅ Done
+- Respect `prefers-color-scheme` system preference ✅ via `ThemeProvider.tsx`
+- Add a manual dark/light/system toggle in the header ✅ `DarkModeToggle` component
+- All Tailwind colors tested in dark mode ✅ `dark:` classes applied across header, presets bar, BudgetFieldInput, BudgetSection, OnboardingCard, MyBudgets, ScenarioPresets
+- Persist preference to localStorage ✅ `movemath_theme` key
 
 ### E6-T8 · Loading state and skeleton screens
 - Add a loading skeleton for the dashboard on initial hydration
 - Prevent layout shift on first render
 
-### E6-T9 · Onboarding / empty state
-- First-time user sees a brief (dismissible) tooltip or walkthrough card
-- Explain: what the presets are, how Auto vs Manual mode works, what field locking does
-- Store "seen onboarding" in localStorage
+### E6-T9 · Onboarding / empty state ✅ Done
+- First-time user sees a brief (dismissible) tooltip or walkthrough card ✅ `components/OnboardingCard.tsx`
+- Explain: what the presets are, how Auto vs Manual mode works, what field locking does, My Budgets ✅
+- Store "seen onboarding" in localStorage ✅ `movemath_onboarding_seen` key
 
 ---
 

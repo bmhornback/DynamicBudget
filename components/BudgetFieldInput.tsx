@@ -15,6 +15,8 @@ interface BudgetFieldInputProps {
   suffix?: string;
   description?: string;
   disabled?: boolean;
+  /** Optional validation: returns a warning message or null */
+  validate?: (value: number) => string | null;
 }
 
 export default function BudgetFieldInput({
@@ -30,6 +32,7 @@ export default function BudgetFieldInput({
   suffix,
   description,
   disabled = false,
+  validate,
 }: BudgetFieldInputProps) {
   const [raw, setRaw] = React.useState(value.toString());
   const [focused, setFocused] = React.useState(false);
@@ -58,66 +61,80 @@ export default function BudgetFieldInput({
     onChange(finalValue);
   };
 
+  const validationMessage = validate ? validate(value) : null;
+
   return (
-    <div className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-colors ${
-      isLocked ? 'bg-slate-50 border border-slate-200' : 'bg-white border border-gray-100 hover:border-gray-200'
+    <div className={`flex flex-col rounded-lg transition-colors ${
+      isLocked ? 'bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700' : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'
     }`}>
-      {/* Lock button */}
-      <button
-        type="button"
-        onClick={() => onToggleLock(id)}
-        title={isLocked ? 'Unlock field' : 'Lock field'}
-        className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs transition-colors ${
-          isLocked
-            ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-        }`}
-        disabled={disabled}
-      >
-        {isLocked ? '🔒' : '🔓'}
-      </button>
-
-      {/* Label */}
-      <label
-        htmlFor={id}
-        className={`flex-1 text-sm ${isLocked ? 'text-slate-600 font-medium' : 'text-gray-700'} cursor-pointer min-w-0`}
-        title={description}
-      >
-        {label}
-        {description && (
-          <span className="block text-xs text-gray-400 truncate">{description}</span>
-        )}
-      </label>
-
-      {/* Input */}
-      <div className="relative flex items-center">
-        {prefix && (
-          <span className="absolute left-2 text-gray-500 text-sm pointer-events-none">{prefix}</span>
-        )}
-        <input
-          id={id}
-          type="number"
-          value={focused ? raw : value}
-          onChange={handleChange}
-          onFocus={() => { setFocused(true); setRaw(value.toString()); }}
-          onBlur={handleBlur}
-          disabled={disabled}
-          min={min}
-          max={max}
-          step="1"
-          className={`w-28 text-right text-sm rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-            prefix ? 'pl-6' : ''
-          } ${suffix ? 'pr-8' : ''} ${
+      <div className="flex items-center gap-2 py-2 px-3">
+        {/* Lock button */}
+        <button
+          type="button"
+          onClick={() => onToggleLock(id)}
+          title={isLocked ? 'Unlock field' : 'Lock field'}
+          className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs transition-colors ${
             isLocked
-              ? 'bg-slate-100 border-slate-300 text-slate-600 cursor-default'
-              : 'bg-white border-gray-200 text-gray-900'
+              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'
           }`}
-          readOnly={isLocked}
-        />
-        {suffix && (
-          <span className="absolute right-2 text-gray-400 text-xs pointer-events-none">{suffix}</span>
-        )}
+          disabled={disabled}
+        >
+          {isLocked ? '🔒' : '🔓'}
+        </button>
+
+        {/* Label */}
+        <label
+          htmlFor={id}
+          className={`flex-1 text-sm ${isLocked ? 'text-slate-600 dark:text-slate-400 font-medium' : 'text-gray-700 dark:text-gray-300'} cursor-pointer min-w-0`}
+          title={description}
+        >
+          {label}
+          {description && (
+            <span className="block text-xs text-gray-400 dark:text-gray-500 truncate">{description}</span>
+          )}
+        </label>
+
+        {/* Input */}
+        <div className="relative flex items-center">
+          {prefix && (
+            <span className="absolute left-2 text-gray-500 dark:text-gray-400 text-sm pointer-events-none">{prefix}</span>
+          )}
+          <input
+            id={id}
+            type="number"
+            inputMode="decimal"
+            value={focused ? raw : value}
+            onChange={handleChange}
+            onFocus={() => { setFocused(true); setRaw(value.toString()); }}
+            onBlur={handleBlur}
+            disabled={disabled}
+            min={min}
+            max={max}
+            step="1"
+            className={`w-28 text-right text-sm rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+              prefix ? 'pl-6' : ''
+            } ${suffix ? 'pr-8' : ''} ${
+              isLocked
+                ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 cursor-default'
+                : validationMessage
+                  ? 'bg-white dark:bg-gray-800 border-amber-400 dark:border-amber-500 text-gray-900 dark:text-gray-100'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100'
+            }`}
+            readOnly={isLocked}
+          />
+          {suffix && (
+            <span className="absolute right-2 text-gray-400 dark:text-gray-500 text-xs pointer-events-none">{suffix}</span>
+          )}
+        </div>
       </div>
+      {/* Inline validation warning */}
+      {validationMessage && (
+        <div className="px-3 pb-2 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+          <span aria-hidden="true">⚠️</span>
+          <span role="alert">{validationMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
