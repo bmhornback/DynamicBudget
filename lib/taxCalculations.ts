@@ -105,7 +105,7 @@ function applyBrackets(taxableIncome: number, brackets: TaxBracket[]): number {
 // County/local taxes, most state standard deductions, and special surtaxes are
 // excluded for brevity. HOH filers use single brackets unless otherwise noted.
 // No-income-tax states: AK, FL, NV, NH, SD, TN, TX, WA, WY.
-const STATE_TAX_CONFIG: Record<string, StateTaxConfig> = {
+const STATE_TAX_CONFIG: Record<Exclude<StateOfResidence, 'no_state_tax'>, StateTaxConfig> = {
 
   // ── No income tax ──────────────────────────────────────────────────────────
   AK: { type: 'none' },
@@ -573,18 +573,30 @@ export function stateIncomeTaxEstimate(
 
   if (state === 'no_state_tax') return 0;
 
-  const config = STATE_TAX_CONFIG[state];
+  const config = STATE_TAX_CONFIG[state as Exclude<StateOfResidence, 'no_state_tax'>];
   if (!config || config.type === 'none') return 0;
 
   if (config.type === 'flat') {
-    return taxableIncome * (config.rate ?? 0);
+    if (config.rate === undefined) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[taxCalculations] Missing flat rate for state: ${state}`);
+      }
+      return 0;
+    }
+    return taxableIncome * config.rate;
   }
 
   // bracket
   const brackets =
     filingStatus === 'married_jointly' && config.bracketsMFJ
       ? config.bracketsMFJ
-      : (config.bracketsSingle ?? []);
+      : config.bracketsSingle;
+  if (!brackets || brackets.length === 0) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`[taxCalculations] Missing bracket data for state: ${state}, filing: ${filingStatus}`);
+    }
+    return 0;
+  }
   return applyBrackets(taxableIncome, brackets);
 }
 
