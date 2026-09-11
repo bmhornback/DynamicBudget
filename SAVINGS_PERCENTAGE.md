@@ -68,13 +68,14 @@ When **Percentage Mode** is enabled:
 In the **Savings Summary** section:
 
 **When in Percentage Mode:**
-- Shows: "Monthly Savings: $X from Y% of net income"
+- Shows: "Savings (Y% of net income)" with the calculated monthly and annual amounts
 - Displays the calculated dollar amount prominently
 - Individual field breakdown is hidden
 
 **When in Fixed Amount Mode:**
 - Shows: Detailed breakdown of all savings categories
-- Emergency Fund, House Down Payment, Cash Savings totals
+- Total Savings (sum of emergency fund, house fund, cash savings)
+- House Fund, Taxable Investments, Other Investments as separate rows
 - Plus IRA/401k contributions above the line
 
 ## Integration with Budget Features

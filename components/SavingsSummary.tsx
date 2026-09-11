@@ -90,7 +90,7 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
         )}
         <Divider />
         <SavingsRow
-          label={isPercentageMode ? `Savings (${inputs?.savingsPercentOfNetIncome}% of net income)` : "Emergency Fund"}
+          label={isPercentageMode ? `Savings (${inputs?.savingsPercentOfNetIncome}% of net income)` : "Total Savings"}
           monthly={totalSavings > 0 ? totalSavings : 0}
           annual={totalSavings * 12}
         />
