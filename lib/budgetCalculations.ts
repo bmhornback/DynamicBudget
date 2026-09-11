@@ -4,6 +4,8 @@
  */
 
 import type { BudgetInputs, BudgetBreakdown, TaxBreakdown, RetirementBreakdown } from '@/types/budget';
+import { DEFAULT_INPUTS } from './defaultScenarios';
+import { clamp } from './formatters';
 import {
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
@@ -25,6 +27,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     bonusIncome,
     otherMonthlyIncome,
     iraContribution,
+    isSavingsByPercentage,
+    savingsPercentOfNetIncome,
   } = inputs;
 
   // ── Retirement ────────────────────────────────────────────────────────────
@@ -133,12 +137,29 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     inputs.miscBuffer;
 
   // ── Savings & Investing ───────────────────────────────────────────────────
-  const totalSavings =
-    inputs.emergencyFundContribution +
-    inputs.houseDownPaymentContribution +
-    inputs.generalCashSavings;
+  // If percentage-based savings is enabled, calculate based on net income
+  // Otherwise, use fixed dollar amounts from inputs
+  const netMonthly = netCalc.netMonthly;
+  const savingsPercentage = isSavingsByPercentage
+    ? clamp(
+        Number.isFinite(savingsPercentOfNetIncome)
+          ? savingsPercentOfNetIncome
+          : DEFAULT_INPUTS.savingsPercentOfNetIncome,
+        0,
+        50
+      )
+    : 0;
+  const calculatedSavingsFromPercentage = isSavingsByPercentage
+    ? netMonthly * (savingsPercentage / 100)
+    : 0;
 
-  const totalInvestments = inputs.taxableInvestments + inputs.extraDebtPayoff;
+  const totalSavings = isSavingsByPercentage
+    ? calculatedSavingsFromPercentage
+    : inputs.emergencyFundContribution +
+      inputs.houseDownPaymentContribution +
+      inputs.generalCashSavings;
+
+  const totalInvestments = isSavingsByPercentage ? 0 : inputs.taxableInvestments + inputs.extraDebtPayoff;
 
   // ── Aggregates ────────────────────────────────────────────────────────────
   // Fixed = housing + utilities + transportation + health + groceries (baseline)
@@ -181,7 +202,6 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
 
   // ── Rates ─────────────────────────────────────────────────────────────────
   const grossMonthly = netCalc.grossMonthly;
-  const netMonthly = netCalc.netMonthly;
 
   const savingsRateGross =
     grossMonthly > 0
@@ -216,6 +236,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalLifestyle,
     totalSavings,
     totalInvestments,
+    calculatedSavingsFromPercentage,
     totalFixedExpenses,
     totalVariableExpenses,
     totalAllocated,

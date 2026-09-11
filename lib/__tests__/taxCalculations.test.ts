@@ -10,27 +10,27 @@ import {
 describe('taxCalculations', () => {
   describe('federalIncomeTaxEstimate', () => {
     it('should calculate federal tax for single filer with no 401k', () => {
-      // Single filer earning $50,000
-      // Taxable income: $50,000 - $14,600 (standard deduction) = $35,400
-      // Tax: $1,160 (10% on $0-11,600) + $2,856 (12% on $11,600-35,400) = $4,016
+      // Single filer earning $50,000 (2026 brackets)
+      // Taxable income: $50,000 - $16,100 (standard deduction) = $33,900
+      // Tax: $1,240 (10% on $0-12,400) + $2,580 (12% on $12,400-33,900) = $3,820
       const result = federalIncomeTaxEstimate(50000, 'single', 0);
-      expect(result).toBeCloseTo(4016, 0);
+      expect(result).toBeCloseTo(3820, 0);
     });
 
     it('should calculate federal tax for married filing jointly', () => {
-      // MFJ earning $100,000
-      // Taxable: $100,000 - $29,200 = $70,800
-      // Tax: $2,320 (10% on $0-23,200) + $5,712 (12% on $23,200-70,800) = $8,032
+      // MFJ earning $100,000 (2026 brackets)
+      // Taxable: $100,000 - $32,200 = $67,800
+      // Tax: $2,480 (10% on $0-24,800) + $5,160 (12% on $24,800-67,800) = $7,640
       const result = federalIncomeTaxEstimate(100000, 'married_jointly', 0);
-      expect(result).toBeCloseTo(8032, 0);
+      expect(result).toBeCloseTo(7640, 0);
     });
 
     it('should calculate federal tax for head of household', () => {
-      // HOH earning $60,000
-      // Taxable: $60,000 - $21,900 = $38,100
-      // Tax: $1,655 (10% on $0-16,550) + $2,586 (12% on $16,550-38,100) = $4,241
+      // HOH earning $60,000 (2026 brackets)
+      // Taxable: $60,000 - $24,150 = $35,850
+      // Tax: $1,770 (10% on $0-17,700) + $2,178 (12% on $17,700-35,850) = $3,948
       const result = federalIncomeTaxEstimate(60000, 'head_of_household', 0);
-      expect(result).toBeCloseTo(4241, 0);
+      expect(result).toBeCloseTo(3948, 0);
     });
 
     it('should account for 401k pre-tax deduction', () => {

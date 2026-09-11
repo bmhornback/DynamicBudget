@@ -16,6 +16,17 @@ import RebalanceControls from '@/components/RebalanceControls';
 import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
 
+// ─── Module-level constants ───────────────────────────────────────────────────
+// Savings fields that should be locked/unlocked when toggling percentage mode
+const SAVINGS_FIELDS = [
+  'emergencyFundContribution',
+  'houseDownPaymentContribution',
+  'taxableInvestments',
+  'generalCashSavings',
+  'extraDebtPayoff',
+] as const;
+const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
+
 export default function MoveMathPage() {
   // Initialize from localStorage if available, otherwise use defaults
   const [inputs, setInputs] = useState<BudgetInputs>(() => {
@@ -32,6 +43,7 @@ export default function MoveMathPage() {
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+  const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
 
   // ── Load from localStorage on mount ──────────────────────────────────────
   // (handled in useState initializer above)
@@ -61,7 +73,42 @@ export default function MoveMathPage() {
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleChange = useCallback((updates: Partial<BudgetInputs>) => {
     setInputs((prev) => {
-      const next = { ...prev, ...updates };
+      let next = { ...prev, ...updates };
+      
+      // Auto-lock individual savings fields when entering percentage mode
+      // to prevent confusion about which fields are actually used
+      if (updates.isSavingsByPercentage === true && !prev.isSavingsByPercentage) {
+        previousSavingsFieldLocks.current = SAVINGS_FIELDS.reduce<Record<string, boolean>>(
+          (acc, field) => {
+            acc[field] = Boolean(prev.lockedFields[field]);
+            return acc;
+          },
+          {}
+        );
+        const newLockedFields = { ...next.lockedFields };
+        SAVINGS_FIELDS.forEach(field => {
+          newLockedFields[field] = true;
+        });
+        const savingsPercentOfNetIncome = Number.isFinite(next.savingsPercentOfNetIncome)
+          ? next.savingsPercentOfNetIncome
+          : DEFAULT_SAVINGS_PERCENT;
+        next = { ...next, lockedFields: newLockedFields, savingsPercentOfNetIncome };
+      }
+      
+      // Auto-unlock individual savings fields when exiting percentage mode
+      if (updates.isSavingsByPercentage === false && prev.isSavingsByPercentage) {
+        const newLockedFields = { ...next.lockedFields };
+        SAVINGS_FIELDS.forEach(field => {
+          if (previousSavingsFieldLocks.current[field]) {
+            newLockedFields[field] = true;
+          } else {
+            delete newLockedFields[field];
+          }
+        });
+        previousSavingsFieldLocks.current = {};
+        next = { ...next, lockedFields: newLockedFields };
+      }
+      
       if (prev.budgetMode === 'auto') {
         const result = rebalanceBudget(next, next.rebalanceStrategy, next.surplusAllocation);
         setRebalanceResult(result);

@@ -71,6 +71,8 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   iraContribution: 0,
   extraDebtPayoff: 0,
   generalCashSavings: 0,
+  isSavingsByPercentage: false,
+  savingsPercentOfNetIncome: 30,
 
   // Lifestyle
   funEntertainment: 300,
@@ -86,6 +88,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   budgetMode: 'manual',
   rebalanceStrategy: 'reduce_lifestyle_first',
   surplusAllocation: 'house_fund',
+  spendingHistory: { entries: [], lastUpdated: '', version: 1 },
 };
 
 export const SCENARIO_PRESETS: ScenarioPreset[] = [

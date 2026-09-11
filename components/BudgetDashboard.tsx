@@ -92,7 +92,7 @@ export default function BudgetDashboard({
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <IncomeSummary breakdown={breakdown} />
-        <SavingsSummary breakdown={breakdown} />
+        <SavingsSummary breakdown={breakdown} inputs={inputs} />
         <ExpenseSummary breakdown={breakdown} inputs={inputs} />
         <BudgetHealthScore healthScore={healthScore} />
       </div>

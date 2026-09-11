@@ -35,9 +35,9 @@
 | Area | Status |
 |---|---|
 | Single-page Next.js app (`/`) | ✅ Done |
-| Income & tax estimation (federal + CA + GA) | ✅ Done |
+| Income & tax estimation (federal 2026 + all 50 states + DC) | ✅ Done |
 | Full expense input form (housing, utilities, transport, pets, food, health, lifestyle) | ✅ Done |
-| Savings & investing fields | ✅ Done |
+| Savings & investing fields (fixed amounts OR percentage-based) | ✅ Done |
 | Auto/Manual budget modes | ✅ Done |
 | Rebalance engine (6 strategies + surplus allocation) | ✅ Done |
 | Field locking | ✅ Done |
@@ -50,32 +50,39 @@
 | Charts / visualization (Recharts) | ✅ Done |
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
-| Test suite | ❌ None |
+| Test suite | ✅ Jest (73 tests passing) |
 | CI/CD | ❌ None |
-| Additional tax states | ❌ Only CA, GA, no-state-tax |
+| Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ❌ Not differentiated |
 | HSA / FSA | ❌ Not modeled |
 | Multi-scenario comparison | ❌ Not available |
 | Debt amortization | ❌ Only flat extra-payment field |
 
-### New in This Release
+### New in This Release (v1.0.0)
 
-✨ **Spending Trends & Analytics Feature**
-- Track actual spending across 10 categories: dining out, gasoline, utilities, groceries, subscriptions, etc.
-- View 6-month spending trends with budget vs. actual comparisons
-- Automatic spending forecasting using linear regression
-- Insights about overspending, trending patterns, and budget adherence
-- All data stored locally in browser (no account required)
-- Interactive charts powered by Recharts
-- localStorage auto-save with debouncing
+✨ **Complete Tax Coverage for All 50 US States + DC**
+- Full tax bracket and rate tables for all 50 states plus District of Columbia (51 jurisdictions total)
+- 2026 Federal tax brackets with IRS inflation adjustments
+- State-specific progressive brackets, flat rates, or no-income-tax configurations
+- Accurate tax modeling for relocation scenarios across any US state
+- Complete state-level tax coverage, while still using estimated take-home math that excludes county/local taxes and some deductions
+
+✨ **2026 Tax Tables & Percentage-Based Savings** (v0.9.3 features)
+- 2026 Federal tax brackets updated with inflation adjustments
+- 2026 California state tax brackets updated
+- Georgia confirmed at 5.49% flat tax
+- New "Save X% of Net Income" feature: Set savings as a percentage that auto-adjusts with income changes
+- Savings fields automatically locked when in percentage mode to prevent confusion
+- Integration with rebalancing engine for both modes
+- All 73 unit tests updated and passing for 2026 calculations
 
 ### Known gaps / rough edges
 
-
 - `budgetHealthScore.ts` accesses `houseDownPaymentContribution` and `emergencyFundContribution` via a type cast on `BudgetBreakdown` — these aren't actually on the breakdown type; they come from `inputs` directly.
-- Tax limits (`ANNUAL_401K_LIMIT = 24500`, `ANNUAL_IRA_LIMIT = 7500`) are hardcoded to 2024 and need annual updates.
 - Scenario preset matching in `page.tsx` uses fragile field-comparison heuristics instead of preset ID lookup.
 - No error boundaries — a bad input can throw unhandled.
+- 2027 tax brackets not yet published by IRS (typically available late 2026).
+- County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
 
 ---
 
@@ -578,16 +585,16 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ## Tech Debt Register
 
-| ID | Description | Severity | Epic Ref |
-|---|---|---|---|
-| TD-1 | `budgetHealthScore.ts` casts `BudgetBreakdown` to access `inputs` fields | Medium | E1-T8 |
-| TD-2 | Tax year constants (401k limit, IRA limit, brackets) hardcoded to 2024 | High | E3-T6 |
-| TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | E2-T4 |
-| TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | E1-T9 |
-| TD-5 | No tests — any refactor carries risk | Critical | E1 |
-| TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | E3 |
-| TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | General |
-| TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | E3-T2 |
+| ID | Description | Severity | Status | Epic Ref |
+|---|---|---|---|---|
+| TD-1 | `budgetHealthScore.ts` casts `BudgetBreakdown` to access `inputs` fields | Medium | Open | E1-T8 |
+| TD-2 | Tax year constants updated to 2026 (401k limit, IRA limit, and brackets refreshed per IRS 2026 adjustments) | High | ✅ Resolved (2026) | E3-T6 |
+| TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | Open | E2-T4 |
+| TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | Open | E1-T9 |
+| TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (73 tests) | E1 |
+| TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | Open | E3 |
+| TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | Open | General |
+| TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | Open | E3-T2 |
 
 ---
 
@@ -606,4 +613,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-06-11 — reflects codebase state at initial plan creation.*
+*Last updated: 2026-09-11 — v1.0.0 release: All 50 states + DC tax tables, 2026 tax brackets, percentage-based savings feature.*

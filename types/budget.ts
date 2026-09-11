@@ -179,6 +179,10 @@ export interface BudgetInputs {
   iraContribution: number;
   extraDebtPayoff: number;
   generalCashSavings: number;
+  
+  // Savings mode: percentage vs. fixed amounts
+  isSavingsByPercentage: boolean;
+  savingsPercentOfNetIncome: number; // e.g., 30 for 30% of net income
 
   // Lifestyle
   funEntertainment: number;
@@ -224,6 +228,7 @@ export interface BudgetBreakdown {
   // Savings totals
   totalSavings: number;
   totalInvestments: number;
+  calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
 
   // Summary totals
   totalFixedExpenses: number;

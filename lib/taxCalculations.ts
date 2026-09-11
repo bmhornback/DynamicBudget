@@ -1,12 +1,25 @@
 /**
- * Tax calculation utilities for MoveMath.
+ * Tax calculation utilities for DynamicBudget.
  * These are simplified estimates, NOT exact tax filing calculations.
  * Clearly labeled as estimates throughout the UI.
+ *
+ * ⚠️ Tax Year: 2026
+ * Last Updated: September 11, 2026
+ * Sources:
+ * - Federal: IRS 2026 tax inflation adjustments (https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026)
+ * - States: Individual state tax authority publications for 2026
+ *
+ * IMPORTANT: When updating tax tables, remember to also update:
+ * - ANNUAL_401K_LIMIT (currently $24,500 for 2026; was $23,500 in 2025, $23,000 in 2024)
+ * - ANNUAL_IRA_LIMIT (currently $7,000 for 2026; was $7,000 in 2024-2025, increased from $6,500 in 2023)
+ * - All test expectations in lib/__tests__/taxCalculations.test.ts
  */
 
 import type { FilingStatus, StateOfResidence } from '@/types/budget';
 
-// ─── Federal Income Tax (2024 brackets) ────────────────────────────────────
+// ─── Federal Income Tax (2026 brackets) ────────────────────────────────────
+// Updated per IRS 2026 inflation adjustments
+// Source: https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026
 
 interface TaxBracket {
   rate: number;
@@ -15,38 +28,38 @@ interface TaxBracket {
 
 const FEDERAL_BRACKETS: Record<FilingStatus, TaxBracket[]> = {
   single: [
-    { rate: 0.10, upTo: 11600 },
-    { rate: 0.12, upTo: 47150 },
-    { rate: 0.22, upTo: 100525 },
-    { rate: 0.24, upTo: 191950 },
-    { rate: 0.32, upTo: 243725 },
-    { rate: 0.35, upTo: 609350 },
+    { rate: 0.10, upTo: 12400 },
+    { rate: 0.12, upTo: 50400 },
+    { rate: 0.22, upTo: 105700 },
+    { rate: 0.24, upTo: 201775 },
+    { rate: 0.32, upTo: 256225 },
+    { rate: 0.35, upTo: 640600 },
     { rate: 0.37, upTo: Infinity },
   ],
   married_jointly: [
-    { rate: 0.10, upTo: 23200 },
-    { rate: 0.12, upTo: 94300 },
-    { rate: 0.22, upTo: 201050 },
-    { rate: 0.24, upTo: 383900 },
-    { rate: 0.32, upTo: 487450 },
-    { rate: 0.35, upTo: 731200 },
+    { rate: 0.10, upTo: 24800 },
+    { rate: 0.12, upTo: 100800 },
+    { rate: 0.22, upTo: 211400 },
+    { rate: 0.24, upTo: 403550 },
+    { rate: 0.32, upTo: 512450 },
+    { rate: 0.35, upTo: 768700 },
     { rate: 0.37, upTo: Infinity },
   ],
   head_of_household: [
-    { rate: 0.10, upTo: 16550 },
-    { rate: 0.12, upTo: 63100 },
-    { rate: 0.22, upTo: 100500 },
-    { rate: 0.24, upTo: 191950 },
-    { rate: 0.32, upTo: 243700 },
-    { rate: 0.35, upTo: 609350 },
+    { rate: 0.10, upTo: 17700 },
+    { rate: 0.12, upTo: 67450 },
+    { rate: 0.22, upTo: 105700 },
+    { rate: 0.24, upTo: 201750 },
+    { rate: 0.32, upTo: 256200 },
+    { rate: 0.35, upTo: 640600 },
     { rate: 0.37, upTo: Infinity },
   ],
 };
 
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = {
-  single: 14600,
-  married_jointly: 29200,
-  head_of_household: 21900,
+  single: 16100,
+  married_jointly: 32200,
+  head_of_household: 24150,
 };
 
 /**
@@ -101,10 +114,11 @@ function applyBrackets(taxableIncome: number, brackets: TaxBracket[]): number {
   return Math.max(0, tax);
 }
 
-// State income tax tables (2024 estimates).
+// State income tax tables (2026 estimates).
 // County/local taxes, most state standard deductions, and special surtaxes are
 // excluded for brevity. HOH filers use single brackets unless otherwise noted.
 // No-income-tax states: AK, FL, NV, NH, SD, TN, TX, WA, WY.
+// Updated per state tax authority 2026 rates and inflation adjustments.
 const STATE_TAX_CONFIG: Record<Exclude<StateOfResidence, 'no_state_tax'>, StateTaxConfig> = {
 
   // ── No income tax ──────────────────────────────────────────────────────────
@@ -121,7 +135,7 @@ const STATE_TAX_CONFIG: Record<Exclude<StateOfResidence, 'no_state_tax'>, StateT
   // ── Flat rate ──────────────────────────────────────────────────────────────
   AZ: { type: 'flat', rate: 0.025  },  // 2.5%
   CO: { type: 'flat', rate: 0.044  },  // 4.4%
-  GA: { type: 'flat', rate: 0.0549 },  // 5.49%
+  GA: { type: 'flat', rate: 0.0549 },  // 5.49% (flat tax as of 2024, continues 2026)
   ID: { type: 'flat', rate: 0.058  },  // 5.8%
   IL: { type: 'flat', rate: 0.0495 },  // 4.95%
   IN: { type: 'flat', rate: 0.0305 },  // 3.05%
@@ -158,26 +172,28 @@ const STATE_TAX_CONFIG: Record<Exclude<StateOfResidence, 'no_state_tax'>, StateT
   CA: {
     type: 'bracket',
     bracketsSingle: [
-      { rate: 0.01,  upTo: 10412 },
-      { rate: 0.02,  upTo: 24684 },
-      { rate: 0.04,  upTo: 38959 },
-      { rate: 0.06,  upTo: 54081 },
-      { rate: 0.08,  upTo: 68350 },
-      { rate: 0.093, upTo: 349137 },
-      { rate: 0.103, upTo: 418961 },
-      { rate: 0.113, upTo: 698274 },
-      { rate: 0.123, upTo: Infinity },
+      { rate: 0.01,  upTo: 11079 },
+      { rate: 0.02,  upTo: 26264 },
+      { rate: 0.04,  upTo: 41452 },
+      { rate: 0.06,  upTo: 57542 },
+      { rate: 0.08,  upTo: 72724 },
+      { rate: 0.093, upTo: 371479 },
+      { rate: 0.103, upTo: 445771 },
+      { rate: 0.113, upTo: 742953 },
+      { rate: 0.123, upTo: 1000000 },
+      { rate: 0.133, upTo: Infinity },  // 13.3% on income over $1M
     ],
     bracketsMFJ: [
-      { rate: 0.01,  upTo: 20824 },
-      { rate: 0.02,  upTo: 49368 },
-      { rate: 0.04,  upTo: 77918 },
-      { rate: 0.06,  upTo: 108162 },
-      { rate: 0.08,  upTo: 136700 },
-      { rate: 0.093, upTo: 698274 },
-      { rate: 0.103, upTo: 837922 },
-      { rate: 0.113, upTo: 1000000 },
-      { rate: 0.123, upTo: Infinity },
+      { rate: 0.01,  upTo: 22158 },
+      { rate: 0.02,  upTo: 52528 },
+      { rate: 0.04,  upTo: 82904 },
+      { rate: 0.06,  upTo: 115084 },
+      { rate: 0.08,  upTo: 145448 },
+      { rate: 0.093, upTo: 742958 },
+      { rate: 0.103, upTo: 891542 },
+      { rate: 0.113, upTo: 1485906 },
+      { rate: 0.123, upTo: 2000000 },
+      { rate: 0.133, upTo: Infinity },  // 13.3% on income over $2M
     ],
   },
   CT: {
@@ -636,10 +652,10 @@ export function payrollTaxEstimate(
 
 // ─── Retirement Contribution ────────────────────────────────────────────────
 
-/** 2024 401(k) employee contribution limit */
+/** 2026 401(k) employee contribution limit */
 export const ANNUAL_401K_LIMIT = 24500;
-/** 2024 IRA contribution limit */
-export const ANNUAL_IRA_LIMIT = 7500;
+/** 2026 IRA contribution limit */
+export const ANNUAL_IRA_LIMIT = 7000;
 
 /**
  * Calculate annual 401(k) employee contribution.

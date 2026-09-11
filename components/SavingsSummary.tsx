@@ -1,12 +1,14 @@
 'use client';
 
 import React from 'react';
-import type { BudgetBreakdown } from '@/types/budget';
+import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
+import type { BudgetBreakdown, BudgetInputs } from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import BudgetCard from './BudgetCard';
 
 interface SavingsSummaryProps {
   breakdown: BudgetBreakdown;
+  inputs?: BudgetInputs;
 }
 
 function SavingsRow({ label, monthly, annual, rate, highlight }: {
@@ -38,7 +40,7 @@ function Divider() {
   return <div className="h-px bg-gray-100 my-1" />;
 }
 
-export default function SavingsSummary({ breakdown }: SavingsSummaryProps) {
+export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProps) {
   const {
     retirement,
     totalSavings,
@@ -55,6 +57,11 @@ export default function SavingsSummary({ breakdown }: SavingsSummaryProps) {
     surplus,
     deficit,
   } = breakdown;
+
+  const isPercentageMode = inputs?.isSavingsByPercentage ?? false;
+  const savingsPercentOfNetIncome = Number.isFinite(inputs?.savingsPercentOfNetIncome)
+    ? inputs?.savingsPercentOfNetIncome
+    : DEFAULT_INPUTS.savingsPercentOfNetIncome;
 
   const bufferColor = isOverBudget
     ? 'text-red-600'
@@ -87,25 +94,29 @@ export default function SavingsSummary({ breakdown }: SavingsSummaryProps) {
         )}
         <Divider />
         <SavingsRow
-          label="Emergency Fund"
+          label={isPercentageMode ? `Savings (${savingsPercentOfNetIncome}% of net income)` : "Total Savings"}
           monthly={totalSavings > 0 ? totalSavings : 0}
           annual={totalSavings * 12}
         />
-        <SavingsRow
-          label="House Fund"
-          monthly={annualHouseFund / 12}
-          annual={annualHouseFund}
-        />
-        <SavingsRow
-          label="Taxable Investments"
-          monthly={annualTaxableInvestments / 12}
-          annual={annualTaxableInvestments}
-        />
-        <SavingsRow
-          label="Other Investments"
-          monthly={totalInvestments}
-          annual={totalInvestments * 12}
-        />
+        {!isPercentageMode && (
+          <>
+            <SavingsRow
+              label="House Fund"
+              monthly={annualHouseFund / 12}
+              annual={annualHouseFund}
+            />
+            <SavingsRow
+              label="Taxable Investments"
+              monthly={annualTaxableInvestments / 12}
+              annual={annualTaxableInvestments}
+            />
+            <SavingsRow
+              label="Other Investments"
+              monthly={totalInvestments}
+              annual={totalInvestments * 12}
+            />
+          </>
+        )}
         <Divider />
         <div className="py-1.5">
           <div className="flex justify-between items-baseline font-semibold">

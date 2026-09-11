@@ -171,6 +171,95 @@ describe('budgetCalculations', () => {
       expect(result.totalInvestments).toBeCloseTo(500, 0);
     });
 
+    it('should keep fixed savings and investments separate in fixed savings mode', () => {
+      const inputs = {
+        ...DEFAULT_INPUTS,
+        isSavingsByPercentage: false,
+        emergencyFundContribution: 300,
+        houseDownPaymentContribution: 400,
+        generalCashSavings: 50,
+        taxableInvestments: 250,
+        extraDebtPayoff: 150,
+      };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.calculatedSavingsFromPercentage).toBe(0);
+      expect(result.totalSavings).toBeCloseTo(750, 0);
+      expect(result.totalInvestments).toBeCloseTo(400, 0);
+      expect(result.totalAllocated).toBeCloseTo(
+        result.totalHousing +
+          result.totalUtilities +
+          result.totalTransportation +
+          result.totalPets +
+          result.totalGroceriesFood +
+          result.totalHealth +
+          result.totalLifestyle +
+          750 +
+          400,
+        0
+      );
+    });
+
+    it.each([0, 15, 50])(
+      'should calculate percentage-based savings correctly at %i percent of net income',
+      (savingsPercentOfNetIncome) => {
+        const inputs = {
+          ...DEFAULT_INPUTS,
+          isSavingsByPercentage: true,
+          savingsPercentOfNetIncome,
+          emergencyFundContribution: 300,
+          houseDownPaymentContribution: 400,
+          generalCashSavings: 50,
+          taxableInvestments: 250,
+          extraDebtPayoff: 150,
+        };
+        const result = calculateBudgetBreakdown(inputs);
+        const expectedSavings = result.netMonthlyIncome * (savingsPercentOfNetIncome / 100);
+
+        expect(result.calculatedSavingsFromPercentage).toBeCloseTo(expectedSavings, 2);
+        expect(result.totalSavings).toBeCloseTo(expectedSavings, 2);
+        expect(result.totalInvestments).toBe(0);
+        expect(result.totalAllocated).toBeCloseTo(
+          result.totalHousing +
+            result.totalUtilities +
+            result.totalTransportation +
+            result.totalPets +
+            result.totalGroceriesFood +
+            result.totalHealth +
+            result.totalLifestyle +
+            expectedSavings,
+          2
+        );
+        expect(result.remainingMonthlyBuffer).toBeCloseTo(
+          result.netMonthlyIncome - result.totalAllocated,
+          2
+        );
+      }
+    );
+
+    it('should default and clamp percentage-based savings inputs from persisted data', () => {
+      const defaultedResult = calculateBudgetBreakdown({
+        ...DEFAULT_INPUTS,
+        isSavingsByPercentage: true,
+        savingsPercentOfNetIncome: undefined as unknown as number,
+      });
+      const clampedResult = calculateBudgetBreakdown({
+        ...DEFAULT_INPUTS,
+        isSavingsByPercentage: true,
+        savingsPercentOfNetIncome: 75,
+      });
+
+      expect(defaultedResult.totalSavings).toBeCloseTo(
+        defaultedResult.netMonthlyIncome * 0.3,
+        2
+      );
+      expect(clampedResult.totalSavings).toBeCloseTo(
+        clampedResult.netMonthlyIncome * 0.5,
+        2
+      );
+      expect(clampedResult.totalInvestments).toBe(0);
+    });
+
     it('should calculate total allocated expenses correctly', () => {
       const inputs = {
         ...DEFAULT_INPUTS,
