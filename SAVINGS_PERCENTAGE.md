@@ -33,7 +33,7 @@ When **Percentage Mode** is enabled:
 1. The app calculates your **net monthly income** (after all taxes, 401k, IRA)
 2. Your target savings = `net monthly income × (savings percentage / 100)`
 3. This calculated amount appears in the budget breakdown as **"Calculated Savings from Percentage"**
-4. Individual savings fields (Emergency Fund, etc.) are **automatically locked** to prevent accidental changes
+4. Emergency Fund, House Down Payment, Taxable Investments, General Cash Savings, and Extra Debt Payoff are **automatically locked** to prevent accidental changes
 
 **Example:**
 - Annual salary: $150,000
@@ -50,7 +50,7 @@ When **Percentage Mode** is enabled:
 2. Toggle the switch labeled **"Use Percentage-Based Savings"** to **ON**
 3. A slider appears showing the percentage (default 30%)
 4. Individual savings fields automatically hide
-5. Individual savings fields are automatically locked to protect them
+5. Emergency Fund, House Down Payment, Taxable Investments, General Cash Savings, and Extra Debt Payoff are automatically locked to protect them
 
 #### To Adjust Percentage:
 1. With percentage mode enabled, use the **Percentage Slider** (0-50%)
@@ -100,10 +100,10 @@ Percentage-based savings automatically adjusts when:
 ### Field Locking
 
 When you enable percentage mode:
-- Emergency Fund, House Down Payment, and General Cash Savings fields are **automatically locked**
+- Emergency Fund, House Down Payment, Taxable Investments, General Cash Savings, and Extra Debt Payoff fields are **automatically locked**
 - This prevents the rebalancing engine from modifying these fields
 - It prevents accidental user changes while in percentage mode
-- When you disable percentage mode, the locks are automatically removed
+- When you disable percentage mode, those fields return to their prior lock state
 
 ## Use Cases
 

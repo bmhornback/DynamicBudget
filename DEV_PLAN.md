@@ -588,7 +588,7 @@ States to add (in priority order based on population and no-income-tax interest)
 | ID | Description | Severity | Status | Epic Ref |
 |---|---|---|---|---|
 | TD-1 | `budgetHealthScore.ts` casts `BudgetBreakdown` to access `inputs` fields | Medium | Open | E1-T8 |
-| TD-2 | Tax year constants (401k limit, IRA limit, brackets) hardcoded to 2024 | High | ✅ Resolved (2026) | E3-T6 |
+| TD-2 | Tax year constants updated to 2026 (401k limit, IRA limit, and brackets refreshed per IRS 2026 adjustments) | High | ✅ Resolved (2026) | E3-T6 |
 | TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | Open | E2-T4 |
 | TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | Open | E1-T9 |
 | TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (73 tests) | E1 |
