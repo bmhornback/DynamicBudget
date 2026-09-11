@@ -8,6 +8,8 @@ const STORAGE_VERSION = 1;
  * Save budget inputs to localStorage
  */
 export function saveBudgetInputs(inputs: BudgetInputs): void {
+  if (typeof window === 'undefined') return;
+
   try {
     const data = {
       version: STORAGE_VERSION,
@@ -24,6 +26,8 @@ export function saveBudgetInputs(inputs: BudgetInputs): void {
  * Load budget inputs from localStorage
  */
 export function loadBudgetInputs(): BudgetInputs | null {
+  if (typeof window === 'undefined') return null;
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return null;
@@ -54,6 +58,8 @@ export function loadBudgetInputs(): BudgetInputs | null {
  * Clear all stored data
  */
 export function clearBudgetStorage(): void {
+  if (typeof window === 'undefined') return;
+
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {

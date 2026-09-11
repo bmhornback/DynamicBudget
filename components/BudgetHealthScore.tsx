@@ -40,7 +40,11 @@ export default function BudgetHealthScore({ healthScore }: BudgetHealthScoreProp
     <BudgetCard title="Budget Health Score">
       {/* Score display */}
       <div className="flex items-center gap-5 mb-5">
-        <div className="relative w-20 h-20 shrink-0">
+        <div
+          className="relative w-20 h-20 shrink-0"
+          role="img"
+          aria-label={`Budget health score ${score} out of 100, rated ${label}`}
+        >
           <svg viewBox="0 0 36 36" className="w-20 h-20 -rotate-90">
             <path
               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -62,7 +66,7 @@ export default function BudgetHealthScore({ healthScore }: BudgetHealthScoreProp
           </div>
         </div>
         <div>
-          <div className={`text-2xl font-bold ${colorClass}`}>{label}</div>
+          <div className={`text-2xl font-bold ${colorClass}`} aria-live="polite">{label}</div>
           <div className="text-sm text-gray-500 mt-1">out of 100</div>
         </div>
       </div>

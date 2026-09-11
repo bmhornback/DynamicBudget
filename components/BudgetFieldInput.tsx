@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { formatCurrency } from '@/lib/formatters';
 
 interface BudgetFieldInputProps {
   id: string;

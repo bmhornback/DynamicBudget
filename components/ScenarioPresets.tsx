@@ -5,7 +5,7 @@ import type { BudgetInputs } from '@/types/budget';
 import { SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 
 interface ScenarioPresetsProps {
-  onApplyPreset: (inputs: BudgetInputs) => void;
+  onApplyPreset: (inputs: BudgetInputs, presetId: string) => void;
   currentPreset?: string;
 }
 
@@ -16,8 +16,9 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset }: Scenar
         <button
           key={preset.id}
           type="button"
-          onClick={() => onApplyPreset(applyScenarioPreset(preset.inputs))}
+          onClick={() => onApplyPreset(applyScenarioPreset(preset.inputs), preset.id)}
           title={preset.description}
+          aria-pressed={currentPreset === preset.id}
           className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
             currentPreset === preset.id
               ? 'bg-blue-600 text-white border-blue-600 shadow-sm'

@@ -8,12 +8,15 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 
 ### Core Capabilities
 - 📊 **Real-world tax modeling** — 2026 Federal, state (all 50 US states + DC), payroll, and bonus taxation
+- 💳 **Retirement-aware tax planning** — Traditional vs. Roth IRA support, HSA modeling, and deduction-aware recommendations
 - 💰 **Comprehensive expense tracking** — Housing, utilities, transport, pets, food, health, lifestyle, and more
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
+- 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset scenarios
 - 💾 **Data persistence** — Auto-save your budget to your browser (no account needed)
+- 📦 **JSON import/export** — Backup and restore budgets locally
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 📱 **Responsive design** — Works great on desktop and mobile
@@ -27,10 +30,10 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 ### Upcoming Features
-- 💳 Roth vs. Traditional IRA distinction, HSA/FSA support
 - 📤 Export to PDF/CSV, share budgets via link
-- 📋 Multi-scenario comparison
+- 📋 Named saved budgets and deeper multi-scenario workflows
 - 🏠 Debt amortization and homeowner modes
+- 📊 Cost-of-living comparisons for move planning
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 
 ## Getting Started
@@ -100,7 +103,7 @@ components/
   TrendChart.tsx          ← 6-month trend chart
   [other UI components]
 app/
-  page.tsx                ← Main app (Budget + Trends tabs)
+  page.tsx                ← Main app (Budget, comparison, and Trends tabs)
   layout.tsx
   globals.css
 ```
@@ -161,12 +164,13 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
+**Current focus:** finish the v1.0 closeout work (stability, accessibility, and documentation), then expand v1.5 starting with scenario comparison.
+
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
-- **v0.9 — Solid Foundation** (current): Core testing, localStorage, accessibility basics
-- **v1.0 — Ship It**: Polished, tested tool with 10+ state taxes, data visualization
-- **v1.5 — Grow It**: Multi-scenario comparison, debt payoff, export/share
-- **v2.0 — Platform**: Optional cloud sync, public landing page, analytics
+- **v1.0 closeout** (current): Stability, accessibility, typing cleanup, and roadmap rebaseline
+- **v1.5 — Grow It**: Multi-scenario comparison, debt payoff, homeowner mode, export/share
+- **v2.0 — Platform**: Optional cloud sync, landing page/SEO, analytics, and MCP integrations after core budgeting work is complete
 
 ## Contributing
 

@@ -10,12 +10,10 @@ import {
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
   ANNUAL_401K_LIMIT,
-  ANNUAL_401K_CATCHUP_LIMIT,
   ANNUAL_IRA_LIMIT,
   ANNUAL_IRA_CATCHUP_LIMIT,
   ANNUAL_HSA_LIMIT_SELF,
   ANNUAL_HSA_LIMIT_FAMILY,
-  get401kLimit,
   getIRALimit,
 } from './taxCalculations';
 
@@ -305,6 +303,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalSavings,
     totalInvestments,
     calculatedSavingsFromPercentage,
+    effectiveEmergencyFundContribution: isSavingsByPercentage ? calculatedSavingsFromPercentage : inputs.emergencyFundContribution,
+    effectiveHouseDownPaymentContribution: isSavingsByPercentage ? 0 : inputs.houseDownPaymentContribution,
     monthlyRothIRA,
     monthlyHSA,
     totalFixedExpenses,

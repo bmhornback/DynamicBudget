@@ -7,12 +7,19 @@ import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
 import { calculateBudgetHealthScore } from '@/lib/budgetHealthScore';
 import { generateRecommendations } from '@/lib/recommendations';
 import { rebalanceBudget } from '@/lib/rebalanceBudget';
+import {
+  buildScenarioComparisonItems,
+  getDefaultComparisonPresetIds,
+  normalizeComparisonPresetIds,
+} from '@/lib/scenarioComparison';
 import { initializeSpendingHistory } from '@/lib/spendingTrends';
 import { saveBudgetInputs, loadBudgetInputs } from '@/lib/storage';
 import BudgetForm from '@/components/BudgetForm';
 import BudgetDashboard from '@/components/BudgetDashboard';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import ScenarioPresets from '@/components/ScenarioPresets';
 import RebalanceControls from '@/components/RebalanceControls';
+import ScenarioComparison from '@/components/ScenarioComparison';
 import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
 
@@ -43,6 +50,9 @@ export default function MoveMathPage() {
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+  const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
+    () => getDefaultComparisonPresetIds('san_diego_baseline')
+  );
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
 
   // ── Load from localStorage on mount ──────────────────────────────────────
@@ -68,6 +78,10 @@ export default function MoveMathPage() {
   const recommendations = useMemo(
     () => generateRecommendations(inputs, breakdown),
     [inputs, breakdown]
+  );
+  const comparisonItems = useMemo(
+    () => buildScenarioComparisonItems(inputs, comparisonPresetIds, activePreset),
+    [inputs, comparisonPresetIds, activePreset]
   );
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -117,6 +131,7 @@ export default function MoveMathPage() {
       return next;
     });
     setActivePreset(undefined);
+    setComparisonPresetIds((prev) => normalizeComparisonPresetIds(prev));
   }, []);
 
   const handleToggleLock = useCallback((fieldId: string) => {
@@ -133,6 +148,10 @@ export default function MoveMathPage() {
     setInputs(newInputs);
     setRebalanceResult(null);
     setActivePreset(presetId);
+    setComparisonPresetIds((prev) => {
+      const normalized = normalizeComparisonPresetIds(prev, presetId);
+      return normalized.length > 0 ? normalized : getDefaultComparisonPresetIds(presetId);
+    });
   }, []);
 
   const handleStrategyChange = useCallback((strategy: RebalanceStrategy) => {
@@ -153,6 +172,7 @@ export default function MoveMathPage() {
     setInputs(DEFAULT_INPUTS);
     setRebalanceResult(null);
     setActivePreset('san_diego_baseline');
+    setComparisonPresetIds(getDefaultComparisonPresetIds('san_diego_baseline'));
   }, []);
 
   const handleToggleMode = useCallback(() => {
@@ -189,6 +209,8 @@ export default function MoveMathPage() {
             <button
               type="button"
               onClick={handleToggleMode}
+              aria-pressed={inputs.budgetMode === 'auto'}
+              aria-label={`Budget mode: ${inputs.budgetMode === 'auto' ? 'Auto' : 'Manual'}`}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                 inputs.budgetMode === 'auto'
                   ? 'bg-blue-600 text-white border-blue-600'
@@ -201,34 +223,46 @@ export default function MoveMathPage() {
             <button
               type="button"
               onClick={() => setShowForm((v) => !v)}
+              aria-pressed={showForm}
+              aria-label={showForm ? 'Show dashboard panel' : 'Show editor panel'}
               className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white text-gray-600 border-gray-200 hover:border-blue-300 transition-all md:hidden"
             >
               {showForm ? '📊 Dashboard' : '✏️ Edit'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('budget')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                activeTab === 'budget'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
-              }`}
-            >
-              📊 Budget
-            </button>
+            <div role="tablist" aria-label="Primary views" className="flex items-center gap-2">
+              <button
+                id="budget-tab"
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'budget'}
+                aria-controls="budget-panel"
+                onClick={() => setActiveTab('budget')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  activeTab === 'budget'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                }`}
+              >
+                📊 Budget
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('trends')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                activeTab === 'trends'
-                  ? 'bg-purple-600 text-white border-purple-600'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300'
-              }`}
-            >
-              📈 Trends
-            </button>
+              <button
+                id="trends-tab"
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'trends'}
+                aria-controls="trends-panel"
+                onClick={() => setActiveTab('trends')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  activeTab === 'trends'
+                    ? 'bg-purple-600 text-white border-purple-600'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300'
+                }`}
+              >
+                📈 Trends
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -240,15 +274,7 @@ export default function MoveMathPage() {
             <span className="text-xs font-medium text-gray-500 shrink-0">Presets:</span>
             <ScenarioPresets
               currentPreset={activePreset}
-              onApplyPreset={(newInputs) => {
-                const matchId = SCENARIO_PRESETS.find(
-                  (p) =>
-                    p.inputs.annualSalary === newInputs.annualSalary &&
-                    p.inputs.state === newInputs.state &&
-                    p.inputs.rent === newInputs.rent
-                )?.id;
-                handleApplyPreset(newInputs, matchId);
-              }}
+              onApplyPreset={handleApplyPreset}
             />
           </div>
         </div>
@@ -256,61 +282,72 @@ export default function MoveMathPage() {
 
       {/* Main layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {activeTab === 'budget' ? (
-          // Budget view
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Left panel: Form */}
-            <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
-              <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
-                <RebalanceControls
-                  inputs={inputs}
-                  rebalanceResult={rebalanceResult}
-                  onStrategyChange={handleStrategyChange}
-                  onSurplusAllocationChange={handleSurplusAllocationChange}
-                  onRebalance={handleRebalance}
-                  onReset={handleReset}
-                />
-                <BudgetForm
-                  inputs={inputs}
-                  onChange={handleChange}
-                  onToggleLock={handleToggleLock}
-                />
-              </div>
-            </aside>
-
-            {/* Right panel: Dashboard */}
-            <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
-              <BudgetDashboard
-                breakdown={breakdown}
-                inputs={inputs}
-                healthScore={healthScore}
-                recommendations={recommendations}
-                rebalanceResult={rebalanceResult}
+        <ErrorBoundary onReset={handleReset}>
+          {activeTab === 'budget' ? (
+            <div id="budget-panel" role="tabpanel" aria-labelledby="budget-tab" className="space-y-6">
+              <ScenarioComparison
+                items={comparisonItems}
+                selectedPresetIds={comparisonPresetIds}
+                onSelectionChange={(presetIds) =>
+                  setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
+                }
+                onApplyPreset={(presetId) => {
+                  const preset = SCENARIO_PRESETS.find((item) => item.id === presetId);
+                  if (!preset) return;
+                  handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
+                }}
               />
+
+              <div className="flex flex-col md:flex-row gap-6">
+                <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
+                  <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                    <RebalanceControls
+                      inputs={inputs}
+                      rebalanceResult={rebalanceResult}
+                      onStrategyChange={handleStrategyChange}
+                      onSurplusAllocationChange={handleSurplusAllocationChange}
+                      onRebalance={handleRebalance}
+                      onReset={handleReset}
+                    />
+                    <BudgetForm
+                      inputs={inputs}
+                      onChange={handleChange}
+                      onToggleLock={handleToggleLock}
+                    />
+                  </div>
+                </aside>
+
+                <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
+                  <BudgetDashboard
+                    breakdown={breakdown}
+                    inputs={inputs}
+                    healthScore={healthScore}
+                    recommendations={recommendations}
+                    rebalanceResult={rebalanceResult}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        ) : (
-          // Trends view
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Left panel: Spending Tracker */}
-            <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
-              <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
-                <SpendingTracker
+          ) : (
+            <div id="trends-panel" role="tabpanel" aria-labelledby="trends-tab" className="flex flex-col md:flex-row gap-6">
+              <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
+                <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                  <SpendingTracker
+                    spendingHistory={inputs.spendingHistory}
+                    onHistoryChange={handleSpendingHistoryChange}
+                  />
+                </div>
+              </aside>
+
+              <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
+                <TrendAnalysis
                   spendingHistory={inputs.spendingHistory}
-                  onHistoryChange={handleSpendingHistoryChange}
+                  inputs={inputs}
                 />
               </div>
-            </aside>
-
-            {/* Right panel: Trend Analysis */}
-            <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
-              <TrendAnalysis
-                spendingHistory={inputs.spendingHistory}
-                inputs={inputs}
-              />
             </div>
-          </div>
-        )}
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* Footer */}

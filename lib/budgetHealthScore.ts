@@ -4,7 +4,6 @@
  */
 
 import type { BudgetBreakdown, BudgetHealthScore, HealthScoreLabel } from '@/types/budget';
-import { BUDGET_THRESHOLDS } from './budgetCalculations';
 
 function clampScore(s: number): number {
   return Math.max(0, Math.min(100, s));
@@ -16,22 +15,17 @@ function clampScore(s: number): number {
 export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHealthScore {
   const {
     rentAsPercentGross,
-    rentAsPercentTakeHome,
     retirement,
-    emergencyFundTargetCalculated,
     grossMonthly,
     netMonthlyIncome,
     remainingMonthlyBuffer,
     totalTransportation,
     totalPets,
-    totalSavings,
     totalInvestments,
-    houseDownPaymentContribution,
-    emergencyFundContribution,
-  } = breakdown as BudgetBreakdown & {
-    houseDownPaymentContribution?: number;
-    emergencyFundContribution?: number;
-  };
+    totalSavings,
+    effectiveEmergencyFundContribution,
+    effectiveHouseDownPaymentContribution,
+  } = breakdown;
 
   // ── Rent affordability (0–20 pts) ─────────────────────────────────────────
   let rentScore = 20;
@@ -50,7 +44,7 @@ export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHe
 
   // ── Emergency fund contribution (0–15 pts) ───────────────────────────────
   // Score based on whether they're contributing meaningfully
-  const efContrib = breakdown.totalSavings; // approximation — will refine below
+  const efContrib = effectiveEmergencyFundContribution;
   let efScore = 0;
   if (grossMonthly > 0) {
     const efRate = efContrib / grossMonthly;
@@ -61,7 +55,7 @@ export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHe
 
   // ── House fund contribution (0–10 pts) ───────────────────────────────────
   let houseFundScore = 0;
-  const hfContrib = breakdown.annualHouseFund / 12;
+  const hfContrib = effectiveHouseDownPaymentContribution;
   if (hfContrib >= 2000) houseFundScore = 10;
   else if (hfContrib >= 1000) houseFundScore = 7;
   else if (hfContrib >= 500) houseFundScore = 4;
