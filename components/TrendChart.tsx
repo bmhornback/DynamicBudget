@@ -65,7 +65,7 @@ export default function TrendChart({
           />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip
-            formatter={(value: number | string) => 
+            formatter={(value) => 
               typeof value === 'number' ? `$${value.toFixed(2)}` : '$0.00'
             }
             labelFormatter={(label: string) => {
