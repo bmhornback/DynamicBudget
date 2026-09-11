@@ -1,22 +1,52 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
-import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult } from '@/types/budget';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
 import { DEFAULT_INPUTS, SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
 import { calculateBudgetHealthScore } from '@/lib/budgetHealthScore';
 import { generateRecommendations } from '@/lib/recommendations';
 import { rebalanceBudget } from '@/lib/rebalanceBudget';
+import { initializeSpendingHistory } from '@/lib/spendingTrends';
+import { saveBudgetInputs, loadBudgetInputs } from '@/lib/storage';
 import BudgetForm from '@/components/BudgetForm';
 import BudgetDashboard from '@/components/BudgetDashboard';
 import ScenarioPresets from '@/components/ScenarioPresets';
 import RebalanceControls from '@/components/RebalanceControls';
+import SpendingTracker from '@/components/SpendingTracker';
+import TrendAnalysis from '@/components/TrendAnalysis';
 
 export default function MoveMathPage() {
-  const [inputs, setInputs] = useState<BudgetInputs>(DEFAULT_INPUTS);
+  // Initialize with defaults, then load from storage on mount
+  const [inputs, setInputs] = useState<BudgetInputs>(() => {
+    const defaults = { ...DEFAULT_INPUTS };
+    if (!defaults.spendingHistory) {
+      defaults.spendingHistory = initializeSpendingHistory();
+    }
+    return defaults;
+  });
+  
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
+  const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+
+  // ── Load from localStorage on mount ──────────────────────────────────────
+  useEffect(() => {
+    const stored = loadBudgetInputs();
+    if (stored) {
+      setInputs(stored);
+    }
+  }, []);
+
+  // ── Auto-save to localStorage ────────────────────────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      saveBudgetInputs(inputs);
+    }, 500); // Debounce by 500ms
+
+    return () => clearTimeout(timer);
+  }, [inputs]);
 
   // ── Derived calculations (memoized) ────────────────────────────────────────
   const breakdown = useMemo(() => calculateBudgetBreakdown(inputs), [inputs]);
@@ -83,6 +113,16 @@ export default function MoveMathPage() {
     }));
   }, []);
 
+  const handleSpendingHistoryChange = useCallback(
+    (history: SpendingHistory) => {
+      setInputs((prev) => ({
+        ...prev,
+        spendingHistory: history,
+      }));
+    },
+    []
+  );
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -116,6 +156,30 @@ export default function MoveMathPage() {
             >
               {showForm ? '📊 Dashboard' : '✏️ Edit'}
             </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('budget')}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                activeTab === 'budget'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+              }`}
+            >
+              📊 Budget
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('trends')}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                activeTab === 'trends'
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300'
+              }`}
+            >
+              📈 Trends
+            </button>
           </div>
         </div>
       </header>
@@ -143,37 +207,61 @@ export default function MoveMathPage() {
 
       {/* Main layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Left panel: Form */}
-          <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
-            <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
-              <RebalanceControls
+        {activeTab === 'budget' ? (
+          // Budget view
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Left panel: Form */}
+            <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
+              <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                <RebalanceControls
+                  inputs={inputs}
+                  rebalanceResult={rebalanceResult}
+                  onStrategyChange={handleStrategyChange}
+                  onSurplusAllocationChange={handleSurplusAllocationChange}
+                  onRebalance={handleRebalance}
+                  onReset={handleReset}
+                />
+                <BudgetForm
+                  inputs={inputs}
+                  onChange={handleChange}
+                  onToggleLock={handleToggleLock}
+                />
+              </div>
+            </aside>
+
+            {/* Right panel: Dashboard */}
+            <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
+              <BudgetDashboard
+                breakdown={breakdown}
                 inputs={inputs}
+                healthScore={healthScore}
+                recommendations={recommendations}
                 rebalanceResult={rebalanceResult}
-                onStrategyChange={handleStrategyChange}
-                onSurplusAllocationChange={handleSurplusAllocationChange}
-                onRebalance={handleRebalance}
-                onReset={handleReset}
-              />
-              <BudgetForm
-                inputs={inputs}
-                onChange={handleChange}
-                onToggleLock={handleToggleLock}
               />
             </div>
-          </aside>
-
-          {/* Right panel: Dashboard */}
-          <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
-            <BudgetDashboard
-              breakdown={breakdown}
-              inputs={inputs}
-              healthScore={healthScore}
-              recommendations={recommendations}
-              rebalanceResult={rebalanceResult}
-            />
           </div>
-        </div>
+        ) : (
+          // Trends view
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Left panel: Spending Tracker */}
+            <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
+              <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                <SpendingTracker
+                  spendingHistory={inputs.spendingHistory}
+                  onHistoryChange={handleSpendingHistoryChange}
+                />
+              </div>
+            </aside>
+
+            {/* Right panel: Trend Analysis */}
+            <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
+              <TrendAnalysis
+                spendingHistory={inputs.spendingHistory}
+                inputs={inputs}
+              />
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
