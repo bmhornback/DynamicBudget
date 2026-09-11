@@ -34,13 +34,13 @@ export default function BudgetFieldInput({
 }: BudgetFieldInputProps) {
   const [raw, setRaw] = React.useState(value.toString());
   const [focused, setFocused] = React.useState(false);
+  const [prevValue, setPrevValue] = React.useState(value);
 
   // Keep raw in sync when value changes from outside (e.g., rebalance)
-  React.useEffect(() => {
-    if (!focused) {
-      setRaw(value.toString());
-    }
-  }, [value, focused]);
+  if (!focused && prevValue !== value) {
+    setPrevValue(value);
+    setRaw(value.toString());
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRaw(e.target.value);
