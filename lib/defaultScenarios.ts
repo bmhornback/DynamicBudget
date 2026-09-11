@@ -88,7 +88,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   budgetMode: 'manual',
   rebalanceStrategy: 'reduce_lifestyle_first',
   surplusAllocation: 'house_fund',
-  spendingHistory: { entries: [], lastUpdated: new Date().toISOString(), version: 1 },
+  spendingHistory: { entries: [], lastUpdated: '', version: 1 },
 };
 
 export const SCENARIO_PRESETS: ScenarioPreset[] = [
