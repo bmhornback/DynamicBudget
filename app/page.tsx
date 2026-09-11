@@ -16,6 +16,16 @@ import RebalanceControls from '@/components/RebalanceControls';
 import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
 
+// ─── Module-level constants ───────────────────────────────────────────────────
+// Savings fields that should be locked/unlocked when toggling percentage mode
+const SAVINGS_FIELDS = [
+  'emergencyFundContribution',
+  'houseDownPaymentContribution',
+  'taxableInvestments',
+  'generalCashSavings',
+  'extraDebtPayoff',
+] as const;
+
 export default function MoveMathPage() {
   // Initialize from localStorage if available, otherwise use defaults
   const [inputs, setInputs] = useState<BudgetInputs>(() => {
@@ -32,15 +42,6 @@ export default function MoveMathPage() {
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
-
-  // Savings fields that should be locked/unlocked when toggling percentage mode
-  const SAVINGS_FIELDS = [
-    'emergencyFundContribution',
-    'houseDownPaymentContribution',
-    'taxableInvestments',
-    'generalCashSavings',
-    'extraDebtPayoff',
-  ] as const;
 
   // ── Load from localStorage on mount ──────────────────────────────────────
   // (handled in useState initializer above)
@@ -99,7 +100,7 @@ export default function MoveMathPage() {
       return next;
     });
     setActivePreset(undefined);
-  }, [SAVINGS_FIELDS]);
+  }, []);
 
   const handleToggleLock = useCallback((fieldId: string) => {
     setInputs((prev) => ({

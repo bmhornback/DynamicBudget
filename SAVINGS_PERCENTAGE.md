@@ -47,7 +47,7 @@ When **Percentage Mode** is enabled:
 
 #### To Enable Percentage Mode:
 1. Navigate to the **Savings & Investing** section in the budget form
-2. Toggle the switch labeled **"Save by Percentage of Net Income"** to **ON**
+2. Toggle the switch labeled **"Use Percentage-Based Savings"** to **ON**
 3. A slider appears showing the percentage (default 30%)
 4. Individual savings fields automatically hide
 5. Individual savings fields are automatically locked to protect them
@@ -58,7 +58,7 @@ When **Percentage Mode** is enabled:
 3. The budget breakdown recalculates instantly
 
 #### To Switch Back to Fixed Amounts:
-1. Toggle the **"Save by Percentage of Net Income"** switch to **OFF**
+1. Toggle the **"Use Percentage-Based Savings"** switch to **OFF**
 2. Individual savings fields automatically unlock
 3. Individual savings fields reappear
 4. Return to entering specific dollar amounts
