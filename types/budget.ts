@@ -263,6 +263,8 @@ export interface BudgetBreakdown {
   totalSavings: number;
   totalInvestments: number;
   calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
+  effectiveEmergencyFundContribution: number;
+  effectiveHouseDownPaymentContribution: number;
   monthlyRothIRA: number; // Roth IRA (after-tax contribution)
   monthlyHSA: number; // HSA (pre-tax contribution)
 

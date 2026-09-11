@@ -51,12 +51,12 @@
 | Charts / visualization (Recharts) | ✅ Done |
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
-| Test suite | ✅ Jest (73 tests passing) |
-| CI/CD | ❌ None |
+| Test suite | ✅ Jest (92 tests passing) |
+| CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
-| Roth vs Traditional IRA | ❌ Not differentiated |
-| HSA / FSA | ❌ Not modeled |
-| Multi-scenario comparison | ❌ Not available |
+| Roth vs Traditional IRA | ✅ Done |
+| HSA / FSA | ✅ HSA modeled |
+| Multi-scenario comparison | ✅ Basic side-by-side comparison |
 | Debt amortization | ❌ Only flat extra-payment field |
 
 ### New in This Release (v1.0.0)
@@ -68,20 +68,22 @@
 - Accurate tax modeling for relocation scenarios across any US state
 - Complete state-level tax coverage, while still using estimated take-home math that excludes county/local taxes and some deductions
 
-✨ **2026 Tax Tables & Percentage-Based Savings** (v0.9.3 features)
+✨ **2026 Tax Tables, Retirement Account Modeling, and Scenario Comparison**
 - 2026 Federal tax brackets updated with inflation adjustments
 - 2026 California state tax brackets updated
 - Georgia confirmed at 5.49% flat tax
+- Traditional vs. Roth IRA support with recommendation warnings for Traditional IRA phase-out ranges
+- HSA contribution modeling with 2026 limits and deduction-aware tax treatment
 - New "Save X% of Net Income" feature: Set savings as a percentage that auto-adjusts with income changes
 - Savings fields automatically locked when in percentage mode to prevent confusion
 - Integration with rebalancing engine for both modes
-- All 73 unit tests updated and passing for 2026 calculations
+- New scenario comparison table for side-by-side relocation and savings tradeoff analysis
+- 92 Jest tests passing
 
 ### Known gaps / rough edges
 
-- `budgetHealthScore.ts` accesses `houseDownPaymentContribution` and `emergencyFundContribution` via a type cast on `BudgetBreakdown` — these aren't actually on the breakdown type; they come from `inputs` directly.
-- Scenario preset matching in `page.tsx` uses fragile field-comparison heuristics instead of preset ID lookup.
-- No error boundaries — a bad input can throw unhandled.
+- Accessibility polish is improved but not complete — additional keyboard, contrast, and screen-reader audits are still desirable.
+- Multi-scenario comparison currently focuses on the live budget plus preset scenarios; named saved budgets are still future work.
 - 2027 tax brackets not yet published by IRS (typically available late 2026).
 - County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
 
@@ -89,11 +91,11 @@
 
 ## 2. Vision & Goals
 
-**Short-term (v1.0 — "Ship It"):** A polished, tested, persistent tool that works great on desktop and mobile for the personal use case that inspired it (high-income earner planning a cross-state move).
+**Short-term (v1.0 closeout):** Finish stability, accessibility, and documentation polish so the current feature set feels complete and dependable.
 
-**Medium-term (v1.5 — "Grow It"):** Add visualization, multi-scenario comparison, export, and light sharing capabilities so it is useful to share with others.
+**Medium-term (v1.5 — "Grow It"):** Expand the budgeting workflow with multi-scenario comparison, debt/homeowner planning, and stronger export/share capabilities.
 
-**Long-term (v2.0 — "Platform"):** Optional BaaS-powered cloud sync (Supabase/Firebase), a public landing page, and marketing presence. Because the app is fully static, any cloud features must use third-party BaaS — there is no custom backend server.
+**Long-term (v2.0 — "Platform"):** Optional BaaS-powered cloud sync (Supabase/Firebase), a public landing page, analytics, and MCP/platform work after the core budgeting product is fully polished. Because the app is fully static, any cloud features must use third-party BaaS — there is no custom backend server.
 
 ---
 
@@ -151,15 +153,16 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 
 | # | Epic | Priority | Phase |
 |---|---|---|---|
-| 1 | Developer Experience & Quality | 🔴 Critical | Now |
-| 2 | Persistence & User Data | 🔴 Critical | Now |
-| 3 | Enhanced Tax Engine | 🟠 High | v1.0 |
-| 4 | Data Visualization | 🟠 High | v1.0 |
+| 1 | Developer Experience & Quality | 🔴 Critical | v1.0 closeout |
+| 2 | Persistence & User Data | 🟠 High | v1.0 closeout |
+| 3 | Enhanced Tax Engine | ✅ Shipped | Complete for current release |
+| 4 | Data Visualization | ✅ Shipped | Complete for current release |
 | 5 | Advanced Budget Features | 🟡 Medium | v1.5 |
-| 6 | UX Polish & Accessibility | 🟠 High | v1.0 |
+| 6 | UX Polish & Accessibility | 🔴 Critical | v1.0 closeout |
 | 7 | Export & Sharing | 🟡 Medium | v1.5 |
-| 8 | Backend & Cloud Sync (BaaS, optional) | 🟢 Low | v2.0 |
-| 9 | Growth & Discovery | 🟢 Low | v2.0 |
+| 8 | Backend & Cloud Sync (BaaS, optional) | 🟢 Low | v2.0 (deferred) |
+| 9 | Growth & Discovery | 🟢 Low | v2.0 (deferred) |
+| 10 | AI Integration & MCP | 🟢 Low | v2.0 (deferred) |
 
 ---
 
@@ -660,11 +663,11 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ## Release Milestones
 
-### v0.9 — "Solid Foundation" (current → next)
+### v1.0 closeout — "Finish the Base"
 - Epic 1 (DX & Quality): All tasks complete
 - Epic 2-T1, T2 (localStorage persistence)
-- Epic 6-T1, T2, T3 (accessibility baseline)
-- Bug fixes: health score type cast, scenario matching, tax year constants
+- Epic 6 accessibility baseline plus dynamic-region polish
+- Bug fixes: health score typing cleanup, scenario matching, error boundary, tax year constants
 
 ### v1.0 — "Ship It"
 - Epic 2 complete (persistence, named saves, import/export JSON)
@@ -676,7 +679,7 @@ States to add (in priority order based on population and no-income-tax interest)
 ### v1.5 — "Grow It"
 - Epic 3 complete
 - Epic 4 complete (including projection chart, rebalance diff)
-- Epic 5-T1 through T4 (multi-scenario, debt payoff, homeowner mode, COLI)
+- Epic 5-T1 through T4 (multi-scenario expansion, debt payoff, homeowner mode, COLI)
 - Epic 7 complete
 
 ### v2.0 — "Platform"
@@ -691,11 +694,11 @@ States to add (in priority order based on population and no-income-tax interest)
 
 | ID | Description | Severity | Status | Epic Ref |
 |---|---|---|---|---|
-| TD-1 | `budgetHealthScore.ts` casts `BudgetBreakdown` to access `inputs` fields | Medium | Open | E1-T8 |
+| TD-1 | `budgetHealthScore.ts` casts `BudgetBreakdown` to access `inputs` fields | Medium | ✅ Resolved | E1-T8 |
 | TD-2 | Tax year constants updated to 2026 (401k limit, IRA limit, and brackets refreshed per IRS 2026 adjustments) | High | ✅ Resolved (2026) | E3-T6 |
-| TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | Open | E2-T4 |
-| TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | Open | E1-T9 |
-| TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (73 tests) | E1 |
+| TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | ✅ Resolved | E2-T4 |
+| TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | ✅ Resolved | E1-T9 |
+| TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (92 tests) | E1 |
 | TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | Open | E3 |
 | TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | Open | General |
 | TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | Open | E3-T2 |
@@ -718,4 +721,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-11 — Epic 10: Added AI Integration & MCP feature roadmap for v2.0+.*
+*Last updated: 2026-09-11 — Rebaselined roadmap to shipped features, closed core v1.0 gaps, and started v1.5 scenario comparison.*

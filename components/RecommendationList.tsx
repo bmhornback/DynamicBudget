@@ -46,7 +46,7 @@ export default function RecommendationList({ recommendations }: RecommendationLi
 
   return (
     <BudgetCard title="Recommendations & Warnings">
-      <div className="space-y-2">
+      <div className="space-y-2" role="region" aria-live="polite" aria-label="Budget recommendations">
         {sorted.map((rec) => {
           const style = SEVERITY_STYLES[rec.severity];
           return (
