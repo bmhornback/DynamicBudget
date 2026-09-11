@@ -1,8 +1,8 @@
-# MoveMath — Dynamic Budget Planner
+# Dynamic Budget Planner
 
 Take your overall salary, subtract taxes, ensure savings, and dynamically allocate the rest with precision.
 
-**MoveMath** is a personal finance planning tool that empowers high-income earners to confidently budget across major life changes like relocating, changing jobs, or major life events. It combines real-world tax modeling with dynamic budget rebalancing to help you make informed financial decisions.
+**Dynamic Budget** is a personal finance planning tool that empowers high-income earners to confidently budget across major life changes like relocating, changing jobs, or major life events. It combines real-world tax modeling with dynamic budget rebalancing to help you make informed financial decisions.
 
 ## Features
 
@@ -35,7 +35,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ## Getting Started
 
 ### Try It Online
-Visit the app: [MoveMath on GitHub Pages](https://bmhornback.github.io/DynamicBudget)
+Visit the app at: https://bmhornback.github.io/DynamicBudget
 
 ### Run Locally
 ```bash
