@@ -27,11 +27,15 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset, currentI
   const handleSaveCustomPreset = () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
+    const scenarioInputs: Partial<BudgetInputs> = { ...currentInputs };
+    delete scenarioInputs.spendingHistory;
+    delete scenarioInputs.lockedFields;
+
     const preset: CustomPreset = {
       id: `custom_${crypto.randomUUID()}`,
       name: trimmed,
       description: 'Custom preset',
-      inputs: currentInputs,
+      inputs: scenarioInputs,
       createdAt: new Date().toISOString(),
     };
     saveCustomPreset(preset);
