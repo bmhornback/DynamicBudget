@@ -7,6 +7,7 @@ import {
   generateSpendingInsights,
   CATEGORY_CONFIG,
 } from '@/lib/spendingTrends';
+import TrendChart from '@/components/TrendChart';
 
 interface TrendAnalysisProps {
   spendingHistory: SpendingHistory | undefined;
@@ -184,6 +185,21 @@ export default function TrendAnalysis({
                       }}
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Trend Chart */}
+              {metric.entries.length > 0 && (
+                <div className="mt-4 border-t border-gray-100 pt-4">
+                  <p className="text-xs font-medium text-gray-600 mb-3">
+                    6-Month Trend
+                  </p>
+                  <TrendChart
+                    category={metric.category}
+                    spendingHistory={spendingHistory}
+                    inputs={inputs}
+                    months={6}
+                  />
                 </div>
               )}
             </div>

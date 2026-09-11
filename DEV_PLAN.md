@@ -45,18 +45,32 @@
 | Recommendations engine | ✅ Done |
 | Scenario presets (San Diego, Atlanta, Living w/ Parents, etc.) | ✅ Done |
 | Responsive layout (mobile toggle) | ✅ Basic |
-| Data persistence | ❌ None |
-| Charts / visualization | ❌ None |
+| Data persistence (localStorage) | ✅ Done |
+| Spending trends tracking | ✅ Done |
+| Charts / visualization (Recharts) | ✅ Done |
+| Spending insights & forecasting | ✅ Done |
+| Export / import JSON | ✅ Done |
 | Test suite | ❌ None |
 | CI/CD | ❌ None |
-| Export / share | ❌ None |
 | Additional tax states | ❌ Only CA, GA, no-state-tax |
 | Roth vs Traditional IRA | ❌ Not differentiated |
 | HSA / FSA | ❌ Not modeled |
 | Multi-scenario comparison | ❌ Not available |
 | Debt amortization | ❌ Only flat extra-payment field |
 
+### New in This Release
+
+✨ **Spending Trends & Analytics Feature**
+- Track actual spending across 10 categories: dining out, gasoline, utilities, groceries, subscriptions, etc.
+- View 6-month spending trends with budget vs. actual comparisons
+- Automatic spending forecasting using linear regression
+- Insights about overspending, trending patterns, and budget adherence
+- All data stored locally in browser (no account required)
+- Interactive charts powered by Recharts
+- localStorage auto-save with debouncing
+
 ### Known gaps / rough edges
+
 
 - `budgetHealthScore.ts` accesses `houseDownPaymentContribution` and `emergencyFundContribution` via a type cast on `BudgetBreakdown` — these aren't actually on the breakdown type; they come from `inputs` directly.
 - Tax limits (`ANNUAL_401K_LIMIT = 24500`, `ANNUAL_IRA_LIMIT = 7500`) are hardcoded to 2024 and need annual updates.
