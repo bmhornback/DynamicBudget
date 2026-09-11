@@ -10,6 +10,7 @@ import BudgetCard from './BudgetCard';
 interface ScenarioComparisonProps {
   items: ScenarioComparisonItem[];
   selectedPresetIds: string[];
+  activePresetId?: string;
   onSelectionChange: (presetIds: string[]) => void;
   onApplyPreset: (presetId: string) => void;
 }
@@ -43,10 +44,12 @@ const METRIC_ROWS: Array<{
 export default function ScenarioComparison({
   items,
   selectedPresetIds,
+  activePresetId,
   onSelectionChange,
   onApplyPreset,
 }: ScenarioComparisonProps) {
   const handleTogglePreset = (presetId: string) => {
+    if (presetId === activePresetId) return;
     if (selectedPresetIds.includes(presetId)) {
       onSelectionChange(selectedPresetIds.filter((id) => id !== presetId));
       return;
@@ -70,16 +73,20 @@ export default function ScenarioComparison({
           <div className="flex flex-wrap gap-2" role="group" aria-label="Scenario comparison presets">
             {SCENARIO_PRESETS.map((preset) => {
               const isSelected = selectedPresetIds.includes(preset.id);
+              const isActive = preset.id === activePresetId;
               return (
                 <button
                   key={preset.id}
                   type="button"
                   onClick={() => handleTogglePreset(preset.id)}
                   aria-pressed={isSelected}
+                  disabled={isActive}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                    isSelected
-                      ? 'border-blue-600 bg-blue-600 text-white'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:text-blue-600'
+                    isActive
+                      ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'
+                      : isSelected
+                        ? 'border-blue-600 bg-blue-600 text-white'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:text-blue-600'
                   }`}
                 >
                   {preset.name}

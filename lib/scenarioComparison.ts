@@ -1,4 +1,4 @@
-import type { BudgetHealthScore, BudgetInputs } from '@/types/budget';
+import type { BudgetHealthScore, BudgetInputs, StateOfResidence } from '@/types/budget';
 import { calculateBudgetBreakdown } from './budgetCalculations';
 import { calculateBudgetHealthScore } from './budgetHealthScore';
 import { applyScenarioPreset, SCENARIO_PRESETS } from './defaultScenarios';
@@ -11,7 +11,7 @@ export interface ScenarioComparisonItem {
   description: string;
   isCurrent: boolean;
   annualSalary: number;
-  state: string;
+  state: StateOfResidence;
   rent: number;
   takeHomeMonthly: number;
   totalAllocatedMonthly: number;

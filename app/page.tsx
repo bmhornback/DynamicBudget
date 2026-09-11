@@ -223,7 +223,6 @@ export default function MoveMathPage() {
             <button
               type="button"
               onClick={() => setShowForm((v) => !v)}
-              aria-pressed={showForm}
               aria-label={showForm ? 'Show dashboard panel' : 'Show editor panel'}
               className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white text-gray-600 border-gray-200 hover:border-blue-300 transition-all md:hidden"
             >
@@ -288,6 +287,7 @@ export default function MoveMathPage() {
               <ScenarioComparison
                 items={comparisonItems}
                 selectedPresetIds={comparisonPresetIds}
+                activePresetId={activePreset}
                 onSelectionChange={(presetIds) =>
                   setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
                 }

@@ -103,7 +103,7 @@ components/
   TrendChart.tsx          ← 6-month trend chart
   [other UI components]
 app/
-  page.tsx                ← Main app (Budget, comparison, and Trends tabs)
+  page.tsx                ← Main app (Budget and Trends tabs, scenario comparison embedded in Budget view)
   layout.tsx
   globals.css
 ```
