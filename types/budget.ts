@@ -94,12 +94,18 @@ export interface RetirementBreakdown {
   monthly401k: number;
   /** Annual 401(k) employee contribution */
   annual401k: number;
+  /** Type of 401k: traditional (pre-tax) or roth (after-tax) */
+  is401kRoth: boolean;
   /** Whether contribution maxes out the 401(k) */
   isMaxing401k: boolean;
   /** Monthly employer match */
   monthlyEmployerMatch: number;
   /** Annual employer match */
   annualEmployerMatch: number;
+  /** Capped employer match amount (actual cap applied) */
+  monthlyEmployerMatchCapped: number;
+  /** Annual capped employer match */
+  annualEmployerMatchCapped: number;
   /** Monthly IRA contribution */
   monthlyIRA: number;
   /** Annual IRA contribution */
@@ -114,9 +120,9 @@ export interface RetirementBreakdown {
   annualHSA: number;
   /** Whether HSA contribution maxes out the limit */
   isMaxingHSA: boolean;
-  /** Total monthly retirement savings (employee only, excludes Roth IRA) */
+  /** Total monthly retirement savings (employee only, excludes Roth IRA and Roth 401k) */
   totalMonthlyEmployee: number;
-  /** Total annual retirement savings (employee only, excludes Roth IRA) */
+  /** Total annual retirement savings (employee only, excludes Roth IRA and Roth 401k) */
   totalAnnualEmployee: number;
   /** Retirement savings rate as % of gross */
   retirementSavingsRate: number;
@@ -130,8 +136,10 @@ export interface BudgetInputs {
   state: StateOfResidence;
   filingStatus: FilingStatus;
   retirementContributionPercent: number;
+  is401kRoth: boolean; // Whether 401k is Roth (after-tax) vs Traditional (pre-tax)
   maxOut401k: boolean;
   employerMatchPercent: number;
+  employerMatchCapPercent: number; // Cap on employer match (default 100%)
   bonusIncome: number;
   otherMonthlyIncome: number;
 

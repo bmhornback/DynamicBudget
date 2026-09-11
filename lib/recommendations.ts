@@ -207,7 +207,7 @@ export function generateRecommendations(
     if (grossAnnual > phaseoutStart && grossAnnual < phaseoutEnd) {
       const percentThroughPhaseout = (grossAnnual - phaseoutStart) / (phaseoutEnd - phaseoutStart);
       const allowedPercent = 1 - percentThroughPhaseout;
-      const maxAllowedIRA = TRADITIONAL_IRA_PHASEOUT_END === Infinity ? 7000 : (allowedPercent * 7000);
+      const maxAllowedIRA = allowedPercent * 7000;
 
       recs.push({
         id: 'ira_phaseout_partial',

@@ -190,6 +190,25 @@ describe('taxCalculations', () => {
       expect(result.annual401k).toBe(0);
       expect(result.annualEmployerMatch).toBe(0);
     });
+
+    it('should calculate capped employer match correctly', () => {
+      // Employer offers 5%, but capped at 3%
+      const result = calculateRetirementContribution(100000, 10, false, 5, 3);
+      expect(result.annualEmployerMatch).toBeCloseTo(5000, 0); // Uncapped: 5%
+      expect(result.annualEmployerMatchCapped).toBeCloseTo(3000, 0); // Capped: 3%
+      expect(result.monthlyEmployerMatchCapped).toBeCloseTo(250, 0);
+    });
+
+    it('should not cap match when cap is 100%', () => {
+      const result = calculateRetirementContribution(100000, 10, false, 5, 100);
+      expect(result.annualEmployerMatch).toBeCloseTo(5000, 0);
+      expect(result.annualEmployerMatchCapped).toBeCloseTo(5000, 0); // No difference
+    });
+
+    it('should handle 0% match cap', () => {
+      const result = calculateRetirementContribution(100000, 10, false, 5, 0);
+      expect(result.annualEmployerMatchCapped).toBeCloseTo(0, 0);
+    });
   });
 
   describe('calculateNetMonthlyIncome', () => {
@@ -477,6 +496,53 @@ describe('taxCalculations', () => {
       const expectedDifference = hsaMonthly - totalTaxSavings;
       // Allow 5% tolerance due to state tax variations
       expect(resultWithoutHSA.netMonthly - resultWithHSA.netMonthly).toBeCloseTo(expectedDifference, 1);
+    });
+
+    it('should not reduce taxable income for Roth 401k', () => {
+      const gross = 100000;
+      const traditional401k = 10000;
+      const roth401k = 10000;
+      const filing = 'single';
+      const state = 'no_state_tax';
+
+      // Traditional 401k should reduce taxes
+      const resultTraditional = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        traditional401k,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        false // is401kRoth = false (Traditional)
+      );
+
+      // Roth 401k should NOT reduce taxes
+      const resultRoth = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        roth401k,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        true // is401kRoth = true (Roth)
+      );
+
+      // Traditional 401k should result in lower federal taxes
+      expect(resultTraditional.federalTaxAnnual).toBeLessThan(resultRoth.federalTaxAnnual);
+
+      // Both should have same 401k deduction from net pay
+      expect(resultTraditional.total401kMonthly).toBeCloseTo(resultRoth.total401kMonthly, 0);
+
+      // But Roth should have higher net monthly since it's not pre-tax
+      // Actually, both get the same net impact because Roth is post-tax
+      // Let's verify the math: Roth 401k should result in even lower net than Traditional
+      expect(resultRoth.netMonthly).toBeLessThan(resultTraditional.netMonthly);
     });
 
     it('should combine Traditional IRA and HSA pre-tax deductions', () => {

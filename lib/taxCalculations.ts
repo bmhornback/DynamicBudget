@@ -686,13 +686,16 @@ export function calculateRetirementContribution(
   grossAnnual: number,
   contributionPercent: number,
   maxOut401k: boolean,
-  employerMatchPercent: number
+  employerMatchPercent: number,
+  employerMatchCapPercent: number = 100
 ): {
   annual401k: number;
   monthly401k: number;
   isMaxing401k: boolean;
   annualEmployerMatch: number;
   monthlyEmployerMatch: number;
+  annualEmployerMatchCapped: number;
+  monthlyEmployerMatchCapped: number;
 } {
   let annual401k: number;
   if (maxOut401k) {
@@ -704,8 +707,14 @@ export function calculateRetirementContribution(
   const isMaxing401k = annual401k >= ANNUAL_401K_LIMIT;
   const monthly401k = annual401k / 12;
 
+  // Calculate uncapped employer match
   const annualEmployerMatch = grossAnnual * (employerMatchPercent / 100);
   const monthlyEmployerMatch = annualEmployerMatch / 12;
+
+  // Apply match cap (typically cap is per-paycheck, but we'll cap annual)
+  const cappedMatchPercent = Math.min(employerMatchPercent, employerMatchCapPercent);
+  const annualEmployerMatchCapped = grossAnnual * (cappedMatchPercent / 100);
+  const monthlyEmployerMatchCapped = annualEmployerMatchCapped / 12;
 
   return {
     annual401k,
@@ -713,6 +722,8 @@ export function calculateRetirementContribution(
     isMaxing401k,
     annualEmployerMatch,
     monthlyEmployerMatch,
+    annualEmployerMatchCapped,
+    monthlyEmployerMatchCapped,
   };
 }
 
@@ -730,7 +741,8 @@ export function calculateNetMonthlyIncome(
   bonusIncome: number = 0,
   otherMonthlyIncome: number = 0,
   iraType: 'traditional' | 'roth' = 'traditional',
-  annualHSA: number = 0
+  annualHSA: number = 0,
+  is401kRoth: boolean = false
 ): {
   grossMonthly: number;
   federalTaxMonthly: number;
@@ -751,10 +763,13 @@ export function calculateNetMonthlyIncome(
   const annualTraditionalIRA = iraType === 'traditional' ? annualIRA : 0;
   const annualRothIRA = iraType === 'roth' ? annualIRA : 0;
 
+  // For tax purposes, only Traditional 401k reduces taxable income, not Roth 401k
+  const annual401kPreTax = is401kRoth ? 0 : annual401k;
+
   const federalTaxAnnual = federalIncomeTaxEstimate(
     totalAnnualGross,
     filingStatus,
-    annual401k,
+    annual401kPreTax,
     annualTraditionalIRA,
     annualHSA
   );
@@ -762,7 +777,7 @@ export function calculateNetMonthlyIncome(
     totalAnnualGross,
     state,
     filingStatus,
-    annual401k,
+    annual401kPreTax,
     annualTraditionalIRA,
     annualHSA
   );
@@ -776,16 +791,17 @@ export function calculateNetMonthlyIncome(
   const payrollTaxMonthly = payrollTaxAnnual / 12;
   const total401kMonthly = annual401k / 12;
 
-  // Net monthly: gross - taxes - 401(k) pre-tax - Traditional IRA pre-tax - HSA pre-tax - Roth IRA after-tax
+  // Net monthly: gross - taxes - Traditional 401k pre-tax - Traditional IRA pre-tax - HSA pre-tax - Roth IRA after-tax - Roth 401k after-tax
   const netMonthly =
     grossMonthly -
     federalTaxMonthly -
     stateTaxMonthly -
     payrollTaxMonthly -
-    total401kMonthly -
+    annual401kPreTax / 12 -
     annualTraditionalIRA / 12 -
     annualHSA / 12 -
-    annualRothIRA / 12;
+    annualRothIRA / 12 -
+    (is401kRoth ? annual401k / 12 : 0);
 
   return {
     grossMonthly,

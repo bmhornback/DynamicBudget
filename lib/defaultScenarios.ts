@@ -10,8 +10,10 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   state: 'CA',
   filingStatus: 'single',
   retirementContributionPercent: 15,
+  is401kRoth: false,
   maxOut401k: false,
   employerMatchPercent: 3,
+  employerMatchCapPercent: 100,
   bonusIncome: 0,
   otherMonthlyIncome: 0,
 

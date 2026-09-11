@@ -24,8 +24,10 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     filingStatus,
     state,
     retirementContributionPercent,
+    is401kRoth,
     maxOut401k,
     employerMatchPercent,
+    employerMatchCapPercent,
     bonusIncome,
     otherMonthlyIncome,
     iraContribution,
@@ -43,7 +45,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     annualSalary,
     retirementContributionPercent,
     maxOut401k,
-    employerMatchPercent
+    employerMatchPercent,
+    employerMatchCapPercent
   );
 
   // Calculate IRA contribution with max-out logic
@@ -82,9 +85,12 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   const retirementBreakdown: RetirementBreakdown = {
     monthly401k: retCalc.monthly401k,
     annual401k: retCalc.annual401k,
+    is401kRoth,
     isMaxing401k: retCalc.isMaxing401k,
     monthlyEmployerMatch: retCalc.monthlyEmployerMatch,
     annualEmployerMatch: retCalc.annualEmployerMatch,
+    monthlyEmployerMatchCapped: retCalc.monthlyEmployerMatchCapped,
+    annualEmployerMatchCapped: retCalc.annualEmployerMatchCapped,
     monthlyIRA,
     annualIRA,
     iraType,
@@ -108,7 +114,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     bonusIncome,
     otherMonthlyIncome,
     iraType,
-    annualHSA
+    annualHSA,
+    is401kRoth
   );
 
   const taxBreakdown: TaxBreakdown = {
