@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import {
-  LineChart,
   Line,
-  BarChart,
   Bar,
   XAxis,
   YAxis,
@@ -67,10 +65,10 @@ export default function TrendChart({
           />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip
-            formatter={(value: any) => 
+            formatter={(value: number | string) => 
               typeof value === 'number' ? `$${value.toFixed(2)}` : '$0.00'
             }
-            labelFormatter={(label: any) => {
+            labelFormatter={(label: string) => {
               const [year, month] = (label || '').split('-');
               return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', {
                 month: 'long',

@@ -113,7 +113,7 @@ export function getCategoryEntriesLastNMonths(
   months: number
 ): SpendingEntry[] {
   const now = new Date();
-  const startDate = new Date(now.getFullYear(), now.getMonth() - months, 1);
+  const startDate = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
 
   const entries = getCategoryEntries(history, category);
   return entries.filter(
@@ -316,7 +316,7 @@ export function generateSpendingInsights(
 
   metrics.forEach((metric) => {
     // Alert if current month is significantly over budget
-    if (metric.currentMonthSpent > metric.budgetedMonthly * 1.2) {
+    if (metric.budgetedMonthly > 0 && metric.currentMonthSpent > metric.budgetedMonthly * 1.2) {
       insights.push({
         id: `overspend_${metric.category}`,
         type: 'warning',
@@ -345,6 +345,7 @@ export function generateSpendingInsights(
 
     // Positive reinforcement for staying under budget
     if (
+      metric.budgetedMonthly > 0 &&
       metric.currentMonthSpent > 0 &&
       metric.currentMonthSpent < metric.budgetedMonthly * 0.8
     ) {
@@ -360,6 +361,7 @@ export function generateSpendingInsights(
 
     // Forecast alert
     if (
+      metric.budgetedMonthly > 0 &&
       metric.forecastNextMonth > metric.budgetedMonthly * 1.15 &&
       metric.entries.length > 0
     ) {

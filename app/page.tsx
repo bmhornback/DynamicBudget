@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
 import { DEFAULT_INPUTS, SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
@@ -17,8 +17,10 @@ import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
 
 export default function MoveMathPage() {
-  // Initialize with defaults, then load from storage on mount
+  // Initialize from localStorage if available, otherwise use defaults
   const [inputs, setInputs] = useState<BudgetInputs>(() => {
+    const stored = loadBudgetInputs();
+    if (stored) return stored;
     const defaults = { ...DEFAULT_INPUTS };
     if (!defaults.spendingHistory) {
       defaults.spendingHistory = initializeSpendingHistory();
@@ -32,15 +34,15 @@ export default function MoveMathPage() {
   const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
 
   // ── Load from localStorage on mount ──────────────────────────────────────
-  useEffect(() => {
-    const stored = loadBudgetInputs();
-    if (stored) {
-      setInputs(stored);
-    }
-  }, []);
+  // (handled in useState initializer above)
 
   // ── Auto-save to localStorage ────────────────────────────────────────
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     const timer = setTimeout(() => {
       saveBudgetInputs(inputs);
     }, 500); // Debounce by 500ms
