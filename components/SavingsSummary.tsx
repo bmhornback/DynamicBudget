@@ -78,11 +78,25 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
           annual={retirement.annual401k}
           rate={grossMonthly > 0 ? retirement.monthly401k / grossMonthly : 0}
         />
+        {retirement.monthly401kCatchUp > 0 && (
+          <SavingsRow
+            label="401(k) Catch-Up (50+)"
+            monthly={retirement.monthly401kCatchUp}
+            annual={retirement.annual401kCatchUp}
+          />
+        )}
         {retirement.monthlyIRA > 0 && (
           <SavingsRow
             label="IRA"
             monthly={retirement.monthlyIRA}
             annual={retirement.annualIRA}
+          />
+        )}
+        {retirement.monthlyIRACatchUp > 0 && (
+          <SavingsRow
+            label="IRA Catch-Up (50+)"
+            monthly={retirement.monthlyIRACatchUp}
+            annual={retirement.annualIRACatchUp}
           />
         )}
         {retirement.monthlyEmployerMatch > 0 && (

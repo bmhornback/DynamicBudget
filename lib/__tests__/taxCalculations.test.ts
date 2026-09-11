@@ -209,6 +209,27 @@ describe('taxCalculations', () => {
       const result = calculateRetirementContribution(100000, 10, false, 5, 0);
       expect(result.annualEmployerMatchCapped).toBeCloseTo(0, 0);
     });
+
+    it('should calculate 401k catch-up contribution for age 50+', () => {
+      // Age 50+: eligible for $7,500 catch-up when maxing out
+      const resultAge50 = calculateRetirementContribution(100000, 10, true, 3, 100, 50);
+      expect(resultAge50.annual401k).toBe(32000); // Standard limit (24500) + catch-up (7500)
+      expect(resultAge50.annual401kCatchUp).toBe(7500); // Catch-up tracked separately
+      expect(resultAge50.monthly401kCatchUp).toBeCloseTo(625, 0);
+    });
+
+    it('should not include 401k catch-up for age <50', () => {
+      // Age 49: no catch-up
+      const resultAge49 = calculateRetirementContribution(100000, 10, true, 3, 100, 49);
+      expect(resultAge49.annual401k).toBe(24500); // Only standard limit
+      expect(resultAge49.annual401kCatchUp).toBe(0);
+    });
+
+    it('should only apply catch-up when maxing out 401k', () => {
+      // Age 50, not maxing out: no catch-up
+      const resultNoMaxOut = calculateRetirementContribution(100000, 5, false, 3, 100, 50);
+      expect(resultNoMaxOut.annual401kCatchUp).toBe(0);
+    });
   });
 
   describe('calculateNetMonthlyIncome', () => {

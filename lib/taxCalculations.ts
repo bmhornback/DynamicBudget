@@ -663,8 +663,12 @@ export function payrollTaxEstimate(
 
 /** 2026 401(k) employee contribution limit */
 export const ANNUAL_401K_LIMIT = 24500;
+/** 2026 401(k) catch-up contribution limit (age 50+) */
+export const ANNUAL_401K_CATCHUP_LIMIT = 7500;
 /** 2026 IRA contribution limit */
 export const ANNUAL_IRA_LIMIT = 7000;
+/** 2026 IRA catch-up contribution limit (age 50+) */
+export const ANNUAL_IRA_CATCHUP_LIMIT = 1000;
 /** 2026 HSA contribution limit - individual coverage */
 export const ANNUAL_HSA_LIMIT_SELF = 4150;
 /** 2026 HSA contribution limit - family coverage */
@@ -678,8 +682,24 @@ export const TRADITIONAL_IRA_PHASEOUT_MFJ_START = 123000;
 export const TRADITIONAL_IRA_PHASEOUT_MFJ_END = 143000;
 
 /**
+ * Get age-adjusted 401k contribution limit
+ * Standard: $24,500; with catch-up (age 50+): $32,000
+ */
+export function get401kLimit(userAge: number): number {
+  return ANNUAL_401K_LIMIT + (userAge >= 50 ? ANNUAL_401K_CATCHUP_LIMIT : 0);
+}
+
+/**
+ * Get age-adjusted IRA contribution limit
+ * Standard: $7,000; with catch-up (age 50+): $8,000
+ */
+export function getIRALimit(userAge: number): number {
+  return ANNUAL_IRA_LIMIT + (userAge >= 50 ? ANNUAL_IRA_CATCHUP_LIMIT : 0);
+}
+
+/**
  * Calculate annual 401(k) employee contribution.
- * If maxOut401k is true, caps at ANNUAL_401K_LIMIT.
+ * If maxOut401k is true, caps at age-adjusted ANNUAL_401K_LIMIT.
  * Otherwise uses contributionPercent of grossAnnual.
  */
 export function calculateRetirementContribution(
@@ -687,10 +707,13 @@ export function calculateRetirementContribution(
   contributionPercent: number,
   maxOut401k: boolean,
   employerMatchPercent: number,
-  employerMatchCapPercent: number = 100
+  employerMatchCapPercent: number = 100,
+  userAge: number = 0
 ): {
   annual401k: number;
   monthly401k: number;
+  annual401kCatchUp: number;
+  monthly401kCatchUp: number;
   isMaxing401k: boolean;
   annualEmployerMatch: number;
   monthlyEmployerMatch: number;
@@ -698,14 +721,21 @@ export function calculateRetirementContribution(
   monthlyEmployerMatchCapped: number;
 } {
   let annual401k: number;
+  const limit401k = get401kLimit(userAge);
+  
   if (maxOut401k) {
-    annual401k = ANNUAL_401K_LIMIT;
+    annual401k = limit401k;
   } else {
-    annual401k = Math.min(grossAnnual * (contributionPercent / 100), ANNUAL_401K_LIMIT);
+    annual401k = Math.min(grossAnnual * (contributionPercent / 100), limit401k);
   }
 
-  const isMaxing401k = annual401k >= ANNUAL_401K_LIMIT;
+  const isMaxing401k = annual401k >= limit401k;
   const monthly401k = annual401k / 12;
+
+  // Calculate catch-up contribution for age 50+
+  const eligible401kCatchUp = userAge >= 50 ? ANNUAL_401K_CATCHUP_LIMIT : 0;
+  const annual401kCatchUp = maxOut401k && eligible401kCatchUp > 0 ? eligible401kCatchUp : 0;
+  const monthly401kCatchUp = annual401kCatchUp / 12;
 
   // Calculate uncapped employer match
   const annualEmployerMatch = grossAnnual * (employerMatchPercent / 100);
@@ -719,6 +749,8 @@ export function calculateRetirementContribution(
   return {
     annual401k,
     monthly401k,
+    annual401kCatchUp,
+    monthly401kCatchUp,
     isMaxing401k,
     annualEmployerMatch,
     monthlyEmployerMatch,

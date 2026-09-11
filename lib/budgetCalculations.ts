@@ -10,9 +10,13 @@ import {
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
   ANNUAL_401K_LIMIT,
+  ANNUAL_401K_CATCHUP_LIMIT,
   ANNUAL_IRA_LIMIT,
+  ANNUAL_IRA_CATCHUP_LIMIT,
   ANNUAL_HSA_LIMIT_SELF,
   ANNUAL_HSA_LIMIT_FAMILY,
+  get401kLimit,
+  getIRALimit,
 } from './taxCalculations';
 
 /**
@@ -28,6 +32,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     maxOut401k,
     employerMatchPercent,
     employerMatchCapPercent,
+    userAge,
     bonusIncome,
     otherMonthlyIncome,
     iraContribution,
@@ -46,18 +51,25 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     retirementContributionPercent,
     maxOut401k,
     employerMatchPercent,
-    employerMatchCapPercent
+    employerMatchCapPercent,
+    userAge
   );
 
-  // Calculate IRA contribution with max-out logic
+  // Calculate IRA contribution with max-out logic (age-adjusted limit)
+  const iraLimit = getIRALimit(userAge);
   let annualIRA: number;
   if (maxOutIRA) {
-    annualIRA = ANNUAL_IRA_LIMIT;
+    annualIRA = iraLimit;
   } else {
-    annualIRA = Math.min((iraContribution || 0) * 12, ANNUAL_IRA_LIMIT);
+    annualIRA = Math.min((iraContribution || 0) * 12, iraLimit);
   }
   const monthlyIRA = annualIRA / 12;
-  const isMaxingIRA = annualIRA >= ANNUAL_IRA_LIMIT;
+  const isMaxingIRA = annualIRA >= iraLimit;
+
+  // Calculate IRA catch-up (age 50+)
+  const eligibleIRACatchUp = userAge >= 50 ? ANNUAL_IRA_CATCHUP_LIMIT : 0;
+  const annualIRACatchUp = maxOutIRA && eligibleIRACatchUp > 0 ? eligibleIRACatchUp : 0;
+  const monthlyIRACatchUp = annualIRACatchUp / 12;
 
   // Calculate HSA contribution with max-out logic
   let annualHSA: number = 0;
@@ -78,15 +90,17 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   }
 
   // For retirement savings rate calculation:
-  // Include 401(k), IRA (both types), and HSA
-  const totalEmployeeRetirementAnnual = retCalc.annual401k + annualIRA + annualHSA;
-  const totalEmployeeRetirementMonthly = retCalc.monthly401k + monthlyIRA + monthlyHSA;
+  // Include 401(k) + catch-up, IRA + catch-up (both types), and HSA
+  const totalEmployeeRetirementAnnual = retCalc.annual401k + retCalc.annual401kCatchUp + annualIRA + annualIRACatchUp + annualHSA;
+  const totalEmployeeRetirementMonthly = retCalc.monthly401k + retCalc.monthly401kCatchUp + monthlyIRA + monthlyIRACatchUp + monthlyHSA;
 
   const retirementBreakdown: RetirementBreakdown = {
     monthly401k: retCalc.monthly401k,
     annual401k: retCalc.annual401k,
     is401kRoth,
     isMaxing401k: retCalc.isMaxing401k,
+    monthly401kCatchUp: retCalc.monthly401kCatchUp,
+    annual401kCatchUp: retCalc.annual401kCatchUp,
     monthlyEmployerMatch: retCalc.monthlyEmployerMatch,
     annualEmployerMatch: retCalc.annualEmployerMatch,
     monthlyEmployerMatchCapped: retCalc.monthlyEmployerMatchCapped,
@@ -95,6 +109,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     annualIRA,
     iraType,
     isMaxingIRA,
+    monthlyIRACatchUp,
+    annualIRACatchUp,
     monthlyHSA,
     annualHSA,
     isMaxingHSA,

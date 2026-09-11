@@ -98,6 +98,10 @@ export interface RetirementBreakdown {
   is401kRoth: boolean;
   /** Whether contribution maxes out the 401(k) */
   isMaxing401k: boolean;
+  /** Monthly 401k catch-up contribution (age 50+) */
+  monthly401kCatchUp: number;
+  /** Annual 401k catch-up contribution (age 50+) */
+  annual401kCatchUp: number;
   /** Monthly employer match */
   monthlyEmployerMatch: number;
   /** Annual employer match */
@@ -114,6 +118,10 @@ export interface RetirementBreakdown {
   iraType: IRAType;
   /** Whether IRA contribution maxes out the limit */
   isMaxingIRA: boolean;
+  /** Monthly IRA catch-up contribution (age 50+) */
+  monthlyIRACatchUp: number;
+  /** Annual IRA catch-up contribution (age 50+) */
+  annualIRACatchUp: number;
   /** Monthly HSA contribution (if eligible) */
   monthlyHSA: number;
   /** Annual HSA contribution (if eligible) */
@@ -140,6 +148,7 @@ export interface BudgetInputs {
   maxOut401k: boolean;
   employerMatchPercent: number;
   employerMatchCapPercent: number; // Cap on employer match (default 100%)
+  userAge: number; // User's current age (0 = not specified; 50+ eligible for catch-up)
   bonusIncome: number;
   otherMonthlyIncome: number;
 
