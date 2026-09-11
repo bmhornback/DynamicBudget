@@ -7,7 +7,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ## Features
 
 ### Core Capabilities
-- 📊 **Real-world tax modeling** — Federal, state (CA, GA, no-tax states), payroll, and bonus taxation
+- 📊 **Real-world tax modeling** — 2026 Federal, state (CA, GA, no-tax states), payroll, and bonus taxation
 - 💰 **Comprehensive expense tracking** — Housing, utilities, transport, pets, food, health, lifestyle, and more
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
@@ -15,6 +15,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
 - 💾 **Data persistence** — Auto-save your budget to your browser (no account needed)
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
+- 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 📱 **Responsive design** — Works great on desktop and mobile
 
 ### Spending Trends & Analytics
@@ -126,8 +127,14 @@ All calculations are **pure functions** — no side effects, making them trivial
 All calculations and data are processed entirely in your browser. No data is sent to any server:
 - ✅ Budget calculations are 100% client-side
 - ✅ Spending history is saved to your browser's localStorage
-- ✅ Tax estimates use simplified 2024 rates
+- ✅ Tax estimates use current 2026 rates (federal + CA/GA state-specific)
 - ✅ You own all your data
+
+## Documentation
+
+- **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, features, tech debt register
+- **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
+- **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
 
 ## Development
 

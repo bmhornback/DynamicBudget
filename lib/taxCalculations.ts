@@ -1,7 +1,18 @@
 /**
- * Tax calculation utilities for MoveMath.
+ * Tax calculation utilities for DynamicBudget.
  * These are simplified estimates, NOT exact tax filing calculations.
  * Clearly labeled as estimates throughout the UI.
+ *
+ * ⚠️ Tax Year: 2026
+ * Last Updated: September 11, 2026
+ * Sources:
+ * - Federal: IRS 2026 tax inflation adjustments (https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026)
+ * - States: Individual state tax authority publications for 2026
+ *
+ * IMPORTANT: When updating tax tables, remember to also update:
+ * - ANNUAL_401K_LIMIT (currently $24,500 for 2024-2026)
+ * - ANNUAL_IRA_LIMIT (currently $7,000 for 2026; was $7,500 in 2024-2025)
+ * - All test expectations in lib/__tests__/taxCalculations.test.ts
  */
 
 import type { FilingStatus, StateOfResidence } from '@/types/budget';
