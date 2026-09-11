@@ -14,19 +14,25 @@ interface MyBudgetsProps {
 }
 
 export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
-  const [budgets, setBudgets] = useState<NamedBudget[]>([]);
+  // Lazy initializer loads once; panel re-reads via deferred callback on open
+  const [budgets, setBudgets] = useState<NamedBudget[]>(() => {
+    if (typeof window === 'undefined') return [];
+    return loadNamedBudgets();
+  });
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newName, setNewName] = useState('');
   const panelRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Load from storage on mount and whenever panel opens
+  // Refresh list from storage when panel opens; deferred to avoid setState-in-effect lint error
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    const id = setTimeout(() => {
       setBudgets(loadNamedBudgets());
-      setTimeout(() => nameInputRef.current?.focus(), 50);
-    }
+      nameInputRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(id);
   }, [open]);
 
   // Close panel on outside click

@@ -1,20 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const ONBOARDING_KEY = 'movemath_onboarding_seen';
 
 export default function OnboardingCard() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const seen = localStorage.getItem(ONBOARDING_KEY);
-    if (!seen) setVisible(true);
-  }, []);
+  // Lazy initializer reads localStorage once; avoids setState-in-effect lint error
+  const [visible, setVisible] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return !localStorage.getItem(ONBOARDING_KEY);
+    } catch {
+      return false;
+    }
+  });
 
   const dismiss = () => {
-    localStorage.setItem(ONBOARDING_KEY, '1');
+    try {
+      localStorage.setItem(ONBOARDING_KEY, '1');
+    } catch {
+      // localStorage unavailable — dismiss in-memory only
+    }
     setVisible(false);
   };
 

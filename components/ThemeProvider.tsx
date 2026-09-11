@@ -12,6 +12,29 @@ interface ThemeContextValue {
 
 const THEME_KEY = 'movemath_theme';
 
+function readStoredTheme(): Theme {
+  try {
+    return (localStorage.getItem(THEME_KEY) as Theme | null) ?? 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+function resolveTheme(t: Theme): 'light' | 'dark' {
+  if (t === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return t;
+}
+
+function applyClass(resolved: 'light' | 'dark') {
+  if (resolved === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 const ThemeContext = createContext<ThemeContextValue>({
   theme: 'system',
   resolvedTheme: 'light',
@@ -19,47 +42,51 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
-
-  // Resolve the effective theme
-  const resolve = useCallback((t: Theme): 'light' | 'dark' => {
-    if (t === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return t;
-  }, []);
+  // Lazy initializers read from localStorage once on first render (client only)
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'system';
+    return readStoredTheme();
+  });
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    return resolveTheme(readStoredTheme());
+  });
 
   const applyTheme = useCallback((t: Theme) => {
-    const resolved = resolve(t);
+    const resolved = resolveTheme(t);
     setResolvedTheme(resolved);
-    const root = document.documentElement;
-    if (resolved === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [resolve]);
+    applyClass(resolved);
+  }, []);
 
-  const setTheme = useCallback((t: Theme) => {
-    setThemeState(t);
-    localStorage.setItem(THEME_KEY, t);
-    applyTheme(t);
-  }, [applyTheme]);
-
-  // Initialize on mount
+  // Apply the initial theme class on mount (DOM manipulation only)
   useEffect(() => {
-    const stored = (localStorage.getItem(THEME_KEY) as Theme | null) ?? 'system';
-    setThemeState(stored);
-    applyTheme(stored);
+    applyClass(resolvedTheme);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount
 
-    // Listen for system preference changes
+  // Listen for OS colour-scheme changes when in system mode
+  useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
-      if (stored === 'system') applyTheme('system');
+      // Re-read current preference from storage so handler is never stale
+      if (readStoredTheme() === 'system') {
+        const resolved = resolveTheme('system');
+        setResolvedTheme(resolved);
+        applyClass(resolved);
+      }
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const setTheme = useCallback((t: Theme) => {
+    setThemeState(t);
+    try {
+      localStorage.setItem(THEME_KEY, t);
+    } catch {
+      // localStorage blocked (e.g., private-browsing restrictions) — ignore
+    }
+    applyTheme(t);
   }, [applyTheme]);
 
   return (

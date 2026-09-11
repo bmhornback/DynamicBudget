@@ -250,6 +250,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           onToggleLock={onToggleLock}
           validate={(v) => {
             const grossMonthly = inputs.annualSalary / 12;
+            if (grossMonthly <= 0) return null;
             return v > grossMonthly * 0.5
               ? `Rent is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
               : null;

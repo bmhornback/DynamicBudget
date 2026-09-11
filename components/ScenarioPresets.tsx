@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { BudgetInputs, CustomPreset } from '@/types/budget';
 import { SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import {
@@ -16,13 +16,13 @@ interface ScenarioPresetsProps {
 }
 
 export default function ScenarioPresets({ onApplyPreset, currentPreset, currentInputs }: ScenarioPresetsProps) {
-  const [customPresets, setCustomPresets] = useState<CustomPreset[]>([]);
+  // Lazy initializer loads from localStorage once; avoids setState-in-effect lint error
+  const [customPresets, setCustomPresets] = useState<CustomPreset[]>(() => {
+    if (typeof window === 'undefined') return [];
+    return loadCustomPresets();
+  });
   const [saving, setSaving] = useState(false);
   const [newName, setNewName] = useState('');
-
-  useEffect(() => {
-    setCustomPresets(loadCustomPresets());
-  }, []);
 
   const handleSaveCustomPreset = () => {
     const trimmed = newName.trim();
