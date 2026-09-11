@@ -60,7 +60,7 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
 
   const isPercentageMode = inputs?.isSavingsByPercentage ?? false;
   const savingsPercentOfNetIncome = Number.isFinite(inputs?.savingsPercentOfNetIncome)
-    ? inputs.savingsPercentOfNetIncome
+    ? inputs?.savingsPercentOfNetIncome
     : DEFAULT_INPUTS.savingsPercentOfNetIncome;
 
   const bufferColor = isOverBudget
