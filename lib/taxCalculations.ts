@@ -12,6 +12,8 @@
  * IMPORTANT: When updating tax tables, remember to also update:
  * - ANNUAL_401K_LIMIT (currently $24,500 for 2026; was $23,500 in 2025, $23,000 in 2024)
  * - ANNUAL_IRA_LIMIT (currently $7,000 for 2026; was $7,000 in 2024-2025, increased from $6,500 in 2023)
+ * - ANNUAL_HSA_LIMIT_SELF (currently $4,150 for 2026)
+ * - ANNUAL_HSA_LIMIT_FAMILY (currently $8,300 for 2026)
  * - All test expectations in lib/__tests__/taxCalculations.test.ts
  */
 
@@ -64,16 +66,19 @@ const STANDARD_DEDUCTION: Record<FilingStatus, number> = {
 
 /**
  * Estimate annual federal income tax using bracket math.
- * Applies standard deduction and treats 401(k) contribution as pre-tax.
+ * Applies standard deduction and treats 401(k), Traditional IRA, and HSA as pre-tax deductions.
  */
 export function federalIncomeTaxEstimate(
   grossAnnual: number,
   filingStatus: FilingStatus,
-  annual401kContribution: number
+  annual401kContribution: number,
+  annualTraditionalIRAContribution: number = 0,
+  annualHSAContribution: number = 0
 ): number {
   const deduction = STANDARD_DEDUCTION[filingStatus];
-  // 401(k) is pre-tax, so subtract it from taxable income
-  const taxableIncome = Math.max(0, grossAnnual - annual401kContribution - deduction);
+  // Pre-tax deductions: 401(k), Traditional IRA, and HSA
+  const preTaxDeductions = annual401kContribution + annualTraditionalIRAContribution + annualHSAContribution;
+  const taxableIncome = Math.max(0, grossAnnual - preTaxDeductions - deduction);
   const brackets = FEDERAL_BRACKETS[filingStatus];
 
   let tax = 0;
@@ -577,15 +582,19 @@ const STATE_TAX_CONFIG: Record<Exclude<StateOfResidence, 'no_state_tax'>, StateT
 /**
  * Estimate annual state income tax.
  * Supports all 50 states, DC, and a generic no-state-tax option.
+ * Treats 401(k), Traditional IRA, and HSA as pre-tax deductions.
  */
 export function stateIncomeTaxEstimate(
   grossAnnual: number,
   state: StateOfResidence,
   filingStatus: FilingStatus,
-  annual401kContribution: number
+  annual401kContribution: number,
+  annualTraditionalIRAContribution: number = 0,
+  annualHSAContribution: number = 0
 ): number {
-  // 401(k) is pre-tax for state purposes (simplified)
-  const taxableIncome = Math.max(0, grossAnnual - annual401kContribution);
+  // Pre-tax deductions: 401(k), Traditional IRA, and HSA (simplified assumption that states honor these)
+  const preTaxDeductions = annual401kContribution + annualTraditionalIRAContribution + annualHSAContribution;
+  const taxableIncome = Math.max(0, grossAnnual - preTaxDeductions);
 
   if (state === 'no_state_tax') return 0;
 
@@ -656,6 +665,17 @@ export function payrollTaxEstimate(
 export const ANNUAL_401K_LIMIT = 24500;
 /** 2026 IRA contribution limit */
 export const ANNUAL_IRA_LIMIT = 7000;
+/** 2026 HSA contribution limit - individual coverage */
+export const ANNUAL_HSA_LIMIT_SELF = 4150;
+/** 2026 HSA contribution limit - family coverage */
+export const ANNUAL_HSA_LIMIT_FAMILY = 8300;
+
+/** Traditional IRA income phase-out ranges (2026) - simplified for single filers */
+export const TRADITIONAL_IRA_PHASEOUT_SINGLE_START = 77000;
+export const TRADITIONAL_IRA_PHASEOUT_SINGLE_END = 87000;
+/** Traditional IRA income phase-out ranges (2026) - simplified for MFJ */
+export const TRADITIONAL_IRA_PHASEOUT_MFJ_START = 123000;
+export const TRADITIONAL_IRA_PHASEOUT_MFJ_END = 143000;
 
 /**
  * Calculate annual 401(k) employee contribution.
@@ -707,8 +727,10 @@ export function calculateNetMonthlyIncome(
   state: StateOfResidence,
   annual401k: number,
   annualIRA: number,
-  bonusIncome: number,
-  otherMonthlyIncome: number
+  bonusIncome: number = 0,
+  otherMonthlyIncome: number = 0,
+  iraType: 'traditional' | 'roth' = 'traditional',
+  annualHSA: number = 0
 ): {
   grossMonthly: number;
   federalTaxMonthly: number;
@@ -725,8 +747,25 @@ export function calculateNetMonthlyIncome(
   const totalAnnualGross = grossAnnual + bonusIncome;
   const grossMonthly = totalAnnualGross / 12 + otherMonthlyIncome;
 
-  const federalTaxAnnual = federalIncomeTaxEstimate(totalAnnualGross, filingStatus, annual401k);
-  const stateTaxAnnual = stateIncomeTaxEstimate(totalAnnualGross, state, filingStatus, annual401k);
+  // For tax purposes, only Traditional IRA and HSA reduce taxable income
+  const annualTraditionalIRA = iraType === 'traditional' ? annualIRA : 0;
+  const annualRothIRA = iraType === 'roth' ? annualIRA : 0;
+
+  const federalTaxAnnual = federalIncomeTaxEstimate(
+    totalAnnualGross,
+    filingStatus,
+    annual401k,
+    annualTraditionalIRA,
+    annualHSA
+  );
+  const stateTaxAnnual = stateIncomeTaxEstimate(
+    totalAnnualGross,
+    state,
+    filingStatus,
+    annual401k,
+    annualTraditionalIRA,
+    annualHSA
+  );
   const payrollTaxAnnual = payrollTaxEstimate(totalAnnualGross, filingStatus);
 
   const totalTaxAnnual = federalTaxAnnual + stateTaxAnnual + payrollTaxAnnual;
@@ -737,14 +776,16 @@ export function calculateNetMonthlyIncome(
   const payrollTaxMonthly = payrollTaxAnnual / 12;
   const total401kMonthly = annual401k / 12;
 
-  // Net monthly: gross - taxes - 401(k) pre-tax - IRA (after-tax, but subtract from take-home)
+  // Net monthly: gross - taxes - 401(k) pre-tax - Traditional IRA pre-tax - HSA pre-tax - Roth IRA after-tax
   const netMonthly =
     grossMonthly -
     federalTaxMonthly -
     stateTaxMonthly -
     payrollTaxMonthly -
     total401kMonthly -
-    annualIRA / 12;
+    annualTraditionalIRA / 12 -
+    annualHSA / 12 -
+    annualRothIRA / 12;
 
   return {
     grossMonthly,

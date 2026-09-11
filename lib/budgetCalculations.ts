@@ -11,6 +11,8 @@ import {
   calculateNetMonthlyIncome,
   ANNUAL_401K_LIMIT,
   ANNUAL_IRA_LIMIT,
+  ANNUAL_HSA_LIMIT_SELF,
+  ANNUAL_HSA_LIMIT_FAMILY,
 } from './taxCalculations';
 
 /**
@@ -27,6 +29,11 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     bonusIncome,
     otherMonthlyIncome,
     iraContribution,
+    iraType,
+    maxOutIRA,
+    hsaContribution,
+    hsaEligible,
+    maxOutHSA,
     isSavingsByPercentage,
     savingsPercentOfNetIncome,
   } = inputs;
@@ -39,9 +46,38 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     employerMatchPercent
   );
 
-  // Cap IRA at annual limit
-  const annualIRA = Math.min((iraContribution || 0) * 12, ANNUAL_IRA_LIMIT);
+  // Calculate IRA contribution with max-out logic
+  let annualIRA: number;
+  if (maxOutIRA) {
+    annualIRA = ANNUAL_IRA_LIMIT;
+  } else {
+    annualIRA = Math.min((iraContribution || 0) * 12, ANNUAL_IRA_LIMIT);
+  }
   const monthlyIRA = annualIRA / 12;
+  const isMaxingIRA = annualIRA >= ANNUAL_IRA_LIMIT;
+
+  // Calculate HSA contribution with max-out logic
+  let annualHSA: number = 0;
+  let monthlyHSA: number = 0;
+  let isMaxingHSA: boolean = false;
+
+  if (hsaEligible) {
+    // Determine HSA limit based on filing status (simplified: treat married_jointly as family, others as self)
+    const hsaLimit = filingStatus === 'married_jointly' ? ANNUAL_HSA_LIMIT_FAMILY : ANNUAL_HSA_LIMIT_SELF;
+
+    if (maxOutHSA) {
+      annualHSA = hsaLimit;
+    } else {
+      annualHSA = Math.min((hsaContribution || 0) * 12, hsaLimit);
+    }
+    monthlyHSA = annualHSA / 12;
+    isMaxingHSA = annualHSA >= hsaLimit;
+  }
+
+  // For retirement savings rate calculation:
+  // Include 401(k), IRA (both types), and HSA
+  const totalEmployeeRetirementAnnual = retCalc.annual401k + annualIRA + annualHSA;
+  const totalEmployeeRetirementMonthly = retCalc.monthly401k + monthlyIRA + monthlyHSA;
 
   const retirementBreakdown: RetirementBreakdown = {
     monthly401k: retCalc.monthly401k,
@@ -51,12 +87,15 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     annualEmployerMatch: retCalc.annualEmployerMatch,
     monthlyIRA,
     annualIRA,
-    totalMonthlyEmployee: retCalc.monthly401k + monthlyIRA,
-    totalAnnualEmployee: retCalc.annual401k + annualIRA,
-    retirementSavingsRate:
-      annualSalary > 0 ? (retCalc.annual401k + annualIRA) / annualSalary : 0,
-    isSaving15Percent:
-      annualSalary > 0 ? (retCalc.annual401k + annualIRA) / annualSalary >= 0.15 : false,
+    iraType,
+    isMaxingIRA,
+    monthlyHSA,
+    annualHSA,
+    isMaxingHSA,
+    totalMonthlyEmployee: totalEmployeeRetirementMonthly,
+    totalAnnualEmployee: totalEmployeeRetirementAnnual,
+    retirementSavingsRate: annualSalary > 0 ? totalEmployeeRetirementAnnual / annualSalary : 0,
+    isSaving15Percent: annualSalary > 0 ? totalEmployeeRetirementAnnual / annualSalary >= 0.15 : false,
   };
 
   // ── Net Monthly Income ────────────────────────────────────────────────────
@@ -67,7 +106,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     retCalc.annual401k,
     annualIRA,
     bonusIncome,
-    otherMonthlyIncome
+    otherMonthlyIncome,
+    iraType,
+    annualHSA
   );
 
   const taxBreakdown: TaxBreakdown = {
@@ -197,15 +238,19 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   // ── Annual Projections ────────────────────────────────────────────────────
   const annualHouseFund = inputs.houseDownPaymentContribution * 12;
   const annualTaxableInvestments = inputs.taxableInvestments * 12;
+  
+  // Calculate Roth IRA contribution (for tracking in breakdown)
+  const monthlyRothIRA = iraType === 'roth' ? monthlyIRA : 0;
+  
   const totalAnnualSavingsIncludingRetirement =
-    (totalSavings + totalInvestments) * 12 + retCalc.annual401k + annualIRA;
+    (totalSavings + totalInvestments) * 12 + retCalc.annual401k + annualIRA + annualHSA;
 
   // ── Rates ─────────────────────────────────────────────────────────────────
   const grossMonthly = netCalc.grossMonthly;
 
   const savingsRateGross =
     grossMonthly > 0
-      ? ((totalSavings + totalInvestments + retCalc.monthly401k + monthlyIRA) / grossMonthly)
+      ? ((totalSavings + totalInvestments + retCalc.monthly401k + monthlyIRA + monthlyHSA) / grossMonthly)
       : 0;
 
   const savingsRateNet =
@@ -237,6 +282,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalSavings,
     totalInvestments,
     calculatedSavingsFromPercentage,
+    monthlyRothIRA,
+    monthlyHSA,
     totalFixedExpenses,
     totalVariableExpenses,
     totalAllocated,

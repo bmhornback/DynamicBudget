@@ -48,6 +48,8 @@ export type SurplusAllocation =
 
 export type BudgetMode = 'manual' | 'auto';
 
+export type IRAType = 'traditional' | 'roth';
+
 export interface BudgetField {
   id: string;
   value: number;
@@ -102,9 +104,19 @@ export interface RetirementBreakdown {
   monthlyIRA: number;
   /** Annual IRA contribution */
   annualIRA: number;
-  /** Total monthly retirement savings (employee only) */
+  /** Type of IRA: traditional (pre-tax) or roth (after-tax) */
+  iraType: IRAType;
+  /** Whether IRA contribution maxes out the limit */
+  isMaxingIRA: boolean;
+  /** Monthly HSA contribution (if eligible) */
+  monthlyHSA: number;
+  /** Annual HSA contribution (if eligible) */
+  annualHSA: number;
+  /** Whether HSA contribution maxes out the limit */
+  isMaxingHSA: boolean;
+  /** Total monthly retirement savings (employee only, excludes Roth IRA) */
   totalMonthlyEmployee: number;
-  /** Total annual retirement savings (employee only) */
+  /** Total annual retirement savings (employee only, excludes Roth IRA) */
   totalAnnualEmployee: number;
   /** Retirement savings rate as % of gross */
   retirementSavingsRate: number;
@@ -177,6 +189,11 @@ export interface BudgetInputs {
   houseDownPaymentTarget: number;
   taxableInvestments: number;
   iraContribution: number;
+  iraType: IRAType; // 'traditional' or 'roth'
+  maxOutIRA: boolean; // Checkbox to maximize IRA contribution
+  hsaContribution: number; // HSA contribution (if eligible)
+  hsaEligible: boolean; // Is user eligible for HSA?
+  maxOutHSA: boolean; // Checkbox to maximize HSA contribution
   extraDebtPayoff: number;
   generalCashSavings: number;
   
@@ -229,6 +246,8 @@ export interface BudgetBreakdown {
   totalSavings: number;
   totalInvestments: number;
   calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
+  monthlyRothIRA: number; // Roth IRA (after-tax contribution)
+  monthlyHSA: number; // HSA (pre-tax contribution)
 
   // Summary totals
   totalFixedExpenses: number;
