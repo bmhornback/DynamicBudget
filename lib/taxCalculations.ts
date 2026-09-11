@@ -11,7 +11,7 @@
  *
  * IMPORTANT: When updating tax tables, remember to also update:
  * - ANNUAL_401K_LIMIT (currently $24,500 for 2024-2026)
- * - ANNUAL_IRA_LIMIT (currently $7,000 for 2026; was $7,500 in 2024-2025)
+ * - ANNUAL_IRA_LIMIT (currently $7,000 for 2026; was $7,000 in 2024-2025, decreased from $7,500 in 2023)
  * - All test expectations in lib/__tests__/taxCalculations.test.ts
  */
 

@@ -127,7 +127,7 @@ All calculations are **pure functions** — no side effects, making them trivial
 All calculations and data are processed entirely in your browser. No data is sent to any server:
 - ✅ Budget calculations are 100% client-side
 - ✅ Spending history is saved to your browser's localStorage
-- ✅ Tax estimates use current 2026 rates (federal + CA/GA state-specific)
+- ✅ Tax estimates use current 2026 rates (federal + all 50 US states + DC)
 - ✅ You own all your data
 
 ## Documentation

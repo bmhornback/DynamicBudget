@@ -33,6 +33,15 @@ export default function MoveMathPage() {
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
 
+  // Savings fields that should be locked/unlocked when toggling percentage mode
+  const SAVINGS_FIELDS = [
+    'emergencyFundContribution',
+    'houseDownPaymentContribution',
+    'taxableInvestments',
+    'generalCashSavings',
+    'extraDebtPayoff',
+  ] as const;
+
   // ── Load from localStorage on mount ──────────────────────────────────────
   // (handled in useState initializer above)
 
@@ -66,15 +75,8 @@ export default function MoveMathPage() {
       // Auto-lock individual savings fields when entering percentage mode
       // to prevent confusion about which fields are actually used
       if (updates.isSavingsByPercentage === true && !prev.isSavingsByPercentage) {
-        const savingsFields = [
-          'emergencyFundContribution',
-          'houseDownPaymentContribution',
-          'taxableInvestments',
-          'generalCashSavings',
-          'extraDebtPayoff',
-        ];
         const newLockedFields = { ...next.lockedFields };
-        savingsFields.forEach(field => {
+        SAVINGS_FIELDS.forEach(field => {
           newLockedFields[field] = true;
         });
         next = { ...next, lockedFields: newLockedFields };
@@ -82,15 +84,8 @@ export default function MoveMathPage() {
       
       // Auto-unlock individual savings fields when exiting percentage mode
       if (updates.isSavingsByPercentage === false && prev.isSavingsByPercentage) {
-        const savingsFields = [
-          'emergencyFundContribution',
-          'houseDownPaymentContribution',
-          'taxableInvestments',
-          'generalCashSavings',
-          'extraDebtPayoff',
-        ];
         const newLockedFields = { ...next.lockedFields };
-        savingsFields.forEach(field => {
+        SAVINGS_FIELDS.forEach(field => {
           delete newLockedFields[field];
         });
         next = { ...next, lockedFields: newLockedFields };
@@ -104,7 +99,7 @@ export default function MoveMathPage() {
       return next;
     });
     setActivePreset(undefined);
-  }, []);
+  }, [SAVINGS_FIELDS]);
 
   const handleToggleLock = useCallback((fieldId: string) => {
     setInputs((prev) => ({
