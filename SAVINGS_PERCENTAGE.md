@@ -14,8 +14,10 @@ The app now supports two distinct savings planning modes:
 - Specify exact dollar amounts for each savings category:
   - Emergency Fund Contribution
   - House Down Payment Contribution
+  - Taxable Investments
   - General Cash Savings
-  - Roth IRA Contribution
+  - Extra Debt Payoff
+- IRA remains a separate retirement input and is not affected by the savings-mode toggle
 - Use this mode when you have specific, known savings targets
 - Example: "Save $1,500/month for emergency fund"
 
