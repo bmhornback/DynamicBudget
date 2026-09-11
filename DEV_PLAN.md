@@ -613,4 +613,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-11 — v1.0.0 release: All 50 states + DC tax tables, 2026 tax brackets, percentage-based savings feature.*
+*Last updated: 2026-09-11 — Epic 3 Phase 1 (E3-T2 & E3-T3): Roth vs Traditional IRA distinction, HSA support, 4 new test cases (82 tests total).*

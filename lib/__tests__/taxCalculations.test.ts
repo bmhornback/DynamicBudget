@@ -384,5 +384,120 @@ describe('taxCalculations', () => {
       // HOH between single and MFJ is reasonable
       expect(hoh).toBeGreaterThan(0);
     });
+
+    it('should treat Traditional IRA as pre-tax deduction', () => {
+      const gross = 100000;
+      const filing = 'single';
+      const state = 'GA';
+
+      const federalWithoutIRA = federalIncomeTaxEstimate(gross, filing, 0, 0, 0);
+      const federalWithTraditionalIRA = federalIncomeTaxEstimate(gross, filing, 0, 7000, 0);
+
+      // Traditional IRA should reduce federal tax
+      expect(federalWithTraditionalIRA).toBeLessThan(federalWithoutIRA);
+
+      const stateWithoutIRA = stateIncomeTaxEstimate(gross, state, filing, 0, 0, 0);
+      const stateWithTraditionalIRA = stateIncomeTaxEstimate(gross, state, filing, 0, 7000, 0);
+
+      // Traditional IRA should reduce state tax (simplified assumption)
+      expect(stateWithTraditionalIRA).toBeLessThanOrEqual(stateWithoutIRA);
+    });
+
+    it('should handle Roth IRA as after-tax in net income calculation', () => {
+      const gross = 100000;
+      const filing = 'single';
+      const state = 'GA';
+
+      const resultTraditionalIRA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        0,
+        7000,
+        0,
+        0,
+        'traditional',
+        0
+      );
+
+      const resultRothIRA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        0,
+        7000,
+        0,
+        0,
+        'roth',
+        0
+      );
+
+      // Traditional IRA: reduces taxable income, so higher net income
+      // Roth IRA: after-tax, so lower net income
+      expect(resultTraditionalIRA.netMonthly).toBeGreaterThan(resultRothIRA.netMonthly);
+      expect(resultTraditionalIRA.federalTaxAnnual).toBeLessThan(resultRothIRA.federalTaxAnnual);
+    });
+
+    it('should treat HSA as pre-tax deduction like 401k', () => {
+      const gross = 100000;
+      const filing = 'single';
+      const state = 'GA';
+
+      const resultWithoutHSA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        5000,
+        0,
+        0,
+        0,
+        'traditional',
+        0
+      );
+
+      const resultWithHSA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        5000,
+        0,
+        0,
+        0,
+        'traditional',
+        4150 // Annual HSA limit for individual
+      );
+
+      // HSA should reduce federal tax
+      expect(resultWithHSA.federalTaxAnnual).toBeLessThan(resultWithoutHSA.federalTaxAnnual);
+      // HSA reduces take-home (it's a deduction) but also reduces taxes
+      expect(resultWithHSA.netMonthly).toBeLessThan(resultWithoutHSA.netMonthly);
+      // The difference should be the HSA amount minus the tax savings
+      const hsaMonthly = 4150 / 12;
+      const totalTaxSavings = (resultWithoutHSA.totalTaxAnnual - resultWithHSA.totalTaxAnnual) / 12;
+      const expectedDifference = hsaMonthly - totalTaxSavings;
+      // Allow 5% tolerance due to state tax variations
+      expect(resultWithoutHSA.netMonthly - resultWithHSA.netMonthly).toBeCloseTo(expectedDifference, 1);
+    });
+
+    it('should combine Traditional IRA and HSA pre-tax deductions', () => {
+      const gross = 100000;
+      const filing = 'single';
+
+      const resultNoDeductions = federalIncomeTaxEstimate(gross, filing, 0, 0, 0);
+      const resultBothDeductions = federalIncomeTaxEstimate(gross, filing, 0, 7000, 4150);
+
+      // Both Traditional IRA and HSA should reduce taxes
+      expect(resultBothDeductions).toBeLessThan(resultNoDeductions);
+
+      // Tax savings should be proportional to the deductions
+      const deductionsTotal = 7000 + 4150;
+      const marginalRate = 0.22; // Approximate marginal rate for $100k single filer
+      const expectedTaxSavings = deductionsTotal * marginalRate;
+      const actualTaxSavings = resultNoDeductions - resultBothDeductions;
+
+      // Allow some flexibility due to bracket boundaries
+      expect(actualTaxSavings).toBeGreaterThan(expectedTaxSavings * 0.8);
+      expect(actualTaxSavings).toBeLessThan(expectedTaxSavings * 1.2);
+    });
   });
 });
