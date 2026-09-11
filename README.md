@@ -177,7 +177,3 @@ MIT
 ## Support
 
 For questions, issues, or ideas, please [open an issue](https://github.com/bmhornback/DynamicBudget/issues).
-
----
-
-**Built with ❤️ for high-income earners planning major life changes.**
