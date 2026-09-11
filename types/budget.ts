@@ -196,6 +196,9 @@ export interface BudgetInputs {
   budgetMode: BudgetMode;
   rebalanceStrategy: RebalanceStrategy;
   surplusAllocation: SurplusAllocation;
+
+  // Spending history for trend tracking
+  spendingHistory?: SpendingHistory;
 }
 
 export interface BudgetBreakdown {
@@ -307,4 +310,45 @@ export interface ExpenseCategory {
   label: string;
   category: BudgetCategory;
   fields: Array<{ key: keyof BudgetInputs; label: string }>;
+}
+
+export type TrackableCategory =
+  | 'dining_out'
+  | 'gasoline'
+  | 'electricity'
+  | 'water'
+  | 'online_shopping'
+  | 'groceries'
+  | 'subscriptions'
+  | 'gas_utility'
+  | 'internet'
+  | 'phone';
+
+export interface SpendingEntry {
+  id: string;
+  date: string; // ISO date format: YYYY-MM-DD
+  category: TrackableCategory;
+  amount: number;
+  note?: string;
+  createdAt: string; // ISO timestamp
+}
+
+export interface CategoryMetrics {
+  category: TrackableCategory;
+  label: string;
+  entries: SpendingEntry[];
+  totalSpent: number;
+  averageMonthly: number;
+  currentMonthSpent: number;
+  budgetedMonthly: number;
+  variance: number; // Actual - Budgeted
+  trend: 'up' | 'down' | 'stable'; // Based on monthly trend
+  trendPercent: number; // % change from previous month
+  forecastNextMonth: number;
+}
+
+export interface SpendingHistory {
+  entries: SpendingEntry[];
+  lastUpdated: string; // ISO timestamp
+  version: number;
 }

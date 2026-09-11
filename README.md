@@ -17,8 +17,15 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 📱 **Responsive design** — Works great on desktop and mobile
 
+### Spending Trends & Analytics
+- 📉 **Track Actual Spending** — Log your expenses in real-time by category (dining out, gasoline, utilities, online shopping, etc.)
+- 📊 **View Trends** — See how your actual spending compares to your budget over 6 months
+- 📈 **Visual Charts** — Monthly spending trends with budget vs. actual comparisons (powered by Recharts)
+- 💡 **Smart Insights** — Get alerts when you're overspending or when spending is trending upward
+- 🔮 **Forecasting** — Predict next month's spending using linear regression on historical patterns
+- 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
+
 ### Upcoming Features
-- 📊 Data visualization (pie charts, savings progress, health gauges)
 - 🌎 Support for 10+ US states
 - 💳 Roth vs. Traditional IRA distinction, HSA support
 - 📤 Export to PDF/CSV, share budgets via link
@@ -54,11 +61,20 @@ npm run build
 # Can be hosted on GitHub Pages, Netlify, or any static host
 ```
 
+## How It Works
+
+1. **Enter Income**: Input your annual salary, state, and filing status
+2. **Review Expenses**: Set budgets for all categories (housing, food, transportation, etc.)
+3. **Optimize**: Use auto-rebalance or adjust manually to reach your savings goals
+4. **Track Spending**: Log actual expenses in the Trends tab to see how you're doing
+5. **Analyze**: Review charts and insights to identify spending patterns and opportunities
+
 ## Technology Stack
 
 - **Frontend**: Next.js 16, React 19, TypeScript
 - **Styling**: Tailwind CSS 4
-- **Deployment**: Static export (no server required) — runs fully in the browser
+- **Charting**: Recharts
+- **Storage**: Browser localStorage (no server required)
 - **State**: React hooks (useState, useCallback, useMemo) — no external state manager
 - **Testing**: Jest with ts-jest
 
@@ -73,13 +89,17 @@ lib/
   rebalanceBudget.ts      ← 6 rebalancing strategies
   recommendations.ts      ← Actionable suggestions
   taxCalculations.ts      ← Federal, state, payroll tax
-  storage.ts              ← localStorage persistence (coming)
+  spendingTrends.ts       ← Trend analysis & forecasting
+  storage.ts              ← localStorage persistence
 types/
   budget.ts               ← All TypeScript interfaces
 components/
-  [UI components]
+  SpendingTracker.tsx     ← Expense logging form
+  TrendAnalysis.tsx       ← Analytics dashboard
+  TrendChart.tsx          ← 6-month trend chart
+  [other UI components]
 app/
-  page.tsx                ← Main app
+  page.tsx                ← Main app (Budget + Trends tabs)
   layout.tsx
   globals.css
 ```
@@ -100,6 +120,14 @@ Display Updated Budget
 ```
 
 All calculations are **pure functions** — no side effects, making them trivially unit-testable.
+
+## Data Privacy
+
+All calculations and data are processed entirely in your browser. No data is sent to any server:
+- ✅ Budget calculations are 100% client-side
+- ✅ Spending history is saved to your browser's localStorage
+- ✅ Tax estimates use simplified 2024 rates
+- ✅ You own all your data
 
 ## Development
 
