@@ -12,11 +12,9 @@ interface BudgetFormProps {
   onToggleLock: (fieldId: string) => void;
 }
 
-const STATE_OPTIONS: Array<{ value: StateOfResidence; label: string }> = [
-  { value: 'CA', label: 'California' },
-  { value: 'GA', label: 'Georgia' },
-  { value: 'no_state_tax', label: 'No State Income Tax' },
-];
+const STATE_OPTIONS: Array<{ value: StateOfResidence; label: string }> = (
+  Object.entries(STATE_LABELS) as Array<[StateOfResidence, string]>
+).map(([value, label]) => ({ value, label }));
 
 const FILING_STATUS_OPTIONS: Array<{ value: FilingStatus; label: string }> = [
   { value: 'single', label: 'Single' },
