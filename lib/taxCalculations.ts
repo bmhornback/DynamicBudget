@@ -12,6 +12,8 @@
  * IMPORTANT: When updating tax tables, remember to also update:
  * - ANNUAL_401K_LIMIT (currently $24,500 for 2026; was $23,500 in 2025, $23,000 in 2024)
  * - ANNUAL_IRA_LIMIT (currently $7,000 for 2026; was $7,000 in 2024-2025, increased from $6,500 in 2023)
+ * - ANNUAL_HSA_LIMIT_SELF (currently $4,150 for 2026)
+ * - ANNUAL_HSA_LIMIT_FAMILY (currently $8,300 for 2026)
  * - All test expectations in lib/__tests__/taxCalculations.test.ts
  */
 
@@ -64,16 +66,19 @@ const STANDARD_DEDUCTION: Record<FilingStatus, number> = {
 
 /**
  * Estimate annual federal income tax using bracket math.
- * Applies standard deduction and treats 401(k) contribution as pre-tax.
+ * Applies standard deduction and treats 401(k), Traditional IRA, and HSA as pre-tax deductions.
  */
 export function federalIncomeTaxEstimate(
   grossAnnual: number,
   filingStatus: FilingStatus,
-  annual401kContribution: number
+  annual401kContribution: number,
+  annualTraditionalIRAContribution: number = 0,
+  annualHSAContribution: number = 0
 ): number {
   const deduction = STANDARD_DEDUCTION[filingStatus];
-  // 401(k) is pre-tax, so subtract it from taxable income
-  const taxableIncome = Math.max(0, grossAnnual - annual401kContribution - deduction);
+  // Pre-tax deductions: 401(k), Traditional IRA, and HSA
+  const preTaxDeductions = annual401kContribution + annualTraditionalIRAContribution + annualHSAContribution;
+  const taxableIncome = Math.max(0, grossAnnual - preTaxDeductions - deduction);
   const brackets = FEDERAL_BRACKETS[filingStatus];
 
   let tax = 0;
@@ -577,15 +582,19 @@ const STATE_TAX_CONFIG: Record<Exclude<StateOfResidence, 'no_state_tax'>, StateT
 /**
  * Estimate annual state income tax.
  * Supports all 50 states, DC, and a generic no-state-tax option.
+ * Treats 401(k), Traditional IRA, and HSA as pre-tax deductions.
  */
 export function stateIncomeTaxEstimate(
   grossAnnual: number,
   state: StateOfResidence,
   filingStatus: FilingStatus,
-  annual401kContribution: number
+  annual401kContribution: number,
+  annualTraditionalIRAContribution: number = 0,
+  annualHSAContribution: number = 0
 ): number {
-  // 401(k) is pre-tax for state purposes (simplified)
-  const taxableIncome = Math.max(0, grossAnnual - annual401kContribution);
+  // Pre-tax deductions: 401(k), Traditional IRA, and HSA (simplified assumption that states honor these)
+  const preTaxDeductions = annual401kContribution + annualTraditionalIRAContribution + annualHSAContribution;
+  const taxableIncome = Math.max(0, grossAnnual - preTaxDeductions);
 
   if (state === 'no_state_tax') return 0;
 
@@ -654,45 +663,99 @@ export function payrollTaxEstimate(
 
 /** 2026 401(k) employee contribution limit */
 export const ANNUAL_401K_LIMIT = 24500;
+/** 2026 401(k) catch-up contribution limit (age 50+) */
+export const ANNUAL_401K_CATCHUP_LIMIT = 7500;
 /** 2026 IRA contribution limit */
 export const ANNUAL_IRA_LIMIT = 7000;
+/** 2026 IRA catch-up contribution limit (age 50+) */
+export const ANNUAL_IRA_CATCHUP_LIMIT = 1000;
+/** 2026 HSA contribution limit - individual coverage */
+export const ANNUAL_HSA_LIMIT_SELF = 4150;
+/** 2026 HSA contribution limit - family coverage */
+export const ANNUAL_HSA_LIMIT_FAMILY = 8300;
+
+/** Traditional IRA income phase-out ranges (2026) - simplified for single filers */
+export const TRADITIONAL_IRA_PHASEOUT_SINGLE_START = 77000;
+export const TRADITIONAL_IRA_PHASEOUT_SINGLE_END = 87000;
+/** Traditional IRA income phase-out ranges (2026) - simplified for MFJ */
+export const TRADITIONAL_IRA_PHASEOUT_MFJ_START = 123000;
+export const TRADITIONAL_IRA_PHASEOUT_MFJ_END = 143000;
+
+/**
+ * Get age-adjusted 401k contribution limit
+ * Standard: $24,500; with catch-up (age 50+): $32,000
+ */
+export function get401kLimit(userAge: number): number {
+  return ANNUAL_401K_LIMIT + (userAge >= 50 ? ANNUAL_401K_CATCHUP_LIMIT : 0);
+}
+
+/**
+ * Get age-adjusted IRA contribution limit
+ * Standard: $7,000; with catch-up (age 50+): $8,000
+ */
+export function getIRALimit(userAge: number): number {
+  return ANNUAL_IRA_LIMIT + (userAge >= 50 ? ANNUAL_IRA_CATCHUP_LIMIT : 0);
+}
 
 /**
  * Calculate annual 401(k) employee contribution.
- * If maxOut401k is true, caps at ANNUAL_401K_LIMIT.
+ * If maxOut401k is true, caps at age-adjusted ANNUAL_401K_LIMIT.
  * Otherwise uses contributionPercent of grossAnnual.
  */
 export function calculateRetirementContribution(
   grossAnnual: number,
   contributionPercent: number,
   maxOut401k: boolean,
-  employerMatchPercent: number
+  employerMatchPercent: number,
+  employerMatchCapPercent: number = 100,
+  userAge: number = 0
 ): {
   annual401k: number;
   monthly401k: number;
+  annual401kCatchUp: number;
+  monthly401kCatchUp: number;
   isMaxing401k: boolean;
   annualEmployerMatch: number;
   monthlyEmployerMatch: number;
+  annualEmployerMatchCapped: number;
+  monthlyEmployerMatchCapped: number;
 } {
   let annual401k: number;
+  const limit401k = get401kLimit(userAge);
+  
   if (maxOut401k) {
-    annual401k = ANNUAL_401K_LIMIT;
+    annual401k = limit401k;
   } else {
-    annual401k = Math.min(grossAnnual * (contributionPercent / 100), ANNUAL_401K_LIMIT);
+    annual401k = Math.min(grossAnnual * (contributionPercent / 100), limit401k);
   }
 
-  const isMaxing401k = annual401k >= ANNUAL_401K_LIMIT;
+  const isMaxing401k = annual401k >= limit401k;
   const monthly401k = annual401k / 12;
 
+  // Calculate catch-up contribution for age 50+
+  const eligible401kCatchUp = userAge >= 50 ? ANNUAL_401K_CATCHUP_LIMIT : 0;
+  const annual401kCatchUp = maxOut401k && eligible401kCatchUp > 0 ? eligible401kCatchUp : 0;
+  const monthly401kCatchUp = annual401kCatchUp / 12;
+
+  // Calculate uncapped employer match
   const annualEmployerMatch = grossAnnual * (employerMatchPercent / 100);
   const monthlyEmployerMatch = annualEmployerMatch / 12;
+
+  // Apply match cap (typically cap is per-paycheck, but we'll cap annual)
+  const cappedMatchPercent = Math.min(employerMatchPercent, employerMatchCapPercent);
+  const annualEmployerMatchCapped = grossAnnual * (cappedMatchPercent / 100);
+  const monthlyEmployerMatchCapped = annualEmployerMatchCapped / 12;
 
   return {
     annual401k,
     monthly401k,
+    annual401kCatchUp,
+    monthly401kCatchUp,
     isMaxing401k,
     annualEmployerMatch,
     monthlyEmployerMatch,
+    annualEmployerMatchCapped,
+    monthlyEmployerMatchCapped,
   };
 }
 
@@ -707,8 +770,11 @@ export function calculateNetMonthlyIncome(
   state: StateOfResidence,
   annual401k: number,
   annualIRA: number,
-  bonusIncome: number,
-  otherMonthlyIncome: number
+  bonusIncome: number = 0,
+  otherMonthlyIncome: number = 0,
+  iraType: 'traditional' | 'roth' = 'traditional',
+  annualHSA: number = 0,
+  is401kRoth: boolean = false
 ): {
   grossMonthly: number;
   federalTaxMonthly: number;
@@ -725,8 +791,28 @@ export function calculateNetMonthlyIncome(
   const totalAnnualGross = grossAnnual + bonusIncome;
   const grossMonthly = totalAnnualGross / 12 + otherMonthlyIncome;
 
-  const federalTaxAnnual = federalIncomeTaxEstimate(totalAnnualGross, filingStatus, annual401k);
-  const stateTaxAnnual = stateIncomeTaxEstimate(totalAnnualGross, state, filingStatus, annual401k);
+  // For tax purposes, only Traditional IRA and HSA reduce taxable income
+  const annualTraditionalIRA = iraType === 'traditional' ? annualIRA : 0;
+  const annualRothIRA = iraType === 'roth' ? annualIRA : 0;
+
+  // For tax purposes, only Traditional 401k reduces taxable income, not Roth 401k
+  const annual401kPreTax = is401kRoth ? 0 : annual401k;
+
+  const federalTaxAnnual = federalIncomeTaxEstimate(
+    totalAnnualGross,
+    filingStatus,
+    annual401kPreTax,
+    annualTraditionalIRA,
+    annualHSA
+  );
+  const stateTaxAnnual = stateIncomeTaxEstimate(
+    totalAnnualGross,
+    state,
+    filingStatus,
+    annual401kPreTax,
+    annualTraditionalIRA,
+    annualHSA
+  );
   const payrollTaxAnnual = payrollTaxEstimate(totalAnnualGross, filingStatus);
 
   const totalTaxAnnual = federalTaxAnnual + stateTaxAnnual + payrollTaxAnnual;
@@ -737,14 +823,17 @@ export function calculateNetMonthlyIncome(
   const payrollTaxMonthly = payrollTaxAnnual / 12;
   const total401kMonthly = annual401k / 12;
 
-  // Net monthly: gross - taxes - 401(k) pre-tax - IRA (after-tax, but subtract from take-home)
+  // Net monthly: gross - taxes - Traditional 401k pre-tax - Traditional IRA pre-tax - HSA pre-tax - Roth IRA after-tax - Roth 401k after-tax
   const netMonthly =
     grossMonthly -
     federalTaxMonthly -
     stateTaxMonthly -
     payrollTaxMonthly -
-    total401kMonthly -
-    annualIRA / 12;
+    annual401kPreTax / 12 -
+    annualTraditionalIRA / 12 -
+    annualHSA / 12 -
+    annualRothIRA / 12 -
+    (is401kRoth ? annual401k / 12 : 0);
 
   return {
     grossMonthly,

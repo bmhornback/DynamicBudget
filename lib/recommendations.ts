@@ -5,6 +5,12 @@
 
 import type { BudgetBreakdown, BudgetInputs, Recommendation } from '@/types/budget';
 import { BUDGET_THRESHOLDS, ANNUAL_401K_LIMIT } from './budgetCalculations';
+import {
+  TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
+  TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
+  TRADITIONAL_IRA_PHASEOUT_MFJ_START,
+  TRADITIONAL_IRA_PHASEOUT_MFJ_END,
+} from './taxCalculations';
 
 /**
  * Generate a list of contextual recommendations based on budget breakdown and inputs.
@@ -181,6 +187,42 @@ export function generateRecommendations(
       message: 'This salary may be too tight for this rent and savings goal.',
       detail: 'Consider increasing salary, reducing rent, or scaling back savings targets temporarily.',
     });
+  }
+
+  // ── Traditional IRA Phase-Out Warning ──────────────────────────────────────
+  if (inputs.iraType === 'traditional' && inputs.iraContribution > 0) {
+    const grossAnnual = breakdown.taxes.grossAnnual;
+    
+    let phaseoutStart: number;
+    let phaseoutEnd: number;
+
+    if (inputs.filingStatus === 'married_jointly') {
+      phaseoutStart = TRADITIONAL_IRA_PHASEOUT_MFJ_START;
+      phaseoutEnd = TRADITIONAL_IRA_PHASEOUT_MFJ_END;
+    } else {
+      phaseoutStart = TRADITIONAL_IRA_PHASEOUT_SINGLE_START;
+      phaseoutEnd = TRADITIONAL_IRA_PHASEOUT_SINGLE_END;
+    }
+
+    if (grossAnnual > phaseoutStart && grossAnnual < phaseoutEnd) {
+      const percentThroughPhaseout = (grossAnnual - phaseoutStart) / (phaseoutEnd - phaseoutStart);
+      const allowedPercent = 1 - percentThroughPhaseout;
+      const maxAllowedIRA = allowedPercent * 7000;
+
+      recs.push({
+        id: 'ira_phaseout_partial',
+        severity: 'info',
+        message: `Your income is in the Traditional IRA deduction phase-out range.`,
+        detail: `At your income level ($${grossAnnual.toLocaleString()}), only $${maxAllowedIRA.toFixed(0)}/year of Traditional IRA contributions are tax-deductible. Consider a Roth IRA if eligible.`,
+      });
+    } else if (grossAnnual >= phaseoutEnd) {
+      recs.push({
+        id: 'ira_phaseout_full',
+        severity: 'warning',
+        message: `Your income exceeds Traditional IRA contribution limits.`,
+        detail: `At your income level ($${grossAnnual.toLocaleString()}), Traditional IRA contributions are not tax-deductible. Consider a Roth IRA or Backdoor Roth strategy.`,
+      });
+    }
   }
 
   return recs;

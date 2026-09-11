@@ -22,9 +22,10 @@
 11. [Epic 7 — Export & Sharing](#epic-7--export--sharing)
 12. [Epic 8 — Backend & Cloud Sync (Phase 2)](#epic-8--backend--cloud-sync-phase-2)
 13. [Epic 9 — Growth & Discovery](#epic-9--growth--discovery)
-14. [Release Milestones](#release-milestones)
-15. [Tech Debt Register](#tech-debt-register)
-16. [Definition of Done](#definition-of-done)
+14. [Epic 10 — AI Integration & MCP](#epic-10--ai-integration--mcp)
+15. [Release Milestones](#release-milestones)
+16. [Tech Debt Register](#tech-debt-register)
+17. [Definition of Done](#definition-of-done)
 
 ---
 
@@ -555,6 +556,108 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ---
 
+## Epic 10 — AI Integration & MCP
+
+**Goal:** Enable AI assistants (Claude, ChatGPT, etc.) to interact with DynamicBudget via Model Context Protocol (MCP), making budget analysis accessible via natural language queries.
+
+**Context:** DynamicBudget is a fully client-side tool with a sophisticated calculation engine. Exposing this engine through MCP would allow AI assistants to:
+- Answer financial "what-if" questions in real-time
+- Analyze user budgets without requiring form navigation
+- Provide personalized financial insights and recommendations
+- Integrate with AI agent workflows
+
+### E10-T1 · Refactor calculation engine into library
+
+**Goal:** Decouple calculation logic from React components to enable external use (MCP, npm package, etc.)
+
+**Tasks:**
+- Audit `lib/taxCalculations.ts`, `lib/budgetCalculations.ts`, and related functions to identify:
+  - Core calculation functions (no dependencies on React/browser APIs)
+  - Helper utilities (constants, type transformations)
+  - Input validation logic
+- Document the **public API** vs **internal helpers** (mark internal functions clearly)
+- Optionally: Consider extracting into a separate npm package (`@dynamicbudget/calc-engine`) for easier reuse
+- Add JSDoc comments to all public functions explaining parameters, return values, and edge cases
+- Add unit test coverage for all exported functions (target: 95%+ for public API)
+
+### E10-T2 · Define MCP tool schemas
+
+**Goal:** Specify which budget queries should be available via MCP and their input/output contracts.
+
+**Example tools:**
+- `calculate_monthly_budget(salary, location, expenses, savings)` → Returns: net income, taxes, surplus/deficit
+- `analyze_state_move(current_state, target_state, salary)` → Returns: tax impact, cost of living change, recommendations
+- `calculate_retirement_savings(salary, age, contribution_percent, years)` → Returns: projected balance, catch-up eligibility, tax implications
+- `get_recommendations(budget)` → Returns: list of prioritized financial advice
+- `compare_scenarios(scenario_list)` → Returns: side-by-side comparison with insights
+
+**Deliverables:**
+- JSON Schema definitions for each tool
+- Clear validation rules for inputs
+- Example queries and responses
+- Error handling strategy (e.g., invalid income, unsupported states)
+
+### E10-T3 · Build MCP server implementation
+
+**Goal:** Create a Node.js MCP server that exposes budget tools to AI assistants.
+
+**Tasks:**
+- Choose MCP framework (e.g., [anthropic/mcp-sdk-js](https://github.com/anthropic/mcp-sdk-js))
+- Implement server skeleton with tool registration
+- Connect each tool to the calculation engine (using E10-T1 refactoring)
+- Add error handling and input validation
+- Handle context management (e.g., persist user budget across multiple queries)
+- Create a demo/test client to verify tools work end-to-end
+
+**Deliverables:**
+- A runnable MCP server (`src/mcp-server/index.ts`)
+- Dependency list and installation instructions
+- Integration tests (Jest)
+
+### E10-T4 · Test with Claude/ChatGPT integrations
+
+**Goal:** Verify the MCP server works with real AI assistants and provides value.
+
+**Tasks:**
+- Register MCP server with Claude Desktop (using Claude Client configuration)
+- Write test prompts to verify each tool:
+  - "What's my net monthly income if I move to Texas earning $150k?"
+  - "Should I max out my 401k at my current income level?"
+  - "Compare my current budget with these three savings scenarios"
+- Collect feedback on response quality and usefulness
+- Debug any integration issues
+- Document user experience (e.g., response latency, accuracy)
+
+**Deliverables:**
+- Test results and performance metrics
+- Any bug fixes or improvements to tool responses
+- Integration guide for users/developers
+
+### E10-T5 · Document and publish for external use
+
+**Goal:** Make the MCP server and/or calculation engine available to the open-source and AI developer community.
+
+**Tasks:**
+- Write MCP Server README with:
+  - Installation & setup instructions
+  - Configuration options
+  - Tool reference (with examples)
+  - Troubleshooting guide
+- Publish to npm (or GitHub Releases):
+  - Optional: Extract and publish `@dynamicbudget/calc-engine` as a standalone package
+  - Optional: Publish MCP server as `@dynamicbudget/mcp-server`
+- Add examples and tutorials to the DynamicBudget docs
+- Consider licensing and terms for external use
+- Monitor GitHub issues/discussions for feedback from integrators
+
+**Deliverables:**
+- Public npm packages (if applicable)
+- Comprehensive documentation
+- Example projects using the MCP server
+- License file specifying terms
+
+---
+
 ## Release Milestones
 
 ### v0.9 — "Solid Foundation" (current → next)
@@ -580,6 +683,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Epic 5 complete
 - Epic 8 complete (auth, cloud sync, history)
 - Epic 9 complete (landing page, SEO, analytics)
+- Epic 10-T1, T2, T3, T4 (calculation engine refactoring, MCP tools, server implementation, AI assistant integration)
 
 ---
 
@@ -595,6 +699,7 @@ States to add (in priority order based on population and no-income-tax interest)
 | TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | Open | E3 |
 | TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | Open | General |
 | TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | Open | E3-T2 |
+| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | Open | E10-T1 |
 
 ---
 
@@ -613,4 +718,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-11 — v1.0.0 release: All 50 states + DC tax tables, 2026 tax brackets, percentage-based savings feature.*
+*Last updated: 2026-09-11 — Epic 10: Added AI Integration & MCP feature roadmap for v2.0+.*

@@ -48,6 +48,8 @@ export type SurplusAllocation =
 
 export type BudgetMode = 'manual' | 'auto';
 
+export type IRAType = 'traditional' | 'roth';
+
 export interface BudgetField {
   id: string;
   value: number;
@@ -92,19 +94,43 @@ export interface RetirementBreakdown {
   monthly401k: number;
   /** Annual 401(k) employee contribution */
   annual401k: number;
+  /** Type of 401k: traditional (pre-tax) or roth (after-tax) */
+  is401kRoth: boolean;
   /** Whether contribution maxes out the 401(k) */
   isMaxing401k: boolean;
+  /** Monthly 401k catch-up contribution (age 50+) */
+  monthly401kCatchUp: number;
+  /** Annual 401k catch-up contribution (age 50+) */
+  annual401kCatchUp: number;
   /** Monthly employer match */
   monthlyEmployerMatch: number;
   /** Annual employer match */
   annualEmployerMatch: number;
+  /** Capped employer match amount (actual cap applied) */
+  monthlyEmployerMatchCapped: number;
+  /** Annual capped employer match */
+  annualEmployerMatchCapped: number;
   /** Monthly IRA contribution */
   monthlyIRA: number;
   /** Annual IRA contribution */
   annualIRA: number;
-  /** Total monthly retirement savings (employee only) */
+  /** Type of IRA: traditional (pre-tax) or roth (after-tax) */
+  iraType: IRAType;
+  /** Whether IRA contribution maxes out the limit */
+  isMaxingIRA: boolean;
+  /** Monthly IRA catch-up contribution (age 50+) */
+  monthlyIRACatchUp: number;
+  /** Annual IRA catch-up contribution (age 50+) */
+  annualIRACatchUp: number;
+  /** Monthly HSA contribution (if eligible) */
+  monthlyHSA: number;
+  /** Annual HSA contribution (if eligible) */
+  annualHSA: number;
+  /** Whether HSA contribution maxes out the limit */
+  isMaxingHSA: boolean;
+  /** Total monthly retirement savings (employee only, excludes Roth IRA and Roth 401k) */
   totalMonthlyEmployee: number;
-  /** Total annual retirement savings (employee only) */
+  /** Total annual retirement savings (employee only, excludes Roth IRA and Roth 401k) */
   totalAnnualEmployee: number;
   /** Retirement savings rate as % of gross */
   retirementSavingsRate: number;
@@ -118,8 +144,11 @@ export interface BudgetInputs {
   state: StateOfResidence;
   filingStatus: FilingStatus;
   retirementContributionPercent: number;
+  is401kRoth: boolean; // Whether 401k is Roth (after-tax) vs Traditional (pre-tax)
   maxOut401k: boolean;
   employerMatchPercent: number;
+  employerMatchCapPercent: number; // Cap on employer match (default 100%)
+  userAge: number; // User's current age (0 = not specified; 50+ eligible for catch-up)
   bonusIncome: number;
   otherMonthlyIncome: number;
 
@@ -177,6 +206,11 @@ export interface BudgetInputs {
   houseDownPaymentTarget: number;
   taxableInvestments: number;
   iraContribution: number;
+  iraType: IRAType; // 'traditional' or 'roth'
+  maxOutIRA: boolean; // Checkbox to maximize IRA contribution
+  hsaContribution: number; // HSA contribution (if eligible)
+  hsaEligible: boolean; // Is user eligible for HSA?
+  maxOutHSA: boolean; // Checkbox to maximize HSA contribution
   extraDebtPayoff: number;
   generalCashSavings: number;
   
@@ -229,6 +263,8 @@ export interface BudgetBreakdown {
   totalSavings: number;
   totalInvestments: number;
   calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
+  monthlyRothIRA: number; // Roth IRA (after-tax contribution)
+  monthlyHSA: number; // HSA (pre-tax contribution)
 
   // Summary totals
   totalFixedExpenses: number;

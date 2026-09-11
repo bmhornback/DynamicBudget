@@ -73,11 +73,18 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
     <BudgetCard title="Savings & Buffer" accent="green">
       <div>
         <SavingsRow
-          label="401(k) Employee"
+          label={`401(k) Employee${retirement.is401kRoth ? ' (Roth)' : ''}`}
           monthly={retirement.monthly401k}
           annual={retirement.annual401k}
           rate={grossMonthly > 0 ? retirement.monthly401k / grossMonthly : 0}
         />
+        {retirement.monthly401kCatchUp > 0 && (
+          <SavingsRow
+            label="401(k) Catch-Up (50+)"
+            monthly={retirement.monthly401kCatchUp}
+            annual={retirement.annual401kCatchUp}
+          />
+        )}
         {retirement.monthlyIRA > 0 && (
           <SavingsRow
             label="IRA"
@@ -85,11 +92,18 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
             annual={retirement.annualIRA}
           />
         )}
+        {retirement.monthlyIRACatchUp > 0 && (
+          <SavingsRow
+            label="IRA Catch-Up (50+)"
+            monthly={retirement.monthlyIRACatchUp}
+            annual={retirement.annualIRACatchUp}
+          />
+        )}
         {retirement.monthlyEmployerMatch > 0 && (
           <SavingsRow
-            label="Employer Match (bonus)"
-            monthly={retirement.monthlyEmployerMatch}
-            annual={retirement.annualEmployerMatch}
+            label={`Employer Match${retirement.monthlyEmployerMatchCapped < retirement.monthlyEmployerMatch ? ' (capped)' : ''} (bonus)`}
+            monthly={retirement.monthlyEmployerMatchCapped}
+            annual={retirement.annualEmployerMatchCapped}
           />
         )}
         <Divider />

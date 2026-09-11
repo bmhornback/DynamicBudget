@@ -206,10 +206,37 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           />
         )}
 
+        <ToggleField
+          label="Roth 401(k)"
+          value={inputs.is401kRoth}
+          onChange={(v) => onChange({ is401kRoth: v })}
+          description="After-tax contributions; no tax deduction now, tax-free in retirement"
+        />
+
         {field('employerMatchPercent', 'Employer Match %')}
+
+        <NumberSlider
+          label="Employer Match Cap %"
+          value={inputs.employerMatchCapPercent}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(v) => onChange({ employerMatchCapPercent: v })}
+          suffix="%"
+        />
+
+        <NumberSlider
+          label={`Age (for catch-up contribution eligibility)${inputs.userAge >= 50 ? ' ✓ Eligible for $7,500 401k + $1,000 IRA catch-up' : ''}`}
+          value={inputs.userAge}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(v) => onChange({ userAge: v })}
+        />
+
         {field('bonusIncome', 'Annual Bonus Income')}
         {field('otherMonthlyIncome', 'Other Monthly Income')}
-        {field('iraContribution', 'Monthly IRA Contribution', 'Capped at $7,500/year')}
+        {field('iraContribution', 'Monthly IRA Contribution', inputs.userAge >= 50 ? 'Capped at $8,000/year' : 'Capped at $7,000/year')}
       </BudgetSection>
 
       {/* ── Housing ──────────────────────────────────────────────────── */}

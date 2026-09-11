@@ -190,6 +190,46 @@ describe('taxCalculations', () => {
       expect(result.annual401k).toBe(0);
       expect(result.annualEmployerMatch).toBe(0);
     });
+
+    it('should calculate capped employer match correctly', () => {
+      // Employer offers 5%, but capped at 3%
+      const result = calculateRetirementContribution(100000, 10, false, 5, 3);
+      expect(result.annualEmployerMatch).toBeCloseTo(5000, 0); // Uncapped: 5%
+      expect(result.annualEmployerMatchCapped).toBeCloseTo(3000, 0); // Capped: 3%
+      expect(result.monthlyEmployerMatchCapped).toBeCloseTo(250, 0);
+    });
+
+    it('should not cap match when cap is 100%', () => {
+      const result = calculateRetirementContribution(100000, 10, false, 5, 100);
+      expect(result.annualEmployerMatch).toBeCloseTo(5000, 0);
+      expect(result.annualEmployerMatchCapped).toBeCloseTo(5000, 0); // No difference
+    });
+
+    it('should handle 0% match cap', () => {
+      const result = calculateRetirementContribution(100000, 10, false, 5, 0);
+      expect(result.annualEmployerMatchCapped).toBeCloseTo(0, 0);
+    });
+
+    it('should calculate 401k catch-up contribution for age 50+', () => {
+      // Age 50+: eligible for $7,500 catch-up when maxing out
+      const resultAge50 = calculateRetirementContribution(100000, 10, true, 3, 100, 50);
+      expect(resultAge50.annual401k).toBe(32000); // Standard limit (24500) + catch-up (7500)
+      expect(resultAge50.annual401kCatchUp).toBe(7500); // Catch-up tracked separately
+      expect(resultAge50.monthly401kCatchUp).toBeCloseTo(625, 0);
+    });
+
+    it('should not include 401k catch-up for age <50', () => {
+      // Age 49: no catch-up
+      const resultAge49 = calculateRetirementContribution(100000, 10, true, 3, 100, 49);
+      expect(resultAge49.annual401k).toBe(24500); // Only standard limit
+      expect(resultAge49.annual401kCatchUp).toBe(0);
+    });
+
+    it('should only apply catch-up when maxing out 401k', () => {
+      // Age 50, not maxing out: no catch-up
+      const resultNoMaxOut = calculateRetirementContribution(100000, 5, false, 3, 100, 50);
+      expect(resultNoMaxOut.annual401kCatchUp).toBe(0);
+    });
   });
 
   describe('calculateNetMonthlyIncome', () => {
@@ -383,6 +423,168 @@ describe('taxCalculations', () => {
       expect(mfj).toBeLessThan(single);
       // HOH between single and MFJ is reasonable
       expect(hoh).toBeGreaterThan(0);
+    });
+
+    it('should treat Traditional IRA as pre-tax deduction', () => {
+      const gross = 100000;
+      const filing = 'single';
+      const state = 'GA';
+
+      const federalWithoutIRA = federalIncomeTaxEstimate(gross, filing, 0, 0, 0);
+      const federalWithTraditionalIRA = federalIncomeTaxEstimate(gross, filing, 0, 7000, 0);
+
+      // Traditional IRA should reduce federal tax
+      expect(federalWithTraditionalIRA).toBeLessThan(federalWithoutIRA);
+
+      const stateWithoutIRA = stateIncomeTaxEstimate(gross, state, filing, 0, 0, 0);
+      const stateWithTraditionalIRA = stateIncomeTaxEstimate(gross, state, filing, 0, 7000, 0);
+
+      // Traditional IRA should reduce state tax (simplified assumption)
+      expect(stateWithTraditionalIRA).toBeLessThanOrEqual(stateWithoutIRA);
+    });
+
+    it('should handle Roth IRA as after-tax in net income calculation', () => {
+      const gross = 100000;
+      const filing = 'single';
+      const state = 'GA';
+
+      const resultTraditionalIRA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        0,
+        7000,
+        0,
+        0,
+        'traditional',
+        0
+      );
+
+      const resultRothIRA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        0,
+        7000,
+        0,
+        0,
+        'roth',
+        0
+      );
+
+      // Traditional IRA: reduces taxable income, so higher net income
+      // Roth IRA: after-tax, so lower net income
+      expect(resultTraditionalIRA.netMonthly).toBeGreaterThan(resultRothIRA.netMonthly);
+      expect(resultTraditionalIRA.federalTaxAnnual).toBeLessThan(resultRothIRA.federalTaxAnnual);
+    });
+
+    it('should treat HSA as pre-tax deduction like 401k', () => {
+      const gross = 100000;
+      const filing = 'single';
+      const state = 'GA';
+
+      const resultWithoutHSA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        5000,
+        0,
+        0,
+        0,
+        'traditional',
+        0
+      );
+
+      const resultWithHSA = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        5000,
+        0,
+        0,
+        0,
+        'traditional',
+        4150 // Annual HSA limit for individual
+      );
+
+      // HSA should reduce federal tax
+      expect(resultWithHSA.federalTaxAnnual).toBeLessThan(resultWithoutHSA.federalTaxAnnual);
+      // HSA reduces take-home (it's a deduction) but also reduces taxes
+      expect(resultWithHSA.netMonthly).toBeLessThan(resultWithoutHSA.netMonthly);
+      // The difference should be the HSA amount minus the tax savings
+      const hsaMonthly = 4150 / 12;
+      const totalTaxSavings = (resultWithoutHSA.totalTaxAnnual - resultWithHSA.totalTaxAnnual) / 12;
+      const expectedDifference = hsaMonthly - totalTaxSavings;
+      // Allow 5% tolerance due to state tax variations
+      expect(resultWithoutHSA.netMonthly - resultWithHSA.netMonthly).toBeCloseTo(expectedDifference, 1);
+    });
+
+    it('should not reduce taxable income for Roth 401k', () => {
+      const gross = 100000;
+      const traditional401k = 10000;
+      const roth401k = 10000;
+      const filing = 'single';
+      const state = 'no_state_tax';
+
+      // Traditional 401k should reduce taxes
+      const resultTraditional = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        traditional401k,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        false // is401kRoth = false (Traditional)
+      );
+
+      // Roth 401k should NOT reduce taxes
+      const resultRoth = calculateNetMonthlyIncome(
+        gross,
+        filing,
+        state,
+        roth401k,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        true // is401kRoth = true (Roth)
+      );
+
+      // Traditional 401k should result in lower federal taxes
+      expect(resultTraditional.federalTaxAnnual).toBeLessThan(resultRoth.federalTaxAnnual);
+
+      // Both should have same 401k deduction from net pay
+      expect(resultTraditional.total401kMonthly).toBeCloseTo(resultRoth.total401kMonthly, 0);
+
+      // But Roth should have higher net monthly since it's not pre-tax
+      // Actually, both get the same net impact because Roth is post-tax
+      // Let's verify the math: Roth 401k should result in even lower net than Traditional
+      expect(resultRoth.netMonthly).toBeLessThan(resultTraditional.netMonthly);
+    });
+
+    it('should combine Traditional IRA and HSA pre-tax deductions', () => {
+      const gross = 100000;
+      const filing = 'single';
+
+      const resultNoDeductions = federalIncomeTaxEstimate(gross, filing, 0, 0, 0);
+      const resultBothDeductions = federalIncomeTaxEstimate(gross, filing, 0, 7000, 4150);
+
+      // Both Traditional IRA and HSA should reduce taxes
+      expect(resultBothDeductions).toBeLessThan(resultNoDeductions);
+
+      // Tax savings should be proportional to the deductions
+      const deductionsTotal = 7000 + 4150;
+      const marginalRate = 0.22; // Approximate marginal rate for $100k single filer
+      const expectedTaxSavings = deductionsTotal * marginalRate;
+      const actualTaxSavings = resultNoDeductions - resultBothDeductions;
+
+      // Allow some flexibility due to bracket boundaries
+      expect(actualTaxSavings).toBeGreaterThan(expectedTaxSavings * 0.8);
+      expect(actualTaxSavings).toBeLessThan(expectedTaxSavings * 1.2);
     });
   });
 });
