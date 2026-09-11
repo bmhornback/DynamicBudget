@@ -45,8 +45,9 @@ export default function BudgetSection({
       <div className="h-px bg-gray-200 dark:bg-gray-700 mb-4" />
       <div
         ref={contentRef}
+        aria-hidden={!isOpen}
         className="overflow-hidden transition-all duration-200 ease-in-out"
-        style={{ maxHeight: isOpen ? '9999px' : '0px', opacity: isOpen ? 1 : 0 }}
+        style={{ maxHeight: isOpen ? '9999px' : '0px', opacity: isOpen ? 1 : 0, visibility: isOpen ? 'visible' : 'hidden', pointerEvents: isOpen ? 'auto' : 'none' }}
       >
         <div className="space-y-3">{children}</div>
       </div>
