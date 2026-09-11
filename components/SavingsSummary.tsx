@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import type { BudgetBreakdown, BudgetInputs } from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import BudgetCard from './BudgetCard';
@@ -58,6 +59,9 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
   } = breakdown;
 
   const isPercentageMode = inputs?.isSavingsByPercentage ?? false;
+  const savingsPercentOfNetIncome = Number.isFinite(inputs?.savingsPercentOfNetIncome)
+    ? inputs.savingsPercentOfNetIncome
+    : DEFAULT_INPUTS.savingsPercentOfNetIncome;
 
   const bufferColor = isOverBudget
     ? 'text-red-600'
@@ -90,7 +94,7 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
         )}
         <Divider />
         <SavingsRow
-          label={isPercentageMode ? `Savings (${inputs?.savingsPercentOfNetIncome}% of net income)` : "Total Savings"}
+          label={isPercentageMode ? `Savings (${savingsPercentOfNetIncome}% of net income)` : "Total Savings"}
           monthly={totalSavings > 0 ? totalSavings : 0}
           annual={totalSavings * 12}
         />

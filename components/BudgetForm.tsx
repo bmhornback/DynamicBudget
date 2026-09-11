@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { BudgetInputs, CarSituation, FilingStatus, StateOfResidence } from '@/types/budget';
+import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
 import { STATE_LABELS } from '@/lib/taxCalculations';
@@ -132,6 +133,10 @@ function NumberSlider({
 }
 
 export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFormProps) {
+  const savingsPercentOfNetIncome = Number.isFinite(inputs.savingsPercentOfNetIncome)
+    ? inputs.savingsPercentOfNetIncome
+    : DEFAULT_INPUTS.savingsPercentOfNetIncome;
+
   const field = (id: keyof BudgetInputs, label: string, description?: string) => (
     <BudgetFieldInput
       key={id}
@@ -311,7 +316,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         {inputs.isSavingsByPercentage && (
           <NumberSlider
             label="Save % of Net Income"
-            value={inputs.savingsPercentOfNetIncome}
+            value={savingsPercentOfNetIncome}
             min={0}
             max={50}
             step={1}

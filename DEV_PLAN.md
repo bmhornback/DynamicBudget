@@ -65,7 +65,7 @@
 - 2026 Federal tax brackets with IRS inflation adjustments
 - State-specific progressive brackets, flat rates, or no-income-tax configurations
 - Accurate tax modeling for relocation scenarios across any US state
-- Zero estimation gaps — no "simplified assumptions" or defaults
+- Complete state-level tax coverage, while still using estimated take-home math that excludes county/local taxes and some deductions
 
 ✨ **2026 Tax Tables & Percentage-Based Savings** (v0.9.3 features)
 - 2026 Federal tax brackets updated with inflation adjustments

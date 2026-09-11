@@ -4,6 +4,8 @@
  */
 
 import type { BudgetInputs, BudgetBreakdown, TaxBreakdown, RetirementBreakdown } from '@/types/budget';
+import { DEFAULT_INPUTS } from './defaultScenarios';
+import { clamp } from './formatters';
 import {
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
@@ -138,8 +140,17 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   // If percentage-based savings is enabled, calculate based on net income
   // Otherwise, use fixed dollar amounts from inputs
   const netMonthly = netCalc.netMonthly;
+  const savingsPercentage = isSavingsByPercentage
+    ? clamp(
+        Number.isFinite(savingsPercentOfNetIncome)
+          ? savingsPercentOfNetIncome
+          : DEFAULT_INPUTS.savingsPercentOfNetIncome,
+        0,
+        50
+      )
+    : 0;
   const calculatedSavingsFromPercentage = isSavingsByPercentage
-    ? netMonthly * ((savingsPercentOfNetIncome || 0) / 100)
+    ? netMonthly * (savingsPercentage / 100)
     : 0;
 
   const totalSavings = isSavingsByPercentage

@@ -25,6 +25,7 @@ const SAVINGS_FIELDS = [
   'generalCashSavings',
   'extraDebtPayoff',
 ] as const;
+const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
 
 export default function MoveMathPage() {
   // Initialize from localStorage if available, otherwise use defaults
@@ -42,6 +43,7 @@ export default function MoveMathPage() {
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+  const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
 
   // ── Load from localStorage on mount ──────────────────────────────────────
   // (handled in useState initializer above)
@@ -76,19 +78,34 @@ export default function MoveMathPage() {
       // Auto-lock individual savings fields when entering percentage mode
       // to prevent confusion about which fields are actually used
       if (updates.isSavingsByPercentage === true && !prev.isSavingsByPercentage) {
+        previousSavingsFieldLocks.current = SAVINGS_FIELDS.reduce<Record<string, boolean>>(
+          (acc, field) => {
+            acc[field] = Boolean(prev.lockedFields[field]);
+            return acc;
+          },
+          {}
+        );
         const newLockedFields = { ...next.lockedFields };
         SAVINGS_FIELDS.forEach(field => {
           newLockedFields[field] = true;
         });
-        next = { ...next, lockedFields: newLockedFields };
+        const savingsPercentOfNetIncome = Number.isFinite(next.savingsPercentOfNetIncome)
+          ? next.savingsPercentOfNetIncome
+          : DEFAULT_SAVINGS_PERCENT;
+        next = { ...next, lockedFields: newLockedFields, savingsPercentOfNetIncome };
       }
       
       // Auto-unlock individual savings fields when exiting percentage mode
       if (updates.isSavingsByPercentage === false && prev.isSavingsByPercentage) {
         const newLockedFields = { ...next.lockedFields };
         SAVINGS_FIELDS.forEach(field => {
-          delete newLockedFields[field];
+          if (previousSavingsFieldLocks.current[field]) {
+            newLockedFields[field] = true;
+          } else {
+            delete newLockedFields[field];
+          }
         });
+        previousSavingsFieldLocks.current = {};
         next = { ...next, lockedFields: newLockedFields };
       }
       
