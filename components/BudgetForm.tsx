@@ -302,13 +302,34 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
       {/* ── Savings & Investing ──────────────────────────────────────── */}
       <BudgetSection title="Savings & Investing" icon="📈">
-        {field('emergencyFundContribution', 'Emergency Fund Monthly Contribution')}
-        {field('emergencyFundTarget', 'Emergency Fund Target', '0 = auto-calculate (6 months)')}
-        {field('houseDownPaymentContribution', 'House Down Payment Monthly')}
-        {field('houseDownPaymentTarget', 'Down Payment Target')}
-        {field('taxableInvestments', 'Taxable Investments')}
-        {field('extraDebtPayoff', 'Extra Debt Payoff')}
-        {field('generalCashSavings', 'General Cash Savings')}
+        <ToggleField
+          label="Use Percentage-Based Savings"
+          value={inputs.isSavingsByPercentage}
+          onChange={(v) => onChange({ isSavingsByPercentage: v })}
+          description="Save a percentage of net income instead of fixed amounts"
+        />
+        {inputs.isSavingsByPercentage && (
+          <NumberSlider
+            label="Save % of Net Income"
+            value={inputs.savingsPercentOfNetIncome}
+            min={0}
+            max={50}
+            step={1}
+            onChange={(v) => onChange({ savingsPercentOfNetIncome: v })}
+            suffix="%"
+          />
+        )}
+        {!inputs.isSavingsByPercentage && (
+          <>
+            {field('emergencyFundContribution', 'Emergency Fund Monthly Contribution')}
+            {field('emergencyFundTarget', 'Emergency Fund Target', '0 = auto-calculate (6 months)')}
+            {field('houseDownPaymentContribution', 'House Down Payment Monthly')}
+            {field('houseDownPaymentTarget', 'Down Payment Target')}
+            {field('taxableInvestments', 'Taxable Investments')}
+            {field('extraDebtPayoff', 'Extra Debt Payoff')}
+            {field('generalCashSavings', 'General Cash Savings')}
+          </>
+        )}
       </BudgetSection>
 
       {/* ── Lifestyle ────────────────────────────────────────────────── */}
