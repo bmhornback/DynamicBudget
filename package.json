@@ -1,6 +1,6 @@
 {
   "name": "movemath",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Dynamic budget planner for high-income earners — tax modeling, smart rebalancing, real-time recommendations",
   "repository": {
