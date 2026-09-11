@@ -6,12 +6,13 @@ on:
       - main
       - master
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +32,9 @@ jobs:
         id: version
         run: |
           CURRENT_VERSION=$(jq -r '.version' package.json)
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          # Get last commit message safely using git command, not event data
+          COMMIT_MSG=$(git log -1 --pretty=%B)
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           
@@ -79,8 +82,8 @@ jobs:
           tag_name: v${{ steps.version.outputs.new_version }}
           release_name: Release v${{ steps.version.outputs.new_version }}
           body: |
-            Release notes for v${{ steps.version.outputs.new_version }}
+            Release v${{ steps.version.outputs.new_version }}
             
-            Commit: ${{ github.event.head_commit.url }}
+            See commits for details.
           draft: false
           prerelease: false
