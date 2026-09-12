@@ -128,26 +128,29 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   // Helper to escape CSV values
   const esc = (v: string | number): string => {
     const s = String(v);
-    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+    return s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r') ? `"${s.replace(/"/g, '""')}"` : s;
   };
 
   const row = (label: string, monthly: number, annual?: number): string =>
     [esc(label), esc(monthly.toFixed(2)), esc((annual ?? monthly * 12).toFixed(2))].join(',');
 
-  const section = (title: string): string => `${esc(title)},,`;
+  const section = (sectionTitle: string): string => `${esc(sectionTitle)},,`;
 
   const title = (label: string): string => [esc(label), '', ''].join(',');
 
+  /** Blank separator row with consistent column count */
+  const sep = ',,';
+
   const lines: string[] = [
     title(`DynamicBudget Export - ${date}`),
-    '',
+    sep,
     'Category,Monthly ($),Annual ($)',
-    '',
+    sep,
     section('INCOME'),
     row('Gross Income', inputs.annualSalary / 12, inputs.annualSalary),
     row('Bonus Income', inputs.bonusIncome / 12, inputs.bonusIncome),
     row('Other Monthly Income', inputs.otherMonthlyIncome, inputs.otherMonthlyIncome * 12),
-    '',
+    sep,
     section('HOUSING'),
   ];
 
@@ -168,7 +171,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   lines.push(
     row('Parking Fee', inputs.parkingFee),
     row('HOA Fee', inputs.hoaFee),
-    '',
+    sep,
     section('UTILITIES'),
     row('Electric', inputs.electric),
     row('Gas', inputs.gas),
@@ -176,7 +179,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     row('Trash', inputs.trash),
     row('Internet', inputs.internet),
     row('Phone', inputs.phone),
-    '',
+    sep,
     section('TRANSPORTATION'),
     row('Car Payment', inputs.carPayment),
     row('Fuel', inputs.fuel),
@@ -189,7 +192,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
 
   if (inputs.petsEnabled) {
     lines.push(
-      '',
+      sep,
       section('PETS'),
       row('Pet Food', inputs.petFood),
       row('Vet / Medications', inputs.vetMedications),
@@ -202,18 +205,18 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   }
 
   lines.push(
-    '',
+    sep,
     section('FOOD & HOUSEHOLD'),
     row('Groceries', inputs.groceries),
     row('Household Basics', inputs.householdBasics),
     row('Dining Out', inputs.diningOut),
-    '',
+    sep,
     section('HEALTH'),
     row('Health Insurance', inputs.healthInsurance),
     row('Prescriptions', inputs.prescriptions),
     row('Gym / Fitness', inputs.gymFitness),
     row('Therapy / Wellness', inputs.therapyWellness),
-    '',
+    sep,
     section('SAVINGS & INVESTING'),
     row('Emergency Fund Contribution', inputs.emergencyFundContribution),
     row('House Down Payment / Home Equity', inputs.houseDownPaymentContribution),
@@ -222,7 +225,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     row('HSA Contribution', inputs.hsaContribution),
     row('Extra Debt Payoff', inputs.extraDebtPayoff),
     row('General Cash Savings', inputs.generalCashSavings),
-    '',
+    sep,
     section('LIFESTYLE'),
     row('Fun / Entertainment', inputs.funEntertainment),
     row('Travel', inputs.travel),
@@ -233,7 +236,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     row('Misc Buffer', inputs.miscBuffer),
   );
 
-  return lines.join('\n');
+  return lines.join('\r\n');
 }
 
 /**
