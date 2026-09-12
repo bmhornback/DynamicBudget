@@ -221,7 +221,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       inputs.houseDownPaymentContribution +
       inputs.generalCashSavings;
 
-  const totalInvestments = isSavingsByPercentage ? 0 : inputs.taxableInvestments + inputs.extraDebtPayoff;
+  const totalInvestments = isSavingsByPercentage ? 0 : inputs.taxableInvestments;
+  const totalDebtPayoff = isSavingsByPercentage ? 0 : inputs.extraDebtPayoff;
 
   // ── Aggregates ────────────────────────────────────────────────────────────
   // Fixed = housing + utilities + transportation + health + groceries (baseline)
@@ -239,7 +240,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalHealth +
     totalLifestyle +
     totalSavings +
-    totalInvestments;
+    totalInvestments +
+    totalDebtPayoff;
 
   const remainingMonthlyBuffer = netCalc.netMonthly - totalAllocated;
 
@@ -302,6 +304,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalLifestyle,
     totalSavings,
     totalInvestments,
+    totalDebtPayoff,
     calculatedSavingsFromPercentage,
     effectiveEmergencyFundContribution: isSavingsByPercentage ? calculatedSavingsFromPercentage : inputs.emergencyFundContribution,
     effectiveHouseDownPaymentContribution: isSavingsByPercentage ? 0 : inputs.houseDownPaymentContribution,

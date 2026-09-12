@@ -259,7 +259,7 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
         value={formatCurrency(inputs.taxableInvestments)}
         sub={`${formatCurrency(breakdown.annualTaxableInvestments)}/year`}
       />
-      <DetailRow label="Debt Payoff" value={formatCurrency(inputs.extraDebtPayoff)} />
+      <DetailRow label="Debt Payoff" value={formatCurrency(breakdown.totalDebtPayoff)} />
       <DetailRow label="General Cash Savings" value={formatCurrency(inputs.generalCashSavings)} />
       <DividerLine />
       <DetailRow

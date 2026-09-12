@@ -262,6 +262,7 @@ export interface BudgetBreakdown {
   // Savings totals
   totalSavings: number;
   totalInvestments: number;
+  totalDebtPayoff: number;
   calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
   effectiveEmergencyFundContribution: number;
   effectiveHouseDownPaymentContribution: number;
