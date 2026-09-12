@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
 import { DEFAULT_INPUTS, SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
@@ -215,12 +216,14 @@ export default function DynamicBudgetPage() {
       printRestoreState.current = { activeTab, showForm };
     }
 
-    setActiveTab('budget');
-    setShowForm(false);
+    flushSync(() => {
+      setActiveTab('budget');
+      setShowForm(false);
+    });
 
-    window.setTimeout(() => {
+    window.requestAnimationFrame(() => {
       window.print();
-    }, 50);
+    });
   }, [activeTab, showForm]);
 
   const handleToggleMode = useCallback(() => {
@@ -360,26 +363,26 @@ export default function DynamicBudgetPage() {
               </div>
               <div data-print-hidden="true">
                 <ScenarioComparison
-                items={comparisonItems}
-                selectedPresetIds={comparisonPresetIds}
-                activePresetId={activePreset}
-                onSelectionChange={(presetIds) =>
-                  setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
-                }
-                onApplyPreset={(presetId) => {
-                  const preset = SCENARIO_PRESETS.find((item) => item.id === presetId);
-                  if (!preset) return;
-                  handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
-                }}
+                  items={comparisonItems}
+                  selectedPresetIds={comparisonPresetIds}
+                  activePresetId={activePreset}
+                  onSelectionChange={(presetIds) =>
+                    setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
+                  }
+                  onApplyPreset={(presetId) => {
+                    const preset = SCENARIO_PRESETS.find((item) => item.id === presetId);
+                    if (!preset) return;
+                    handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
+                  }}
                 />
               </div>
 
               <div className="flex flex-col md:flex-row gap-6">
                 <aside
-                className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}
-                data-print-hidden="true"
+                  className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}
+                  data-print-hidden="true"
                 >
-                <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                  <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
                     <RebalanceControls
                       inputs={inputs}
                       rebalanceResult={rebalanceResult}
