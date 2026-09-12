@@ -250,9 +250,9 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     lines.push(sep, section('DEBTS'));
     for (const debt of inputs.debts) {
       lines.push(title(`  ${debt.name}`));
-      lines.push(`  Balance,${esc(debt.balance.toFixed(2))},`);
-      lines.push(`  Interest Rate,${esc(debt.interestRate.toFixed(2))}%,`);
-      lines.push(`  Minimum Payment,${esc(debt.minimumPayment.toFixed(2))},${esc((debt.minimumPayment * 12).toFixed(2))}`);
+      lines.push([esc('  Balance'), esc(debt.balance.toFixed(2)), ''].join(','));
+      lines.push([esc('  Interest Rate'), esc(debt.interestRate.toFixed(2) + '%'), ''].join(','));
+      lines.push([esc('  Minimum Payment'), esc(debt.minimumPayment.toFixed(2)), esc((debt.minimumPayment * 12).toFixed(2))].join(','));
     }
   }
 
@@ -260,10 +260,10 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     lines.push(sep, section('LONG-TERM GOALS'));
     for (const goal of inputs.longTermGoals) {
       lines.push(title(`  ${goal.name} (${goal.category})`));
-      lines.push(`  Target Amount,${esc(goal.targetAmount.toFixed(2))},`);
-      lines.push(`  Current Amount,${esc(goal.currentAmount.toFixed(2))},`);
+      lines.push([esc('  Target Amount'), esc(goal.targetAmount.toFixed(2)), ''].join(','));
+      lines.push([esc('  Current Amount'), esc(goal.currentAmount.toFixed(2)), ''].join(','));
       if (goal.targetDate) {
-        lines.push(`  Target Date,${esc(goal.targetDate)},`);
+        lines.push([esc('  Target Date'), esc(goal.targetDate), ''].join(','));
       }
     }
   }

@@ -73,7 +73,6 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
         onClick={() => { setOpen((v) => !v); setImportError(null); }}
         aria-label="Export or import budget"
         aria-expanded={open}
-        aria-haspopup="true"
         className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all"
       >
         ↕ Export / Import
