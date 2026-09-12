@@ -94,6 +94,7 @@ export default function DynamicBudgetPage() {
       setActiveTab(printRestoreState.current.activeTab);
       setShowForm(printRestoreState.current.showForm);
       setIsPreparingPrint(false);
+      window.setTimeout(() => setPrintHeaderDate(null), 0);
       printTriggered.current = false;
       printRestoreState.current = null;
     };
@@ -107,7 +108,11 @@ export default function DynamicBudgetPage() {
     if (!isPreparingPrint || printTriggered.current || !printWindow) return;
 
     printTriggered.current = true;
-    printWindow.print();
+    const timeoutId = printWindow.setTimeout(() => {
+      printWindow.print();
+    }, 0);
+
+    return () => printWindow.clearTimeout(timeoutId);
   }, [isPreparingPrint]);
 
   // ── Derived calculations (memoized) ────────────────────────────────────────
