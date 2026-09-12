@@ -119,7 +119,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   const section = (title: string): string => `${esc(title)},,`;
 
   const lines: string[] = [
-    `DynamicBudget Export — ${date}`,
+    `DynamicBudget Export — ${date},,`,
     '',
     'Category,Monthly ($),Annual ($)',
     '',
@@ -229,7 +229,8 @@ export function triggerDownload(content: string, filename: string, mimeType = 'a
   a.href = url;
   a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
+  // Revoke after a short delay to ensure the browser has started the download
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 /**
