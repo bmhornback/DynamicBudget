@@ -14,6 +14,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
 - 🎯 **Long-term goal planner** — Track house, vacation, retirement, kids, and custom major-purchase targets
+- 🧾 **Business expense guide** — Categorize, track, and estimate potential business tax write-offs with recordkeeping prompts
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
 - 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset scenarios
 - 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
@@ -78,7 +79,8 @@ npm run build
 3. **Optimize**: Use auto-rebalance or adjust manually to reach your savings goals
 4. **Plan Goals**: Set long-term target amounts and dates for goals like retirement, travel, kids, or large purchases
 5. **Track Spending**: Log actual expenses in the Trends tab to see how you're doing
-6. **Analyze**: Review charts, recommendations, and literacy tips to identify opportunities
+6. **Review Business Deductions**: Use the Business tab to classify expenses, estimate write-offs, and capture documentation notes
+7. **Analyze**: Review charts, recommendations, and literacy tips to identify opportunities
 
 ## Technology Stack
 
@@ -111,7 +113,7 @@ components/
   TrendChart.tsx          ← 6-month trend chart
   [other UI components]
 app/
-  page.tsx                ← Main app (Budget and Trends tabs, scenario comparison embedded in Budget view)
+  page.tsx                ← Main app (Budget, Trends, and Business tabs, scenario comparison embedded in Budget view)
   layout.tsx
   globals.css
 ```

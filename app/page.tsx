@@ -24,6 +24,7 @@ import RebalanceControls from '@/components/RebalanceControls';
 import ScenarioComparison from '@/components/ScenarioComparison';
 import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
+import BusinessExpensesGuide from '@/components/BusinessExpensesGuide';
 import MyBudgets from '@/components/MyBudgets';
 import OnboardingCard from '@/components/OnboardingCard';
 import { DarkModeToggle } from '@/components/ThemeProvider';
@@ -39,7 +40,7 @@ const SAVINGS_FIELDS = [
   'extraDebtPayoff',
 ] as const;
 const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
-type ActiveTab = 'budget' | 'trends';
+type ActiveTab = 'budget' | 'trends' | 'business_expenses';
 
 export default function DynamicBudgetPage() {
   // Initialize from localStorage if available, otherwise use defaults
@@ -318,7 +319,6 @@ export default function DynamicBudgetPage() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === 'budget'}
-                aria-controls="budget-panel"
                 onClick={() => setActiveTab('budget')}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'budget'
@@ -334,7 +334,6 @@ export default function DynamicBudgetPage() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === 'trends'}
-                aria-controls="trends-panel"
                 onClick={() => setActiveTab('trends')}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'trends'
@@ -343,6 +342,21 @@ export default function DynamicBudgetPage() {
                 }`}
               >
                 📈 Trends
+              </button>
+
+              <button
+                id="business-expenses-tab"
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'business_expenses'}
+                onClick={() => setActiveTab('business_expenses')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  activeTab === 'business_expenses'
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500'
+                }`}
+              >
+                🧾 Business
               </button>
             </div>
           </div>
@@ -441,7 +455,7 @@ export default function DynamicBudgetPage() {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'trends' ? (
             <div id="trends-panel" role="tabpanel" aria-labelledby="trends-tab" className="flex flex-col md:flex-row gap-6">
               <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
                 <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
@@ -458,6 +472,10 @@ export default function DynamicBudgetPage() {
                   inputs={inputs}
                 />
               </div>
+            </div>
+          ) : (
+            <div id="business-expenses-panel" role="tabpanel" aria-labelledby="business-expenses-tab">
+              <BusinessExpensesGuide />
             </div>
           )}
         </ErrorBoundary>
