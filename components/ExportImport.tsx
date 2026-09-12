@@ -7,6 +7,7 @@ import {
   exportBudgetAsCSV,
   importBudgetFromJSON,
   triggerDownload,
+  todayDateStr,
 } from '@/lib/storage';
 
 interface ExportImportProps {
@@ -19,17 +20,15 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const todayStr = () => new Date().toISOString().slice(0, 10);
-
   const handleExportJSON = () => {
     const json = exportBudgetAsJSON(currentInputs);
-    triggerDownload(json, `dynamicbudget-budget-${todayStr()}.json`, 'application/json');
+    triggerDownload(json, `dynamicbudget-budget-${todayDateStr()}.json`, 'application/json');
     setOpen(false);
   };
 
   const handleExportCSV = () => {
     const csv = exportBudgetAsCSV(currentInputs);
-    triggerDownload(csv, `dynamicbudget-budget-${todayStr()}.csv`, 'text/csv');
+    triggerDownload(csv, `dynamicbudget-budget-${todayDateStr()}.csv`, 'text/csv');
     setOpen(false);
   };
 

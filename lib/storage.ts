@@ -7,6 +7,11 @@ const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
 const CUSTOM_PRESETS_KEY = 'dynamicbudget_custom_presets';
 const STORAGE_VERSION = 1;
 
+// Legacy keys used before the DynamicBudget rename — kept for one-time migration only
+const LEGACY_STORAGE_KEY = 'movemath_budget_inputs';
+const LEGACY_NAMED_BUDGETS_KEY = 'movemath_named_budgets';
+const LEGACY_CUSTOM_PRESETS_KEY = 'movemath_custom_presets';
+
 /**
  * Save budget inputs to localStorage
  */
@@ -26,13 +31,26 @@ export function saveBudgetInputs(inputs: BudgetInputs): void {
 }
 
 /**
- * Load budget inputs from localStorage
+ * Load budget inputs from localStorage.
+ * Falls back to the legacy movemath_* key on first run after the rename,
+ * migrating the data to the new key automatically.
  */
 export function loadBudgetInputs(): BudgetInputs | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    let stored = localStorage.getItem(STORAGE_KEY);
+
+    // One-time migration from legacy key
+    if (!stored) {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy) {
+        localStorage.setItem(STORAGE_KEY, legacy);
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+        stored = legacy;
+      }
+    }
+
     if (!stored) return null;
 
     const data = JSON.parse(stored);
@@ -96,7 +114,7 @@ export function exportBudgetAsJSON(inputs: BudgetInputs): string {
 /**
  * Generate a YYYY-MM-DD date string for filenames.
  */
-function todayDateStr(): string {
+export function todayDateStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
@@ -119,7 +137,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   const section = (title: string): string => `${esc(title)},,`;
 
   const lines: string[] = [
-    `DynamicBudget Export — ${date},,`,
+    `DynamicBudget Export - ${date},,`,
     '',
     'Category,Monthly ($),Annual ($)',
     '',
@@ -279,7 +297,15 @@ export function importBudgetFromJSON(jsonString: string): BudgetInputs | null {
 export function loadNamedBudgets(): NamedBudget[] {
   if (typeof window === 'undefined') return [];
   try {
-    const stored = localStorage.getItem(NAMED_BUDGETS_KEY);
+    let stored = localStorage.getItem(NAMED_BUDGETS_KEY);
+    if (!stored) {
+      const legacy = localStorage.getItem(LEGACY_NAMED_BUDGETS_KEY);
+      if (legacy) {
+        localStorage.setItem(NAMED_BUDGETS_KEY, legacy);
+        localStorage.removeItem(LEGACY_NAMED_BUDGETS_KEY);
+        stored = legacy;
+      }
+    }
     if (!stored) return [];
     return JSON.parse(stored) as NamedBudget[];
   } catch {
@@ -327,7 +353,15 @@ export function deleteNamedBudget(id: string): void {
 export function loadCustomPresets(): CustomPreset[] {
   if (typeof window === 'undefined') return [];
   try {
-    const stored = localStorage.getItem(CUSTOM_PRESETS_KEY);
+    let stored = localStorage.getItem(CUSTOM_PRESETS_KEY);
+    if (!stored) {
+      const legacy = localStorage.getItem(LEGACY_CUSTOM_PRESETS_KEY);
+      if (legacy) {
+        localStorage.setItem(CUSTOM_PRESETS_KEY, legacy);
+        localStorage.removeItem(LEGACY_CUSTOM_PRESETS_KEY);
+        stored = legacy;
+      }
+    }
     if (!stored) return [];
     return JSON.parse(stored) as CustomPreset[];
   } catch {
