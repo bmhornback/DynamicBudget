@@ -125,10 +125,15 @@ export function todayDateStr(): string {
 export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   const date = todayDateStr();
 
-  // Helper to escape CSV values
+  // Helper to escape CSV values (RFC 4180 + spreadsheet formula injection prevention)
   const esc = (v: string | number): string => {
     const s = String(v);
-    return s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r') ? `"${s.replace(/"/g, '""')}"` : s;
+    // Prefix formula-triggering characters to prevent CSV injection in spreadsheet apps
+    const formulaChars = ['=', '+', '-', '@', '\t', '\r'];
+    const needsFormulaEscape = formulaChars.some((c) => s.startsWith(c));
+    const needsQuoting = needsFormulaEscape || s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r');
+    const safe = needsFormulaEscape ? `'${s}` : s;
+    return needsQuoting ? `"${safe.replace(/"/g, '""')}"` : safe;
   };
 
   const row = (label: string, monthly: number, annual?: number): string =>
