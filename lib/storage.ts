@@ -5,6 +5,7 @@ import { DEFAULT_INPUTS } from './defaultScenarios';
 const STORAGE_KEY = 'dynamicbudget_budget_inputs';
 const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
 const CUSTOM_PRESETS_KEY = 'dynamicbudget_custom_presets';
+const SHARE_PARAM_KEY = 'b';
 const STORAGE_VERSION = 1;
 
 // Legacy keys used before the DynamicBudget rename — kept for one-time migration only
@@ -63,24 +64,7 @@ export function loadBudgetInputs(): BudgetInputs | null {
       return null;
     }
 
-    const mergedInputs = {
-      ...DEFAULT_INPUTS,
-      ...data.inputs,
-      lockedFields: data.inputs.lockedFields ?? {},
-    } as BudgetInputs;
-
-    // Initialize spending history if missing
-    if (!mergedInputs.spendingHistory) {
-      mergedInputs.spendingHistory = initializeSpendingHistory();
-    }
-    if (!Array.isArray(mergedInputs.debts)) {
-      mergedInputs.debts = [];
-    }
-    if (!Array.isArray(mergedInputs.longTermGoals)) {
-      mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
-    }
-
-    return mergedInputs;
+    return normalizeBudgetInputs(data.inputs);
   } catch (error) {
     console.warn('Failed to load budget inputs:', error);
     return null;
@@ -314,26 +298,96 @@ export function importBudgetFromJSON(jsonString: string): BudgetInputs | null {
       return null;
     }
 
-    const mergedInputs = {
-      ...DEFAULT_INPUTS,
-      ...data.inputs,
-      lockedFields: data.inputs.lockedFields ?? {},
-    } as BudgetInputs;
-
-    // Initialize spending history if missing
-    if (!mergedInputs.spendingHistory) {
-      mergedInputs.spendingHistory = initializeSpendingHistory();
-    }
-    if (!Array.isArray(mergedInputs.debts)) {
-      mergedInputs.debts = [];
-    }
-    if (!Array.isArray(mergedInputs.longTermGoals)) {
-      mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
-    }
-
-    return mergedInputs;
+    return normalizeBudgetInputs(data.inputs);
   } catch (error) {
     console.warn('Failed to import budget data:', error);
+    return null;
+  }
+}
+
+function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
+  const inputObject = (rawInputs ?? {}) as Partial<BudgetInputs>;
+  const mergedInputs = {
+    ...DEFAULT_INPUTS,
+    ...inputObject,
+    lockedFields: inputObject.lockedFields ?? {},
+  } as BudgetInputs;
+
+  if (!mergedInputs.spendingHistory) {
+    mergedInputs.spendingHistory = initializeSpendingHistory();
+  }
+  if (!Array.isArray(mergedInputs.debts)) {
+    mergedInputs.debts = [];
+  }
+  if (!Array.isArray(mergedInputs.longTermGoals)) {
+    mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
+  }
+
+  return mergedInputs;
+}
+
+function encodeBase64Url(value: string): string {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(value, 'utf-8').toString('base64url');
+  }
+
+  if (typeof btoa === 'function') {
+    const binary = encodeURIComponent(value).replace(/%([0-9A-F]{2})/g, (_, hex: string) =>
+      String.fromCharCode(parseInt(hex, 16))
+    );
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+
+  throw new Error('No base64 encoder available');
+}
+
+function decodeBase64Url(value: string): string {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(value, 'base64url').toString('utf-8');
+  }
+
+  if (typeof atob === 'function') {
+    const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+    const binary = atob(padded);
+    const percentEncoded = Array.from(binary)
+      .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
+      .join('');
+    return decodeURIComponent(percentEncoded);
+  }
+
+  throw new Error('No base64 decoder available');
+}
+
+export function encodeBudgetInputsForShare(inputs: BudgetInputs): string {
+  return encodeBase64Url(JSON.stringify(inputs));
+}
+
+export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | null {
+  try {
+    if (!encoded || encoded.trim() === '') return null;
+    const decoded = decodeBase64Url(encoded.trim());
+    return normalizeBudgetInputs(JSON.parse(decoded));
+  } catch (error) {
+    console.warn('Failed to decode shared budget:', error);
+    return null;
+  }
+}
+
+export function createShareableBudgetUrl(inputs: BudgetInputs, currentUrl: string): string {
+  const url = new URL(currentUrl);
+  url.searchParams.set(SHARE_PARAM_KEY, encodeBudgetInputsForShare(inputs));
+  return url.toString();
+}
+
+export function loadBudgetInputsFromShareUrl(currentUrl: string): BudgetInputs | null {
+  try {
+    const url = new URL(currentUrl);
+    const encoded = url.searchParams.get(SHARE_PARAM_KEY);
+    if (!encoded) return null;
+    return decodeBudgetInputsFromShare(encoded);
+  } catch (error) {
+    console.warn('Failed to parse shared budget URL:', error);
     return null;
   }
 }

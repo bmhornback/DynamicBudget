@@ -15,7 +15,7 @@ import {
 } from '@/lib/scenarioComparison';
 import { calculateDebtPayoffProjection } from '@/lib/debtPayoff';
 import { initializeSpendingHistory } from '@/lib/spendingTrends';
-import { saveBudgetInputs, loadBudgetInputs } from '@/lib/storage';
+import { saveBudgetInputs, loadBudgetInputs, loadBudgetInputsFromShareUrl } from '@/lib/storage';
 import BudgetForm from '@/components/BudgetForm';
 import BudgetDashboard from '@/components/BudgetDashboard';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -45,6 +45,10 @@ type ActiveTab = 'budget' | 'trends' | 'business_expenses';
 export default function DynamicBudgetPage() {
   // Initialize from localStorage if available, otherwise use defaults
   const [inputs, setInputs] = useState<BudgetInputs>(() => {
+    if (typeof window !== 'undefined') {
+      const fromShareUrl = loadBudgetInputsFromShareUrl(window.location.href);
+      if (fromShareUrl) return fromShareUrl;
+    }
     const stored = loadBudgetInputs();
     if (stored) return stored;
     const defaults = { ...DEFAULT_INPUTS };

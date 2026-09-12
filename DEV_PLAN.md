@@ -501,6 +501,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - "Copy Share Link" button in the header
 - On load, parse the URL parameter and pre-populate inputs
 - Max URL length: ~2,000 chars (compress with `pako` / `lz-string`)
+- **Kickoff progress:** Added URL-safe Base64 budget encoding/decoding helpers, wired URL preload (`?b=`) into app initialization, and added a "Copy Share Link" action in Export/Import.
 
 ### E7-T4 · Clipboard copy — quick summary
 - "Copy Summary" button that puts a formatted plain-text budget summary in the clipboard
@@ -737,4 +738,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-12 — Implemented E7-T1 (PDF export) with a print-friendly dashboard flow, alongside the existing ExportImport dropdown, and refreshed README/roadmap export documentation.*
+*Last updated: 2026-09-12 — Started E7-T3 (shareable URL links) by adding URL-safe Base64 share helpers, URL preload support, a "Copy Share Link" action, tests, and refreshed README/roadmap notes.*
