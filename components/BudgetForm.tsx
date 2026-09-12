@@ -166,15 +166,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
   };
 
   const addDebt = () => {
-    const debtId =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `debt_${Date.now()}`;
     onChange({
       debts: [
         ...inputs.debts,
         {
-          id: debtId,
+          id: crypto.randomUUID(),
           name: `Debt ${inputs.debts.length + 1}`,
           balance: 0,
           interestRate: 0,
@@ -441,7 +437,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           inputs.debts.map((debt) => (
             <div key={debt.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <label className="text-sm text-gray-700">Debt Name</label>
+                <label htmlFor={`debt-name-${debt.id}`} className="text-sm text-gray-700">Debt Name</label>
                 <button
                   type="button"
                   onClick={() => removeDebt(debt.id)}
@@ -451,6 +447,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 </button>
               </div>
               <input
+                id={`debt-name-${debt.id}`}
                 type="text"
                 value={debt.name}
                 onChange={(e) => updateDebt(debt.id, { name: e.target.value })}
@@ -458,8 +455,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
               />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">Balance</label>
+                  <label htmlFor={`debt-balance-${debt.id}`} className="text-xs text-gray-500 block mb-1">Balance</label>
                   <input
+                    id={`debt-balance-${debt.id}`}
                     type="number"
                     min="0"
                     step="100"
@@ -471,8 +469,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">APR %</label>
+                  <label htmlFor={`debt-apr-${debt.id}`} className="text-xs text-gray-500 block mb-1">APR %</label>
                   <input
+                    id={`debt-apr-${debt.id}`}
                     type="number"
                     min="0"
                     step="0.1"
@@ -484,8 +483,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">Min Payment</label>
+                  <label htmlFor={`debt-min-${debt.id}`} className="text-xs text-gray-500 block mb-1">Min Payment</label>
                   <input
+                    id={`debt-min-${debt.id}`}
                     type="number"
                     min="0"
                     step="10"

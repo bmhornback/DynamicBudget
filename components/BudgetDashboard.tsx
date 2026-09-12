@@ -3,6 +3,7 @@
 import React from 'react';
 import type { BudgetBreakdown, BudgetInputs, BudgetHealthScore as BudgetHealthScoreType, Recommendation, RebalanceResult } from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { MAX_DEBT_PAYOFF_YEARS } from '@/lib/debtPayoff';
 import type { DebtPayoffProjection } from '@/lib/debtPayoff';
 import IncomeSummary from './IncomeSummary';
 import ExpenseSummary from './ExpenseSummary';
@@ -256,44 +257,6 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
             ? `~${Math.ceil(inputs.houseDownPaymentTarget / inputs.houseDownPaymentContribution)} months to goal`
             : undefined
         }
-
-        function DebtPayoffDetail({
-          projection,
-          debtCount,
-        }: {
-          projection: DebtPayoffProjection;
-          debtCount: number;
-        }) {
-          const latestMonth = projection.schedule[projection.schedule.length - 1];
-          const latestBalance = latestMonth?.remainingBalance ?? 0;
-          const oneYearBalance = projection.schedule.find((entry) => entry.month === 12)?.remainingBalance;
-
-          return (
-            <BudgetCard title="Debt Payoff Timeline">
-              {debtCount === 0 ? (
-                <p className="text-sm text-gray-600">Add debt accounts in the form to calculate payoff timing.</p>
-              ) : (
-                <>
-                  <DetailRow label="Tracked Debts" value={`${debtCount}`} />
-                  <DetailRow label="Monthly Debt Budget" value={formatCurrency(projection.monthlyBudget)} />
-                  <DetailRow
-                    label="Debt-Free Timeline"
-                    value={
-                      projection.monthsToDebtFree === null
-                        ? 'Not reached in 50 years'
-                        : `${projection.monthsToDebtFree} months`
-                    }
-                  />
-                  <DividerLine />
-                  <DetailRow label="Total Interest Paid" value={formatCurrency(projection.totalInterestPaid)} />
-                  <DetailRow label="Total Principal Paid" value={formatCurrency(projection.totalPrincipalPaid)} />
-                  <DetailRow label="Projected Balance After 12 Months" value={formatCurrency(oneYearBalance ?? latestBalance)} />
-                  <DetailRow label="Projected Ending Balance" value={formatCurrency(latestBalance)} />
-                </>
-              )}
-            </BudgetCard>
-          );
-        }
       />
       <DividerLine />
       <DetailRow
@@ -309,6 +272,53 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
         value={formatCurrency(breakdown.totalAnnualSavingsIncludingRetirement)}
         sub={`${formatPercent(breakdown.savingsRateGross)} of gross income`}
       />
+    </BudgetCard>
+  );
+}
+
+function DebtPayoffDetail({
+  projection,
+  debtCount,
+}: {
+  projection: DebtPayoffProjection;
+  debtCount: number;
+}) {
+  const latestMonth = projection.schedule[projection.schedule.length - 1];
+  const latestBalance = latestMonth?.remainingBalance ?? 0;
+  const oneYearBalance = projection.schedule.find((entry) => entry.month === 12)?.remainingBalance;
+
+  return (
+    <BudgetCard title="Debt Payoff Timeline">
+      {debtCount === 0 ? (
+        <p className="text-sm text-gray-600">Add debt accounts in the form to calculate payoff timing.</p>
+      ) : projection.schedule.length === 0 ? (
+        <p className="text-sm text-gray-600">
+          Add a minimum payment or extra debt payoff amount to generate a timeline.
+        </p>
+      ) : (
+        <>
+          <DetailRow label="Tracked Debts" value={`${debtCount}`} />
+          <DetailRow label="Monthly Debt Budget" value={formatCurrency(projection.monthlyBudget)} />
+          <DetailRow
+            label="Debt-Free Timeline"
+            value={
+              projection.monthsToDebtFree === null
+                ? `Not reached in ${MAX_DEBT_PAYOFF_YEARS} years`
+                : `${projection.monthsToDebtFree} months`
+            }
+          />
+          <DividerLine />
+          <DetailRow label="Total Interest Paid" value={formatCurrency(projection.totalInterestPaid)} />
+          <DetailRow label="Total Principal Paid" value={formatCurrency(projection.totalPrincipalPaid)} />
+          <DetailRow
+            label="Projected Balance After 12 Months"
+            value={formatCurrency(oneYearBalance ?? latestBalance)}
+          />
+          {projection.monthsToDebtFree === null && (
+            <DetailRow label="Projected Ending Balance" value={formatCurrency(latestBalance)} />
+          )}
+        </>
+      )}
     </BudgetCard>
   );
 }

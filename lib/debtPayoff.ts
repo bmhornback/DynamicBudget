@@ -7,6 +7,7 @@ export interface DebtPayoffMonth {
   remainingBalance: number;
   principalPaid: number;
   interestPaid: number;
+  extraPaymentTargetDebtId?: string;
 }
 
 export interface DebtPayoffProjection {
@@ -20,6 +21,9 @@ export interface DebtPayoffProjection {
 interface WorkingDebt extends DebtAccount {
   remainingBalance: number;
 }
+
+export const MAX_DEBT_PAYOFF_YEARS = 50;
+export const MAX_DEBT_PAYOFF_MONTHS = MAX_DEBT_PAYOFF_YEARS * 12;
 
 function roundCents(value: number): number {
   return Math.round(value * 100) / 100;
@@ -46,7 +50,6 @@ export function calculateDebtPayoffProjection(
     .filter((debt) => debt.balance > 0)
     .map((debt) => ({
       ...debt,
-      balance: Math.max(0, debt.balance),
       minimumPayment: Math.max(0, debt.minimumPayment),
       interestRate: Math.max(0, debt.interestRate),
       remainingBalance: debt.balance,
@@ -75,12 +78,11 @@ export function calculateDebtPayoffProjection(
     };
   }
 
-  const MAX_MONTHS = 600;
   let totalPrincipalPaid = 0;
   let totalInterestPaid = 0;
   const schedule: DebtPayoffMonth[] = [];
 
-  for (let month = 1; month <= MAX_MONTHS; month += 1) {
+  for (let month = 1; month <= MAX_DEBT_PAYOFF_MONTHS; month += 1) {
     let paymentPool = monthlyBudget;
     let monthInterest = 0;
     let monthPrincipal = 0;
@@ -93,7 +95,11 @@ export function calculateDebtPayoffProjection(
       monthInterest += interest;
     }
 
-    for (const debt of normalizedDebts) {
+    // orderedDebts shares object references with normalizedDebts by design
+    // so mutations stay synchronized while letting strategy control payment order.
+    const orderedDebts = sortDebts(normalizedDebts, strategy);
+
+    for (const debt of orderedDebts) {
       if (debt.remainingBalance <= 0 || paymentPool <= 0) continue;
       const minimumPayment = Math.min(debt.minimumPayment, debt.remainingBalance, paymentPool);
       debt.remainingBalance = roundCents(debt.remainingBalance - minimumPayment);
@@ -101,7 +107,8 @@ export function calculateDebtPayoffProjection(
       monthPrincipal += minimumPayment;
     }
 
-    for (const debt of sortDebts(normalizedDebts, strategy)) {
+    let extraPaymentTargetDebtId: string | undefined;
+    for (const debt of orderedDebts) {
       if (paymentPool <= 0) break;
       if (debt.remainingBalance <= 0) continue;
 
@@ -109,6 +116,9 @@ export function calculateDebtPayoffProjection(
       debt.remainingBalance = roundCents(debt.remainingBalance - additional);
       paymentPool = roundCents(paymentPool - additional);
       monthPrincipal += additional;
+      if (additional > 0 && !extraPaymentTargetDebtId) {
+        extraPaymentTargetDebtId = debt.id;
+      }
     }
 
     totalInterestPaid = roundCents(totalInterestPaid + monthInterest);
@@ -123,6 +133,7 @@ export function calculateDebtPayoffProjection(
       remainingBalance,
       principalPaid: roundCents(monthPrincipal),
       interestPaid: roundCents(monthInterest),
+      extraPaymentTargetDebtId,
     });
 
     if (remainingBalance <= 0) {

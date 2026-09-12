@@ -46,4 +46,48 @@ describe('calculateDebtPayoffProjection', () => {
       snowball.monthsToDebtFree ?? Infinity
     );
   });
+
+  it('returns null payoff timeline when no minimum or extra debt budget exists', () => {
+    const projection = calculateDebtPayoffProjection(
+      [
+        {
+          id: 'no_payment',
+          name: 'No Payment Debt',
+          balance: 1000,
+          interestRate: 10,
+          minimumPayment: 0,
+        },
+      ],
+      0
+    );
+
+    expect(projection.monthlyBudget).toBe(0);
+    expect(projection.monthsToDebtFree).toBeNull();
+    expect(projection.schedule).toHaveLength(0);
+  });
+
+  it('targets different first debt by strategy', () => {
+    const debts: DebtAccount[] = [
+      {
+        id: 'high_rate_big_balance',
+        name: 'High Rate Big Balance',
+        balance: 10000,
+        interestRate: 24,
+        minimumPayment: 100,
+      },
+      {
+        id: 'low_rate_small_balance',
+        name: 'Low Rate Small Balance',
+        balance: 1200,
+        interestRate: 4,
+        minimumPayment: 50,
+      },
+    ];
+
+    const avalanche = calculateDebtPayoffProjection(debts, 300, 'avalanche');
+    const snowball = calculateDebtPayoffProjection(debts, 300, 'snowball');
+
+    expect(avalanche.schedule[0].extraPaymentTargetDebtId).toBe('high_rate_big_balance');
+    expect(snowball.schedule[0].extraPaymentTargetDebtId).toBe('low_rate_small_balance');
+  });
 });
