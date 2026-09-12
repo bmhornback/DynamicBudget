@@ -35,23 +35,23 @@ const HOUSING_MODE_OPTIONS: Array<{ value: HousingMode; label: string }> = [
   { value: 'homeowner', label: 'Homeowner' },
 ];
 
-function SelectField({
+function SelectField<T extends string>({
   label,
   value,
   options,
   onChange,
 }: {
   label: string;
-  value: string;
-  options: Array<{ value: string; label: string }>;
-  onChange: (v: string) => void;
+  value: T;
+  options: Array<{ value: T; label: string }>;
+  onChange: (v: T) => void;
 }) {
   return (
     <div className="flex items-center gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200">
       <label className="flex-1 text-sm text-gray-700">{label}</label>
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value as T)}
         className="text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
         {options.map((opt) => (
@@ -277,7 +277,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           label="Housing Mode"
           value={inputs.housingMode}
           options={HOUSING_MODE_OPTIONS}
-          onChange={(v) => onChange({ housingMode: v as HousingMode })}
+          onChange={(v) => onChange({ housingMode: v })}
         />
         {inputs.housingMode === 'homeowner' ? (
           <>
