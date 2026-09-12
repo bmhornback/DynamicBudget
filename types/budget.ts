@@ -50,6 +50,13 @@ export type BudgetMode = 'manual' | 'auto';
 export type HousingMode = 'renter' | 'homeowner';
 
 export type IRAType = 'traditional' | 'roth';
+export type LongTermGoalCategory =
+  | 'house'
+  | 'vacation'
+  | 'retirement'
+  | 'kids'
+  | 'major_purchase'
+  | 'custom';
 
 export interface DebtAccount {
   id: string;
@@ -57,6 +64,39 @@ export interface DebtAccount {
   balance: number;
   interestRate: number; // annual percentage rate
   minimumPayment: number;
+}
+
+export interface LongTermSavingsGoal {
+  id: string;
+  name: string;
+  category: LongTermGoalCategory;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string; // YYYY-MM, or empty string for no deadline
+}
+
+export interface LongTermGoalProjection {
+  id: string;
+  name: string;
+  category: LongTermGoalCategory;
+  targetAmount: number;
+  currentAmount: number;
+  remainingAmount: number;
+  targetDate: string;
+  monthsRemaining: number | null;
+  requiredMonthlySavings: number;
+  currentMonthlyFunding: number;
+  progress: number;
+  isOnTrack: boolean;
+  fundingSourceLabel: string;
+  status: 'funded' | 'on_track' | 'behind' | 'no_deadline' | 'past_due';
+}
+
+export interface FinancialLiteracyInsight {
+  id: string;
+  priority: 'high' | 'medium' | 'low';
+  title: string;
+  detail: string;
 }
 
 export interface BudgetField {
@@ -232,6 +272,7 @@ export interface BudgetInputs {
   // Savings mode: percentage vs. fixed amounts
   isSavingsByPercentage: boolean;
   savingsPercentOfNetIncome: number; // e.g., 30 for 30% of net income
+  longTermGoals: LongTermSavingsGoal[];
 
   // Lifestyle
   funEntertainment: number;

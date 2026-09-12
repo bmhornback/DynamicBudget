@@ -87,6 +87,48 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   generalCashSavings: 0,
   isSavingsByPercentage: false,
   savingsPercentOfNetIncome: 30,
+  longTermGoals: [
+    {
+      id: 'goal-house',
+      name: 'House',
+      category: 'house',
+      targetAmount: 200000,
+      currentAmount: 25000,
+      targetDate: '2030-12',
+    },
+    {
+      id: 'goal-vacation',
+      name: 'Vacation',
+      category: 'vacation',
+      targetAmount: 6000,
+      currentAmount: 500,
+      targetDate: '2028-06',
+    },
+    {
+      id: 'goal-retirement',
+      name: 'Retirement',
+      category: 'retirement',
+      targetAmount: 1500000,
+      currentAmount: 120000,
+      targetDate: '2055-01',
+    },
+    {
+      id: 'goal-kids',
+      name: 'Kids',
+      category: 'kids',
+      targetAmount: 50000,
+      currentAmount: 0,
+      targetDate: '2035-01',
+    },
+    {
+      id: 'goal-major-purchase',
+      name: 'Major Purchase',
+      category: 'major_purchase',
+      targetAmount: 15000,
+      currentAmount: 0,
+      targetDate: '2029-06',
+    },
+  ],
 
   // Lifestyle
   funEntertainment: 300,
