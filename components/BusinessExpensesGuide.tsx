@@ -136,10 +136,10 @@ function getInitialEntries(): Record<string, BusinessExpenseEntry> {
   }
 }
 
-function parseNumericInput(value: string, fallback: number): number {
-  if (value.trim() === '') return fallback;
+function parseNumericInput(value: string): number {
+  if (value.trim() === '') return 0;
   const parsed = Number(value);
-  return Number.isNaN(parsed) ? fallback : parsed;
+  return Number.isNaN(parsed) ? 0 : parsed;
 }
 
 function getEntryStatus(entry: BusinessExpenseEntry): {
@@ -248,7 +248,7 @@ export default function BusinessExpensesGuide() {
                     value={entry.monthlyAmount}
                     onChange={(event) =>
                       updateEntry(item.id, {
-                        monthlyAmount: parseNumericInput(event.target.value, entry.monthlyAmount),
+                        monthlyAmount: parseNumericInput(event.target.value),
                       })}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                   />
@@ -264,7 +264,7 @@ export default function BusinessExpensesGuide() {
                     value={entry.businessUsePercent}
                     onChange={(event) =>
                       updateEntry(item.id, {
-                        businessUsePercent: parseNumericInput(event.target.value, entry.businessUsePercent),
+                        businessUsePercent: parseNumericInput(event.target.value),
                       })}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                   />
