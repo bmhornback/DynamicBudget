@@ -330,7 +330,7 @@ export interface BudgetHealthScore {
   score: number;
   label: HealthScoreLabel;
   breakdown: {
-    rentAffordability: number;
+    housingAffordability: number;
     retirementRate: number;
     emergencyFundContrib: number;
     houseFundContrib: number;
