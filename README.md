@@ -13,6 +13,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
+- 🎯 **Long-term goal planner** — Track house, vacation, retirement, kids, and custom major-purchase targets
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
 - 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset scenarios
 - 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
@@ -29,6 +30,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 📈 **Visual Charts** — Monthly spending trends with budget vs. actual comparisons (powered by Recharts)
 - 💡 **Smart Insights** — Get alerts when you're overspending or when spending is trending upward
 - 🔮 **Forecasting** — Predict next month's spending using linear regression on historical patterns
+- 🧠 **Financial literacy tips** — Personalized education prompts around emergency funds, retirement, debt, and goal tradeoffs
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 ### Upcoming Features
@@ -71,8 +73,9 @@ npm run build
 1. **Enter Income**: Input your annual salary, state, and filing status
 2. **Review Expenses**: Set budgets for all categories (housing, food, transportation, etc.)
 3. **Optimize**: Use auto-rebalance or adjust manually to reach your savings goals
-4. **Track Spending**: Log actual expenses in the Trends tab to see how you're doing
-5. **Analyze**: Review charts and insights to identify spending patterns and opportunities
+4. **Plan Goals**: Set long-term target amounts and dates for goals like retirement, travel, kids, or large purchases
+5. **Track Spending**: Log actual expenses in the Trends tab to see how you're doing
+6. **Analyze**: Review charts, recommendations, and literacy tips to identify opportunities
 
 ## Technology Stack
 
@@ -91,6 +94,7 @@ lib/
   budgetCalculations.ts   ← Core budget math
   budgetHealthScore.ts    ← 0–100 score + thresholds
   formatters.ts           ← Number/currency formatting
+  longTermGoals.ts        ← Goal projections + literacy insights
   rebalanceBudget.ts      ← 6 rebalancing strategies
   recommendations.ts      ← Actionable suggestions
   taxCalculations.ts      ← Federal, state, payroll tax

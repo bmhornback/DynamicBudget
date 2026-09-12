@@ -1,7 +1,15 @@
 'use client';
 
 import React from 'react';
-import type { BudgetInputs, CarSituation, DebtAccount, FilingStatus, StateOfResidence, HousingMode } from '@/types/budget';
+import type {
+  BudgetInputs,
+  CarSituation,
+  DebtAccount,
+  FilingStatus,
+  HousingMode,
+  LongTermGoalCategory,
+  StateOfResidence,
+} from '@/types/budget';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
@@ -33,6 +41,15 @@ const CAR_SITUATION_OPTIONS: Array<{ value: CarSituation; label: string }> = [
 const HOUSING_MODE_OPTIONS: Array<{ value: HousingMode; label: string }> = [
   { value: 'renter', label: 'Renter' },
   { value: 'homeowner', label: 'Homeowner' },
+];
+
+const LONG_TERM_GOAL_OPTIONS: Array<{ value: LongTermGoalCategory; label: string }> = [
+  { value: 'house', label: 'House' },
+  { value: 'vacation', label: 'Vacation' },
+  { value: 'retirement', label: 'Retirement' },
+  { value: 'kids', label: 'Kids' },
+  { value: 'major_purchase', label: 'Major Purchase' },
+  { value: 'custom', label: 'Custom' },
 ];
 
 function SelectField<T extends string>({
@@ -183,6 +200,36 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           balance: 0,
           interestRate: 0,
           minimumPayment: 0,
+        },
+      ],
+    });
+  };
+
+  const updateGoal = (id: string, updates: Partial<BudgetInputs['longTermGoals'][number]>) => {
+    onChange({
+      longTermGoals: inputs.longTermGoals.map((goal) =>
+        goal.id === id ? { ...goal, ...updates } : goal
+      ),
+    });
+  };
+
+  const removeGoal = (id: string) => {
+    onChange({
+      longTermGoals: inputs.longTermGoals.filter((goal) => goal.id !== id),
+    });
+  };
+
+  const addGoal = () => {
+    onChange({
+      longTermGoals: [
+        ...inputs.longTermGoals,
+        {
+          id: crypto.randomUUID(),
+          name: `Custom Goal ${inputs.longTermGoals.length + 1}`,
+          category: 'custom',
+          targetAmount: 10000,
+          currentAmount: 0,
+          targetDate: '',
         },
       ],
     });
@@ -449,6 +496,96 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
             {field('generalCashSavings', 'General Cash Savings')}
           </>
         )}
+      </BudgetSection>
+
+      <BudgetSection title="Long-Term Goals" icon="🎯" defaultOpen={false}>
+        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-1">
+          <p className="text-sm text-gray-700">Track major goals and compare them against your current savings plan.</p>
+          <p className="text-xs text-gray-500">House goals use your house fund, retirement goals use retirement contributions, and all other goals compare against General Cash Savings.</p>
+        </div>
+
+        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+          <button
+            type="button"
+            onClick={addGoal}
+            className="px-2.5 py-1 text-xs font-medium rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            + Add Goal
+          </button>
+        </div>
+
+        {inputs.longTermGoals.map((goal) => (
+          <div key={goal.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor={`goal-name-${goal.id}`} className="text-sm text-gray-700">Goal Name</label>
+              <button
+                type="button"
+                onClick={() => removeGoal(goal.id)}
+                className="text-xs font-medium text-red-600 hover:text-red-700"
+              >
+                Remove
+              </button>
+            </div>
+            <input
+              id={`goal-name-${goal.id}`}
+              type="text"
+              value={goal.name}
+              onChange={(e) => updateGoal(goal.id, { name: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label htmlFor={`goal-category-${goal.id}`} className="text-xs text-gray-500 block mb-1">Category</label>
+                <select
+                  id={`goal-category-${goal.id}`}
+                  value={goal.category}
+                  onChange={(e) => updateGoal(goal.id, { category: e.target.value as LongTermGoalCategory })}
+                  className="w-full text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  {LONG_TERM_GOAL_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor={`goal-date-${goal.id}`} className="text-xs text-gray-500 block mb-1">Target Month</label>
+                <input
+                  id={`goal-date-${goal.id}`}
+                  type="month"
+                  value={goal.targetDate}
+                  onChange={(e) => updateGoal(goal.id, { targetDate: e.target.value })}
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label htmlFor={`goal-target-${goal.id}`} className="text-xs text-gray-500 block mb-1">Target Amount</label>
+                <input
+                  id={`goal-target-${goal.id}`}
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={goal.targetAmount}
+                  onChange={(e) => updateGoal(goal.id, { targetAmount: Math.max(0, Number(e.target.value)) })}
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <div>
+                <label htmlFor={`goal-current-${goal.id}`} className="text-xs text-gray-500 block mb-1">Saved So Far</label>
+                <input
+                  id={`goal-current-${goal.id}`}
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={goal.currentAmount}
+                  onChange={(e) => updateGoal(goal.id, { currentAmount: Math.max(0, Number(e.target.value)) })}
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
       </BudgetSection>
 
       {/* ── Lifestyle ────────────────────────────────────────────────── */}

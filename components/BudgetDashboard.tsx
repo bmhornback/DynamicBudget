@@ -1,10 +1,19 @@
 'use client';
 
 import React from 'react';
-import type { BudgetBreakdown, BudgetInputs, BudgetHealthScore as BudgetHealthScoreType, Recommendation, RebalanceResult } from '@/types/budget';
+import type {
+  BudgetBreakdown,
+  BudgetInputs,
+  BudgetHealthScore as BudgetHealthScoreType,
+  FinancialLiteracyInsight,
+  LongTermGoalProjection,
+  Recommendation,
+  RebalanceResult,
+} from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { MAX_DEBT_PAYOFF_YEARS } from '@/lib/debtPayoff';
 import type { DebtPayoffProjection } from '@/lib/debtPayoff';
+import { calculateLongTermGoalProjections, generateFinancialLiteracyInsights } from '@/lib/longTermGoals';
 import IncomeSummary from './IncomeSummary';
 import ExpenseSummary from './ExpenseSummary';
 import SavingsSummary from './SavingsSummary';
@@ -29,6 +38,8 @@ export default function BudgetDashboard({
   debtProjection,
 }: BudgetDashboardProps) {
   const { isOverBudget, deficit, surplus, remainingMonthlyBuffer, netMonthlyIncome } = breakdown;
+  const goalProjections = calculateLongTermGoalProjections(inputs, breakdown);
+  const literacyInsights = generateFinancialLiteracyInsights(inputs, breakdown, goalProjections);
 
   // Buffer status banner
   const bufferBanner = isOverBudget ? (
@@ -107,6 +118,8 @@ export default function BudgetDashboard({
         {inputs.petsEnabled && <PetsDetail inputs={inputs} breakdown={breakdown} />}
         <SavingsDetail breakdown={breakdown} inputs={inputs} />
         <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} />
+        <LongTermGoalsDetail goals={goalProjections} />
+        <FinancialLiteracyDetail insights={literacyInsights} />
       </div>
 
       {/* Recommendations */}
@@ -335,6 +348,96 @@ function DebtPayoffDetail({
             <DetailRow label="Projected Ending Balance" value={formatCurrency(latestBalance)} />
           )}
         </>
+      )}
+    </BudgetCard>
+  );
+}
+
+function LongTermGoalsDetail({ goals }: { goals: LongTermGoalProjection[] }) {
+  return (
+    <BudgetCard title="Long-Term Goals">
+      {goals.length === 0 ? (
+        <p className="text-sm text-gray-600">Add goals in the form to track timelines for retirement, travel, kids, and major purchases.</p>
+      ) : (
+        <div className="space-y-3">
+          {goals.map((goal) => (
+            <div key={goal.id} className="rounded-lg border border-gray-100 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{goal.name}</p>
+                  <p className="text-xs text-gray-500 capitalize">{goal.category.replace('_', ' ')}</p>
+                </div>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${goal.status === 'funded' || goal.status === 'on_track' ? 'bg-green-50 text-green-700' : goal.status === 'no_deadline' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
+                  {goal.status === 'funded'
+                    ? 'Funded'
+                    : goal.status === 'on_track'
+                      ? 'On track'
+                      : goal.status === 'no_deadline'
+                        ? 'Needs date'
+                        : goal.status === 'past_due'
+                          ? 'Past due'
+                          : 'Behind'}
+                </span>
+              </div>
+              <div className="mt-2 h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div
+                  className={`h-full ${goal.isOnTrack ? 'bg-green-500' : 'bg-amber-500'}`}
+                  style={{ width: `${Math.max(4, goal.progress * 100)}%` }}
+                />
+              </div>
+              <div className="mt-2 space-y-1">
+                <DetailRow label="Saved So Far" value={formatCurrency(goal.currentAmount)} />
+                <DetailRow label="Remaining" value={formatCurrency(goal.remainingAmount)} />
+                <DetailRow
+                  label="Needed Per Month"
+                  value={goal.monthsRemaining === null ? 'Set target month' : formatCurrency(goal.requiredMonthlySavings)}
+                  sub={goal.targetDate ? `Target ${goal.targetDate}` : undefined}
+                />
+                <DetailRow
+                  label={`Current ${goal.fundingSourceLabel}`}
+                  value={formatCurrency(goal.currentMonthlyFunding)}
+                  sub={
+                    goal.monthsRemaining && goal.monthsRemaining > 0
+                      ? `${goal.monthsRemaining} month${goal.monthsRemaining === 1 ? '' : 's'} remaining`
+                      : goal.targetDate
+                        ? 'Target date reached'
+                        : undefined
+                  }
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </BudgetCard>
+  );
+}
+
+function FinancialLiteracyDetail({ insights }: { insights: FinancialLiteracyInsight[] }) {
+  const priorityStyles = {
+    high: 'bg-red-50 text-red-700 border-red-100',
+    medium: 'bg-amber-50 text-amber-700 border-amber-100',
+    low: 'bg-blue-50 text-blue-700 border-blue-100',
+  };
+
+  return (
+    <BudgetCard title="Financial Literacy Tips">
+      {insights.length === 0 ? (
+        <p className="text-sm text-gray-600">Your budget already covers the main literacy signals this planner tracks.</p>
+      ) : (
+        <div className="space-y-2">
+          {insights.map((insight) => (
+            <div key={insight.id} className="rounded-lg border border-gray-100 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium text-gray-900">{insight.title}</p>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full border ${priorityStyles[insight.priority]}`}>
+                  {insight.priority}
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">{insight.detail}</p>
+            </div>
+          ))}
+        </div>
       )}
     </BudgetCard>
   );

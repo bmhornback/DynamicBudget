@@ -5,6 +5,7 @@
 
 import type { BudgetBreakdown, BudgetInputs, Recommendation } from '@/types/budget';
 import { BUDGET_THRESHOLDS, ANNUAL_401K_LIMIT } from './budgetCalculations';
+import { calculateLongTermGoalProjections } from './longTermGoals';
 import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
@@ -23,6 +24,7 @@ export function generateRecommendations(
   const housingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Housing payment' : 'Rent';
   const housingFundLabel = inputs.housingMode === 'homeowner' ? 'home equity fund' : 'house fund';
   const housingFundLabelTitleCase = housingFundLabel.charAt(0).toUpperCase() + housingFundLabel.slice(1);
+  const goalProjections = calculateLongTermGoalProjections(inputs, breakdown);
 
   const {
     primaryHousingPaymentAsPercentGross,
@@ -129,6 +131,44 @@ export function generateRecommendations(
     });
   }
 
+  // ── Long-term goals ────────────────────────────────────────────────────────
+  const behindGoals = goalProjections.filter((goal) => goal.status === 'behind' || goal.status === 'past_due');
+  const generalGoals = goalProjections.filter((goal) =>
+    ['vacation', 'kids', 'major_purchase', 'custom'].includes(goal.category)
+  );
+  const totalGeneralRequired = generalGoals.reduce((sum, goal) => sum + goal.requiredMonthlySavings, 0);
+
+  if (behindGoals.length > 0) {
+    const goal = behindGoals[0];
+    recs.push({
+      id: `goal_behind_${goal.id}`,
+      severity: goal.status === 'past_due' ? 'warning' : 'info',
+      message:
+        goal.status === 'past_due'
+          ? `${goal.name} is past its target date and still needs ${formatCurrency(goal.remainingAmount)}.`
+          : `${goal.name} needs ${formatCurrency(goal.requiredMonthlySavings)}/month to stay on pace.`,
+      detail: `Current funding from ${goal.fundingSourceLabel} is about ${formatCurrency(goal.currentMonthlyFunding)}/month.`,
+    });
+  }
+
+  if (generalGoals.length > 1 && totalGeneralRequired > inputs.generalCashSavings) {
+    recs.push({
+      id: 'goal_pool_underfunded',
+      severity: 'info',
+      message: 'Shared long-term goals need more monthly cash than your general savings bucket provides.',
+      detail: `${formatCurrency(totalGeneralRequired)}/month is needed across flexible goals, versus ${formatCurrency(inputs.generalCashSavings)}/month currently allocated.`,
+    });
+  }
+
+  if (goalProjections.some((goal) => goal.status === 'no_deadline' && goal.remainingAmount > 0)) {
+    recs.push({
+      id: 'goal_missing_deadline',
+      severity: 'info',
+      message: 'At least one long-term goal is missing a target month.',
+      detail: 'Adding a target date turns a wish list into a monthly savings target you can track.',
+    });
+  }
+
   // ── Pet costs ─────────────────────────────────────────────────────────────
   if (inputs.petsEnabled && breakdown.petCostsAsPercentTakeHome > BUDGET_THRESHOLDS.petPercentTakeHome) {
     recs.push({
@@ -225,4 +265,8 @@ export function generateRecommendations(
   }
 
   return recs;
+}
+
+function formatCurrency(value: number): string {
+  return `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 }
