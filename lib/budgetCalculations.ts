@@ -222,7 +222,10 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       inputs.generalCashSavings;
 
   const totalInvestments = isSavingsByPercentage ? 0 : inputs.taxableInvestments;
-  const totalDebtPayoff = isSavingsByPercentage ? 0 : inputs.extraDebtPayoff;
+  const debtMinimumPayments = isSavingsByPercentage
+    ? 0
+    : (inputs.debtAccounts ?? []).reduce((sum, d) => sum + (d.minimumPayment ?? 0), 0);
+  const totalDebtPayoff = isSavingsByPercentage ? 0 : debtMinimumPayments + inputs.extraDebtPayoff;
 
   // ── Aggregates ────────────────────────────────────────────────────────────
   // Fixed = housing + utilities + transportation + health + groceries (baseline)

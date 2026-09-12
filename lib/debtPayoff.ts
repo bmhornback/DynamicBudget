@@ -121,8 +121,11 @@ export function calculateDebtPayoffProjection(
       }
     }
 
+    // monthPrincipal tracks total payments made; subtract accrued interest to get
+    // true principal reduction (i.e., payments that reduced the outstanding balance).
+    const monthPrincipalReduction = roundCents(Math.max(0, monthPrincipal - monthInterest));
     totalInterestPaid = roundCents(totalInterestPaid + monthInterest);
-    totalPrincipalPaid = roundCents(totalPrincipalPaid + monthPrincipal);
+    totalPrincipalPaid = roundCents(totalPrincipalPaid + monthPrincipalReduction);
 
     const remainingBalance = roundCents(
       normalizedDebts.reduce((sum, debt) => sum + Math.max(0, debt.remainingBalance), 0)
