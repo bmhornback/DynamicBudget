@@ -22,6 +22,9 @@ import RebalanceControls from '@/components/RebalanceControls';
 import ScenarioComparison from '@/components/ScenarioComparison';
 import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
+import MyBudgets from '@/components/MyBudgets';
+import OnboardingCard from '@/components/OnboardingCard';
+import { DarkModeToggle } from '@/components/ThemeProvider';
 
 // ─── Module-level constants ───────────────────────────────────────────────────
 // Savings fields that should be locked/unlocked when toggling percentage mode
@@ -193,19 +196,23 @@ export default function MoveMathPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🧮</span>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 leading-none">MoveMath</h1>
-              <p className="text-xs text-gray-500">Dynamic Salary → Budget Planner</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-none">MoveMath</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Dynamic Salary → Budget Planner</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <MyBudgets currentInputs={inputs} onLoad={(newInputs) => { setInputs(newInputs); setRebalanceResult(null); setActivePreset(undefined); }} />
+
+            <DarkModeToggle />
+
             <button
               type="button"
               onClick={handleToggleMode}
@@ -214,7 +221,7 @@ export default function MoveMathPage() {
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                 inputs.budgetMode === 'auto'
                   ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500'
               }`}
             >
               {inputs.budgetMode === 'auto' ? '⚡ Auto' : '✋ Manual'}
@@ -224,7 +231,7 @@ export default function MoveMathPage() {
               type="button"
               onClick={() => setShowForm((v) => !v)}
               aria-label={showForm ? 'Show dashboard panel' : 'Show editor panel'}
-              className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white text-gray-600 border-gray-200 hover:border-blue-300 transition-all md:hidden"
+              className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all md:hidden"
             >
               {showForm ? '📊 Dashboard' : '✏️ Edit'}
             </button>
@@ -240,7 +247,7 @@ export default function MoveMathPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'budget'
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500'
                 }`}
               >
                 📊 Budget
@@ -256,7 +263,7 @@ export default function MoveMathPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'trends'
                     ? 'bg-purple-600 text-white border-purple-600'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500'
                 }`}
               >
                 📈 Trends
@@ -267,13 +274,14 @@ export default function MoveMathPage() {
       </header>
 
       {/* Scenario presets bar */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-xs font-medium text-gray-500 shrink-0">Presets:</span>
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 shrink-0">Presets:</span>
             <ScenarioPresets
               currentPreset={activePreset}
               onApplyPreset={handleApplyPreset}
+              currentInputs={inputs}
             />
           </div>
         </div>
@@ -284,6 +292,7 @@ export default function MoveMathPage() {
         <ErrorBoundary onReset={handleReset}>
           {activeTab === 'budget' ? (
             <div id="budget-panel" role="tabpanel" aria-labelledby="budget-tab" className="space-y-6">
+              <OnboardingCard />
               <ScenarioComparison
                 items={comparisonItems}
                 selectedPresetIds={comparisonPresetIds}
@@ -351,8 +360,8 @@ export default function MoveMathPage() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-12 border-t border-gray-200 py-6 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-gray-400">
+      <footer className="mt-12 border-t border-gray-200 dark:border-gray-700 py-6 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-gray-400 dark:text-gray-500">
           <p>MoveMath — Personal finance planning tool. All calculations are client-side estimates only.</p>
           <p className="mt-1">Tax figures are simplified estimates and should not be used for tax filing purposes.</p>
         </div>

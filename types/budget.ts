@@ -395,3 +395,24 @@ export interface SpendingHistory {
   lastUpdated: string; // ISO timestamp
   version: number;
 }
+
+// ─── Named Budget Slots (E2-T3) ───────────────────────────────────────────────
+
+/** A user-saved snapshot of BudgetInputs with a custom name. */
+export interface NamedBudget {
+  id: string;
+  name: string;
+  inputs: BudgetInputs;
+  createdAt: string; // ISO timestamp
+}
+
+// ─── Custom Scenario Presets (E2-T4) ─────────────────────────────────────────
+
+/** A user-created preset that extends the built-in preset list. */
+export interface CustomPreset {
+  id: string;
+  name: string;
+  description: string;
+  inputs: Partial<BudgetInputs>;
+  createdAt: string; // ISO timestamp
+}
