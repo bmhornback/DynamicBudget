@@ -46,10 +46,13 @@ function SelectField<T extends string>({
   options: Array<{ value: T; label: string }>;
   onChange: (v: T) => void;
 }) {
+  const selectId = React.useId();
+
   return (
     <div className="flex items-center gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200">
-      <label className="flex-1 text-sm text-gray-700">{label}</label>
+      <label htmlFor={selectId} className="flex-1 text-sm text-gray-700">{label}</label>
       <select
+        id={selectId}
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
         className="text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"

@@ -62,10 +62,10 @@ export function generateRecommendations(
     });
   }
 
-  // ── Rent warnings ─────────────────────────────────────────────────────────
+  // ── Housing payment warnings ──────────────────────────────────────────────
   if (rentAsPercentGross > BUDGET_THRESHOLDS.rentPercentGross) {
     recs.push({
-      id: 'rent_high_gross',
+      id: 'housing_payment_high_gross',
       severity: 'warning',
       message: `${housingPaymentLabel} is ${(rentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
       detail: 'High housing-cost-to-income ratios limit savings and financial flexibility.',
@@ -74,7 +74,7 @@ export function generateRecommendations(
 
   if (rentAsPercentTakeHome > BUDGET_THRESHOLDS.rentPercentTakeHome) {
     recs.push({
-      id: 'rent_high_takehome',
+      id: 'housing_payment_high_takehome',
       severity: 'warning',
       message: `${housingPaymentLabel} is ${(rentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
       detail: 'Very high housing costs relative to take-home pay can make saving very difficult.',

@@ -37,4 +37,21 @@ describe('scenarioComparison', () => {
     expect(items[2].id).toBe('tight_move');
     expect(items[1].takeHomeMonthly).toBeGreaterThan(0);
   });
+
+  it('uses mortgage for homeowner scenarios and rent for renter scenarios', () => {
+    const items = buildScenarioComparisonItems(
+      {
+        ...DEFAULT_INPUTS,
+        housingMode: 'homeowner',
+        rent: 1800,
+        mortgagePayment: 2750,
+      },
+      ['atlanta_baseline']
+    );
+
+    expect(items[0].housingMode).toBe('homeowner');
+    expect(items[0].primaryHousingPayment).toBe(2750);
+    expect(items[1].housingMode).toBe('renter');
+    expect(items[1].primaryHousingPayment).toBe(2200);
+  });
 });

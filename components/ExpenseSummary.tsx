@@ -54,6 +54,7 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
     petCostsAsPercentTakeHome,
     carCostsAsPercentTakeHome,
   } = breakdown;
+  const primaryHousingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Mortgage' : 'Rent';
 
   return (
     <BudgetCard title="Expense Summary" accent="purple">
@@ -104,16 +105,16 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
           <span className="text-sm tabular-nums">{formatCurrency(totalAllocated)}</span>
         </div>
 
-        {/* Rent percentages */}
+        {/* Primary housing payment percentages */}
         <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-1 text-xs text-gray-500">
           <div className="flex justify-between">
-            <span>Rent as % of gross</span>
+            <span>{primaryHousingPaymentLabel} as % of gross</span>
             <span className={rentAsPercentGross > 0.30 ? 'text-amber-600 font-medium' : ''}>
               {formatPercent(rentAsPercentGross)}
             </span>
           </div>
           <div className="flex justify-between">
-            <span>Rent as % of take-home</span>
+            <span>{primaryHousingPaymentLabel} as % of take-home</span>
             <span className={rentAsPercentTakeHome > 0.40 ? 'text-red-600 font-medium' : ''}>
               {formatPercent(rentAsPercentTakeHome)}
             </span>
