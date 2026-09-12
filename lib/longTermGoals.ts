@@ -7,6 +7,7 @@ import type {
 } from '@/types/budget';
 
 const GENERAL_GOAL_CATEGORIES = new Set(['vacation', 'kids', 'major_purchase', 'custom']);
+const MONTHLY_COMPARISON_EPSILON = 0.005;
 
 function parseGoalMonth(targetDate: string): { year: number; month: number } | null {
   const match = /^(\d{4})-(\d{2})$/.exec(targetDate);
@@ -105,7 +106,10 @@ export function calculateLongTermGoalProjections(
     } else if (item.monthsRemaining === 0) {
       status = 'past_due';
     } else {
-      status = currentMonthlyFunding + 0.01 >= item.requiredMonthlySavings ? 'on_track' : 'behind';
+      status =
+        currentMonthlyFunding + MONTHLY_COMPARISON_EPSILON >= item.requiredMonthlySavings
+          ? 'on_track'
+          : 'behind';
     }
 
     return {
@@ -161,7 +165,10 @@ export function generateFinancialLiteracyInsights(
       title: 'Use tax-advantaged accounts first',
       detail: '401(k), IRA, and HSA contributions can improve after-tax wealth faster than saving the same dollars in a taxable account.',
     });
-  } else if (!inputs.maxOut401k || (!inputs.maxOutIRA && inputs.iraContribution <= 0)) {
+  } else if (
+    (!inputs.hsaEligible || inputs.maxOutHSA) &&
+    (!inputs.maxOut401k || (!inputs.maxOutIRA && inputs.iraContribution <= 0))
+  ) {
     insights.push({
       id: 'tax_advantaged_order',
       priority: 'medium',
