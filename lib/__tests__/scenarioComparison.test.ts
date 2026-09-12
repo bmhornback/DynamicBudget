@@ -1,4 +1,4 @@
-import { DEFAULT_INPUTS } from '../defaultScenarios';
+import { applyScenarioPreset, DEFAULT_INPUTS, SCENARIO_PRESETS } from '../defaultScenarios';
 import {
   buildScenarioComparisonItems,
   getDefaultComparisonPresetIds,
@@ -39,6 +39,9 @@ describe('scenarioComparison', () => {
   });
 
   it('uses mortgage for homeowner scenarios and rent for renter scenarios', () => {
+    const atlantaBaseline = SCENARIO_PRESETS.find((preset) => preset.id === 'atlanta_baseline');
+    expect(atlantaBaseline).toBeDefined();
+
     const items = buildScenarioComparisonItems(
       {
         ...DEFAULT_INPUTS,
@@ -48,10 +51,11 @@ describe('scenarioComparison', () => {
       },
       ['atlanta_baseline']
     );
+    const atlantaInputs = applyScenarioPreset(atlantaBaseline!.inputs);
 
     expect(items[0].housingMode).toBe('homeowner');
     expect(items[0].primaryHousingPayment).toBe(2750);
     expect(items[1].housingMode).toBe('renter');
-    expect(items[1].primaryHousingPayment).toBe(2200);
+    expect(items[1].primaryHousingPayment).toBe(atlantaInputs.rent);
   });
 });
