@@ -136,10 +136,18 @@ function getInitialEntries(): Record<string, BusinessExpenseEntry> {
   }
 }
 
-function parseNumericInput(value: string): number {
+function parseMonthlyAmountInput(value: string): number {
   if (value.trim() === '') return 0;
   const parsed = Number(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
+  if (Number.isNaN(parsed)) return 0;
+  return Math.max(0, parsed);
+}
+
+function parseBusinessUsePercentInput(value: string): number {
+  if (value.trim() === '') return 0;
+  const parsed = Number(value);
+  if (Number.isNaN(parsed)) return 0;
+  return Math.min(100, Math.max(0, parsed));
 }
 
 function getEntryStatus(entry: BusinessExpenseEntry): {
@@ -248,10 +256,11 @@ export default function BusinessExpensesGuide() {
                     value={entry.monthlyAmount}
                     onChange={(event) =>
                       updateEntry(item.id, {
-                        monthlyAmount: parseNumericInput(event.target.value),
+                        monthlyAmount: parseMonthlyAmountInput(event.target.value),
                       })}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                   />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Use 0 if there is no monthly cost.</span>
                 </label>
 
                 <label className="flex flex-col gap-1 text-sm text-gray-700 dark:text-gray-300">
@@ -264,7 +273,7 @@ export default function BusinessExpensesGuide() {
                     value={entry.businessUsePercent}
                     onChange={(event) =>
                       updateEntry(item.id, {
-                        businessUsePercent: parseNumericInput(event.target.value),
+                        businessUsePercent: parseBusinessUsePercentInput(event.target.value),
                       })}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                   />
