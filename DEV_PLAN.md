@@ -484,10 +484,11 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Let users capture and share their budgets.
 
-### E7-T1 · PDF export
+### E7-T1 · PDF export ✅ Done
 - "Save as PDF" button using `window.print()` with a dedicated `@media print` stylesheet
 - Alternatively, use `jsPDF` or `react-pdf` for programmatic generation
 - Output: 1-page budget summary with all categories, health score, and recommendations
+- **Implemented:** Added a PDF export action to `components/ExportImport.tsx`, print-only dashboard header/layout handling in `app/page.tsx`, and dedicated `@media print` rules in `app/globals.css`
 
 ### E7-T2 · CSV export ✅ Done
 - Export all budget line items and calculated totals as a CSV
@@ -689,7 +690,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Epic 3-T1 (10+ state taxes), T2 (Roth IRA), T3 (HSA)
 - Epic 4-T1 through T5 (charts: pie, bar, savings progress, health gauge)
 - Epic 6 complete (full UX polish)
-- Epic 7-T1, T2, T3 (PDF, CSV, share link)
+- Epic 7-T1, T2 (PDF, CSV)
 
 ### v1.5 — "Grow It"
 - Epic 3 complete
@@ -736,4 +737,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-12 — Implemented E2-T5 (Export/Import JSON) and E7-T2 (CSV export) with ExportImport dropdown component in header. Also completed full MoveMath → DynamicBudget rename across all docs and source.*
+*Last updated: 2026-09-12 — Implemented E7-T1 (PDF export) with a print-friendly dashboard flow, alongside the existing ExportImport dropdown, and refreshed README/roadmap export documentation.*

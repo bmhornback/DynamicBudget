@@ -38,3 +38,38 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 }
 
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  [data-print-hidden="true"] {
+    display: none !important;
+  }
+
+  [data-print-root="true"] {
+    min-height: auto !important;
+    background: #ffffff !important;
+  }
+
+  [data-print-shell="true"] {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  [data-print-budget="true"],
+  [data-print-dashboard="true"],
+  [data-print-header="true"] {
+    display: block !important;
+  }
+
+  [data-print-card="true"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+}

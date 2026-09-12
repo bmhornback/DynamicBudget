@@ -19,7 +19,10 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
 - 💳 **Debt payoff timeline** — Track debt accounts with projected payoff timeline and interest totals
 - 💾 **Data persistence** — Auto-save your budget to your browser (no account needed)
+- 🖨️ **PDF export** — Save a print-friendly dashboard summary to PDF from the Export / Import menu
 - 📦 **JSON import/export** — Backup and restore budgets locally
+- 📊 **CSV export** — Download monthly and annual budget line items for spreadsheet use
+- 📋 **Named budgets** — Save and reload custom budget snapshots locally
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 📱 **Responsive design** — Works great on desktop and mobile
@@ -34,8 +37,8 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 ### Upcoming Features
-- 📤 Export to PDF/CSV, share budgets via link
-- 📋 Named saved budgets and deeper multi-scenario workflows
+- 🔗 Share budgets via link
+- 📋 Deeper multi-scenario workflows
 - 📊 Cost-of-living comparisons for move planning
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 
