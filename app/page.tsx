@@ -39,6 +39,7 @@ const SAVINGS_FIELDS = [
   'extraDebtPayoff',
 ] as const;
 const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
+type ActiveTab = 'budget' | 'trends';
 
 export default function DynamicBudgetPage() {
   // Initialize from localStorage if available, otherwise use defaults
@@ -55,13 +56,13 @@ export default function DynamicBudgetPage() {
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
-  const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('budget');
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
   const printRestoreState = useRef<{
-    activeTab: 'budget' | 'trends';
+    activeTab: ActiveTab;
     showForm: boolean;
   } | null>(null);
 
