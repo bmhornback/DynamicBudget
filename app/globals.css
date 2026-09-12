@@ -62,8 +62,7 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 
   [data-print-budget="true"],
-  [data-print-dashboard="true"],
-  [data-print-header="true"] {
+  [data-print-dashboard="true"] {
     display: block !important;
   }
 
