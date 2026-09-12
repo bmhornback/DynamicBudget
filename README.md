@@ -183,7 +183,8 @@ We welcome contributions! Please:
 
 ## License
 
-MIT
+Proprietary (All Rights Reserved).  
+See [LICENSE](./LICENSE) for terms. All monetization rights are reserved by the copyright holder.
 
 ## Support
 
