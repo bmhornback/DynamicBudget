@@ -222,7 +222,9 @@ export default function DynamicBudgetPage() {
     });
 
     window.requestAnimationFrame(() => {
-      window.print();
+      window.requestAnimationFrame(() => {
+        window.print();
+      });
     });
   }, [activeTab, showForm]);
 
@@ -403,7 +405,7 @@ export default function DynamicBudgetPage() {
                   className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}
                   data-print-dashboard="true"
                 >
-                  <div data-print-header="true" className="hidden">
+                  <div data-print-header="true" style={{ display: 'none' }}>
                     <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
                     <p className="mt-1 text-sm text-gray-500">
                       Generated {todayDateStr()} · Client-side estimate for planning only
