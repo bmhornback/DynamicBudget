@@ -1,5 +1,5 @@
 /**
- * Core budget calculation utilities for MoveMath.
+ * Core budget calculation utilities for DynamicBudget.
  * All logic is pure/deterministic — no React, no side effects.
  */
 

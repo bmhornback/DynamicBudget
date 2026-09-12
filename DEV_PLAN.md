@@ -1,6 +1,6 @@
-# MoveMath — Development Plan
+# DynamicBudget — Development Plan
 
-> **App:** MoveMath (repo: DynamicBudget)
+> **App:** DynamicBudget (repo: DynamicBudget)
 > **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind CSS 4
 > **Deployment target:** Static web app — fully self-hosted in the browser, no server required. `npm run build` outputs to `out/` and can be served via GitHub Pages, any static host, or opened directly as a local file. Follows the same pattern as [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
 > **Purpose:** A client-side personal finance tool that takes an annual salary, estimates taxes, ensures savings, and lets the user dynamically budget every remaining dollar.
@@ -272,7 +272,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - **Implemented:** `CustomPreset` type in `budget.ts`; `saveCustomPreset`, `loadCustomPresets`, `deleteCustomPreset` in `storage.ts`; updated `ScenarioPresets.tsx` with ⭐ badge + inline delete
 
 ### E2-T5 · Import / export JSON
-- "Export as JSON" button: downloads `movemath-budget-YYYY-MM-DD.json`
+- "Export as JSON" button: downloads `dynamicbudget-budget-YYYY-MM-DD.json`
 - "Import JSON" button: parses and validates a previously exported file, replaces current inputs
 - Validate schema on import; show an error if the file is incompatible
 
@@ -465,7 +465,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Respect `prefers-color-scheme` system preference ✅ via `ThemeProvider.tsx`
 - Add a manual dark/light/system toggle in the header ✅ `DarkModeToggle` component
 - All Tailwind colors tested in dark mode ✅ `dark:` classes applied across header, presets bar, BudgetFieldInput, BudgetSection, OnboardingCard, MyBudgets, ScenarioPresets
-- Persist preference to localStorage ✅ `movemath_theme` key
+- Persist preference to localStorage ✅ `dynamicbudget_theme` key
 
 ### E6-T8 · Loading state and skeleton screens
 - Add a loading skeleton for the dashboard on initial hydration
@@ -474,7 +474,7 @@ States to add (in priority order based on population and no-income-tax interest)
 ### E6-T9 · Onboarding / empty state ✅ Done
 - First-time user sees a brief (dismissible) tooltip or walkthrough card ✅ `components/OnboardingCard.tsx`
 - Explain: what the presets are, how Auto vs Manual mode works, what field locking does, My Budgets ✅
-- Store "seen onboarding" in localStorage ✅ `movemath_onboarding_seen` key
+- Store "seen onboarding" in localStorage ✅ `dynamicbudget_onboarding_seen` key
 
 ---
 
@@ -490,7 +490,7 @@ States to add (in priority order based on population and no-income-tax interest)
 ### E7-T2 · CSV export
 - Export all budget line items and calculated totals as a CSV
 - Two formats: "Monthly" and "Annual"
-- Filename: `movemath-budget-YYYY-MM-DD.csv`
+- Filename: `dynamicbudget-budget-YYYY-MM-DD.csv`
 
 ### E7-T3 · Shareable URL / link
 - Encode budget inputs as a compressed Base64 URL parameter (e.g., `?b=<encoded>`)

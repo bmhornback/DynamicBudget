@@ -10,7 +10,7 @@ interface ThemeContextValue {
   setTheme: (t: Theme) => void;
 }
 
-const THEME_KEY = 'movemath_theme';
+const THEME_KEY = 'dynamicbudget_theme';
 
 function readStoredTheme(): Theme {
   try {

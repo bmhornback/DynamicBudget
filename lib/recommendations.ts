@@ -1,5 +1,5 @@
 /**
- * Budget recommendations engine for MoveMath.
+ * Budget recommendations engine for DynamicBudget.
  * Generates contextual warnings and suggestions based on current budget state.
  */
 

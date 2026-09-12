@@ -38,7 +38,7 @@ const SAVINGS_FIELDS = [
 ] as const;
 const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
 
-export default function MoveMathPage() {
+export default function DynamicBudgetPage() {
   // Initialize from localStorage if available, otherwise use defaults
   const [inputs, setInputs] = useState<BudgetInputs>(() => {
     const stored = loadBudgetInputs();
@@ -208,7 +208,7 @@ export default function MoveMathPage() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">🧮</span>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-none">MoveMath</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-none">DynamicBudget</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">Dynamic Salary → Budget Planner</p>
             </div>
           </div>
@@ -368,7 +368,7 @@ export default function MoveMathPage() {
       {/* Footer */}
       <footer className="mt-12 border-t border-gray-200 dark:border-gray-700 py-6 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-gray-400 dark:text-gray-500">
-          <p>MoveMath — Personal finance planning tool. All calculations are client-side estimates only.</p>
+          <p>DynamicBudget — Personal finance planning tool. All calculations are client-side estimates only.</p>
           <p className="mt-1">Tax figures are simplified estimates and should not be used for tax filing purposes.</p>
         </div>
       </footer>

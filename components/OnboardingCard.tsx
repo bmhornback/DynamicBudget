@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-const ONBOARDING_KEY = 'movemath_onboarding_seen';
+const ONBOARDING_KEY = 'dynamicbudget_onboarding_seen';
 
 export default function OnboardingCard() {
   // Lazy initializer reads localStorage once; avoids setState-in-effect lint error
@@ -29,7 +29,7 @@ export default function OnboardingCard() {
   return (
     <div
       role="dialog"
-      aria-label="Welcome to MoveMath"
+      aria-label="Welcome to DynamicBudget"
       aria-modal="false"
       className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border border-blue-200 dark:border-blue-700 rounded-xl p-4 mb-4 relative"
     >
@@ -45,7 +45,7 @@ export default function OnboardingCard() {
       <div className="flex items-start gap-3">
         <span className="text-2xl shrink-0">🧮</span>
         <div className="space-y-3 pr-4">
-          <h2 className="text-sm font-bold text-blue-800 dark:text-blue-200">Welcome to MoveMath!</h2>
+          <h2 className="text-sm font-bold text-blue-800 dark:text-blue-200">Welcome to DynamicBudget!</h2>
           <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
             Enter your salary and expenses to instantly see your tax-adjusted budget. Here&apos;s how to get started:
           </p>

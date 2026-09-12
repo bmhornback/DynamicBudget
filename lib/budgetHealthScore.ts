@@ -1,5 +1,5 @@
 /**
- * Budget health score calculation for MoveMath.
+ * Budget health score calculation for DynamicBudget.
  * Returns a 0–100 score based on key affordability and savings metrics.
  */
 

@@ -1,5 +1,5 @@
 /**
- * Default budget scenarios / presets for MoveMath.
+ * Default budget scenarios / presets for DynamicBudget.
  */
 
 import type { BudgetInputs, ScenarioPreset } from '@/types/budget';

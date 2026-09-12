@@ -2,9 +2,9 @@ import type { BudgetInputs, NamedBudget, CustomPreset } from '@/types/budget';
 import { initializeSpendingHistory } from './spendingTrends';
 import { DEFAULT_INPUTS } from './defaultScenarios';
 
-const STORAGE_KEY = 'movemath_budget_inputs';
-const NAMED_BUDGETS_KEY = 'movemath_named_budgets';
-const CUSTOM_PRESETS_KEY = 'movemath_custom_presets';
+const STORAGE_KEY = 'dynamicbudget_budget_inputs';
+const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
+const CUSTOM_PRESETS_KEY = 'dynamicbudget_custom_presets';
 const STORAGE_VERSION = 1;
 
 /**

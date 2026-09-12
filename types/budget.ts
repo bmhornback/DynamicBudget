@@ -1,4 +1,4 @@
-// Core budget types for MoveMath
+// Core budget types for DynamicBudget
 
 export type FilingStatus = 'single' | 'married_jointly' | 'head_of_household';
 

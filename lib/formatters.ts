@@ -1,5 +1,5 @@
 /**
- * Formatting utilities for MoveMath.
+ * Formatting utilities for DynamicBudget.
  */
 
 const USD_FORMATTER = new Intl.NumberFormat('en-US', {
