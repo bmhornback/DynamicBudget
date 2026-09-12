@@ -13,9 +13,10 @@ import {
 interface ExportImportProps {
   currentInputs: BudgetInputs;
   onImport: (inputs: BudgetInputs) => void;
+  onExportPDF: () => void;
 }
 
-export default function ExportImport({ currentInputs, onImport }: ExportImportProps) {
+export default function ExportImport({ currentInputs, onImport, onExportPDF }: ExportImportProps) {
   const [open, setOpen] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +31,11 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
     const csv = exportBudgetAsCSV(currentInputs);
     triggerDownload(csv, `dynamicbudget-budget-${todayDateStr()}.csv`, 'text/csv');
     setOpen(false);
+  };
+
+  const handleExportPDF = () => {
+    setOpen(false);
+    onExportPDF();
   };
 
   const handleImportClick = () => {
@@ -92,6 +98,15 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-1 mb-1">
               Export
             </p>
+
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+            >
+              🖨️ Export as PDF
+              <span className="block text-xs text-gray-400 dark:text-gray-500">Print-friendly dashboard summary</span>
+            </button>
 
             <button
               type="button"
