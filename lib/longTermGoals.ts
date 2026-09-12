@@ -84,20 +84,30 @@ export function calculateLongTermGoalProjections(
   });
 
   const totalGeneralRequired = baseProjections
-    .filter(({ goal }) => GENERAL_GOAL_CATEGORIES.has(goal.category))
+    .filter(
+      ({ goal, monthsRemaining, remainingAmount }) =>
+        GENERAL_GOAL_CATEGORIES.has(goal.category) &&
+        remainingAmount > 0 &&
+        monthsRemaining !== null &&
+        monthsRemaining > 0
+    )
     .reduce((sum, item) => sum + item.requiredMonthlySavings, 0);
-  const activeGeneralGoalCount = baseProjections.filter(
-    ({ goal, remainingAmount }) =>
-      GENERAL_GOAL_CATEGORIES.has(goal.category) && remainingAmount > 0
+  const openEndedGeneralGoalCount = baseProjections.filter(
+    ({ goal, remainingAmount, monthsRemaining }) =>
+      GENERAL_GOAL_CATEGORIES.has(goal.category) &&
+      remainingAmount > 0 &&
+      monthsRemaining === null
   ).length;
 
   return baseProjections.map((item) => {
     const isGeneralGoal = GENERAL_GOAL_CATEGORIES.has(item.goal.category);
     const currentMonthlyFunding = isGeneralGoal
-      ? totalGeneralRequired > 0
+      ? item.remainingAmount <= 0
+        ? 0
+        : item.monthsRemaining !== null && item.monthsRemaining > 0 && totalGeneralRequired > 0
         ? (inputs.generalCashSavings * item.requiredMonthlySavings) / totalGeneralRequired
-        : item.remainingAmount > 0
-          ? inputs.generalCashSavings / Math.max(1, activeGeneralGoalCount)
+        : item.monthsRemaining === null && totalGeneralRequired <= 0
+          ? inputs.generalCashSavings / Math.max(1, openEndedGeneralGoalCount)
           : 0
       : item.baseFunding;
 
@@ -141,11 +151,11 @@ export function generateFinancialLiteracyInsights(
 ): FinancialLiteracyInsight[] {
   const insights: FinancialLiteracyInsight[] = [];
   const behindGoals = goals.filter((goal) => goal.status === 'behind' || goal.status === 'past_due');
-  const highInterestDebts = (inputs.debts ?? []).filter((debt) => (debt.interestRate ?? 0) >= 8);
-  const totalHighInterestMinimumPayments = highInterestDebts.reduce(
+  const totalMinimumDebtPayments = (inputs.debts ?? []).reduce(
     (sum, debt) => sum + (debt.minimumPayment ?? 0),
     0
   );
+  const highInterestDebts = (inputs.debts ?? []).filter((debt) => (debt.interestRate ?? 0) >= 8);
 
   if (breakdown.retirement.retirementSavingsRate < 0.15) {
     insights.push({
@@ -195,7 +205,7 @@ export function generateFinancialLiteracyInsights(
 
   if (
     highInterestDebts.length > 0 &&
-    breakdown.totalDebtPayoff <= totalHighInterestMinimumPayments + MONTHLY_COMPARISON_EPSILON
+    breakdown.totalDebtPayoff <= totalMinimumDebtPayments + MONTHLY_COMPARISON_EPSILON
   ) {
     insights.push({
       id: 'debt_vs_savings',
