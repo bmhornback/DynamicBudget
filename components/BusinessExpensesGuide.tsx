@@ -113,23 +113,25 @@ function getDefaultEntries(): Record<string, BusinessExpenseEntry> {
   }, {});
 }
 
-export default function BusinessExpensesGuide() {
-  const [entries, setEntries] = useState<Record<string, BusinessExpenseEntry>>(getDefaultEntries);
+function getInitialEntries(): Record<string, BusinessExpenseEntry> {
+  const defaults = getDefaultEntries();
+  if (typeof window === 'undefined') return defaults;
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Record<string, Partial<BusinessExpenseEntry>>;
-      const merged = getDefaultEntries();
-      BUSINESS_EXPENSE_CATEGORIES.forEach(({ id }) => {
-        merged[id] = normalizeEntry(parsed[id]);
-      });
-      setEntries(merged);
-    } catch {
-      setEntries(getDefaultEntries());
-    }
-  }, []);
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaults;
+    const parsed = JSON.parse(raw) as Record<string, Partial<BusinessExpenseEntry>>;
+    BUSINESS_EXPENSE_CATEGORIES.forEach(({ id }) => {
+      defaults[id] = normalizeEntry(parsed[id]);
+    });
+    return defaults;
+  } catch {
+    return defaults;
+  }
+}
+
+export default function BusinessExpensesGuide() {
+  const [entries, setEntries] = useState<Record<string, BusinessExpenseEntry>>(getInitialEntries);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
