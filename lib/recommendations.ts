@@ -5,6 +5,7 @@
 
 import type { BudgetBreakdown, BudgetInputs, Recommendation } from '@/types/budget';
 import { BUDGET_THRESHOLDS, ANNUAL_401K_LIMIT } from './budgetCalculations';
+import { formatCurrency } from './formatters';
 import { calculateLongTermGoalProjections, MONTHLY_COMPARISON_EPSILON } from './longTermGoals';
 import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
@@ -276,6 +277,3 @@ export function generateRecommendations(
   return recs;
 }
 
-function formatCurrency(value: number): string {
-  return `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-}

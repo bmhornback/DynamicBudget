@@ -59,7 +59,7 @@ export function loadBudgetInputs(): BudgetInputs | null {
       mergedInputs.debts = [];
     }
     if (!Array.isArray(mergedInputs.longTermGoals)) {
-      mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals;
+      mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
     }
 
     return mergedInputs;
@@ -121,7 +121,7 @@ export function importBudgetFromJSON(jsonString: string): BudgetInputs | null {
       mergedInputs.debts = [];
     }
     if (!Array.isArray(mergedInputs.longTermGoals)) {
-      mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals;
+      mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
     }
 
     return mergedInputs;

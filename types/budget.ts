@@ -72,7 +72,7 @@ export interface LongTermSavingsGoal {
   category: LongTermGoalCategory;
   targetAmount: number;
   currentAmount: number;
-  targetDate: string; // YYYY-MM
+  targetDate: string; // YYYY-MM, or empty string for no deadline
 }
 
 export interface LongTermGoalProjection {
