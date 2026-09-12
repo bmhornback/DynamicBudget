@@ -23,6 +23,7 @@ import RebalanceControls from '@/components/RebalanceControls';
 import ScenarioComparison from '@/components/ScenarioComparison';
 import SpendingTracker from '@/components/SpendingTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
+import BusinessExpensesGuide from '@/components/BusinessExpensesGuide';
 import MyBudgets from '@/components/MyBudgets';
 import OnboardingCard from '@/components/OnboardingCard';
 import { DarkModeToggle } from '@/components/ThemeProvider';
@@ -54,7 +55,7 @@ export default function DynamicBudgetPage() {
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
-  const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+  const [activeTab, setActiveTab] = useState<'budget' | 'trends' | 'business_expenses'>('budget');
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
@@ -282,6 +283,22 @@ export default function DynamicBudgetPage() {
               >
                 📈 Trends
               </button>
+
+              <button
+                id="business-expenses-tab"
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'business_expenses'}
+                aria-controls="business-expenses-panel"
+                onClick={() => setActiveTab('business_expenses')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  activeTab === 'business_expenses'
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500'
+                }`}
+              >
+                🧾 Business
+              </button>
             </div>
           </div>
         </div>
@@ -352,7 +369,7 @@ export default function DynamicBudgetPage() {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'trends' ? (
             <div id="trends-panel" role="tabpanel" aria-labelledby="trends-tab" className="flex flex-col md:flex-row gap-6">
               <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
                 <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
@@ -369,6 +386,10 @@ export default function DynamicBudgetPage() {
                   inputs={inputs}
                 />
               </div>
+            </div>
+          ) : (
+            <div id="business-expenses-panel" role="tabpanel" aria-labelledby="business-expenses-tab">
+              <BusinessExpensesGuide />
             </div>
           )}
         </ErrorBoundary>
