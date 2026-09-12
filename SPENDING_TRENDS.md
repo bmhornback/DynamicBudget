@@ -67,7 +67,7 @@ Forecasts use simple linear regression on the last 6 months of data:
 ## Data Storage
 
 ### Storage Location
-All data is stored in the browser's `localStorage` with key `movemath_budget_inputs`.
+All data is stored in the browser's `localStorage` with key `dynamicbudget_budget_inputs`.
 
 ### Storage Format
 ```json

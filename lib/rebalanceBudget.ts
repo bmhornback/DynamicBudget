@@ -1,5 +1,5 @@
 /**
- * Budget rebalancing logic for MoveMath.
+ * Budget rebalancing logic for DynamicBudget.
  * Adjusts unlocked flexible fields to bring the budget into balance.
  */
 

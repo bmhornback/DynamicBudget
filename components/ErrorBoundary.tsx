@@ -25,7 +25,7 @@ export default class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error) {
-    console.error('MoveMath UI error:', error);
+    console.error('DynamicBudget UI error:', error);
   }
 
   private handleReset = () => {

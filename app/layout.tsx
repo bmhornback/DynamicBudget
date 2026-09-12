@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "MoveMath — Dynamic Salary to Budget Planner",
+  title: "DynamicBudget — Dynamic Salary to Budget Planner",
   description: "Interactive personal finance sandbox for budgeting, long-term savings goals, retirement planning, and practical financial literacy guidance.",
 };
 
