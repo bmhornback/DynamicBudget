@@ -92,6 +92,7 @@ export function calculateLongTermGoalProjections(
         monthsRemaining > 0
     )
     .reduce((sum, item) => sum + item.requiredMonthlySavings, 0);
+  const timedGeneralFundingPool = Math.min(inputs.generalCashSavings, totalGeneralRequired);
   const openEndedGeneralGoalCount = baseProjections.filter(
     ({ goal, remainingAmount, monthsRemaining }) =>
       GENERAL_GOAL_CATEGORIES.has(goal.category) &&
@@ -105,9 +106,10 @@ export function calculateLongTermGoalProjections(
       ? item.remainingAmount <= 0
         ? 0
         : item.monthsRemaining !== null && item.monthsRemaining > 0 && totalGeneralRequired > 0
-        ? (inputs.generalCashSavings * item.requiredMonthlySavings) / totalGeneralRequired
-        : item.monthsRemaining === null && totalGeneralRequired <= 0
-          ? inputs.generalCashSavings / Math.max(1, openEndedGeneralGoalCount)
+        ? (timedGeneralFundingPool * item.requiredMonthlySavings) / totalGeneralRequired
+        : item.monthsRemaining === null
+          ? Math.max(0, inputs.generalCashSavings - timedGeneralFundingPool) /
+            Math.max(1, openEndedGeneralGoalCount)
           : 0
       : item.baseFunding;
 

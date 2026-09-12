@@ -136,7 +136,15 @@ export function generateRecommendations(
   const generalGoals = goalProjections.filter((goal) =>
     ['vacation', 'kids', 'major_purchase', 'custom'].includes(goal.category)
   );
-  const totalGeneralRequired = generalGoals.reduce((sum, goal) => sum + goal.requiredMonthlySavings, 0);
+  const totalGeneralRequired = generalGoals
+    .filter(
+      (goal) =>
+        goal.status !== 'funded' &&
+        goal.status !== 'past_due' &&
+        goal.monthsRemaining !== null &&
+        goal.monthsRemaining > 0
+    )
+    .reduce((sum, goal) => sum + goal.requiredMonthlySavings, 0);
 
   if (behindGoals.length > 0) {
     behindGoals.slice(0, 3).forEach((goal) => {
