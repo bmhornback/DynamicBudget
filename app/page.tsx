@@ -62,6 +62,7 @@ export default function DynamicBudgetPage() {
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
+  const printTriggered = useRef(false);
   const printRestoreState = useRef<{
     activeTab: ActiveTab;
     showForm: boolean;
@@ -92,6 +93,7 @@ export default function DynamicBudgetPage() {
       setActiveTab(printRestoreState.current.activeTab);
       setShowForm(printRestoreState.current.showForm);
       setPendingPrintDate(null);
+      printTriggered.current = false;
       printRestoreState.current = null;
     };
 
@@ -100,8 +102,9 @@ export default function DynamicBudgetPage() {
   }, []);
 
   useEffect(() => {
-    if (!pendingPrintDate) return;
+    if (!pendingPrintDate || printTriggered.current) return;
 
+    printTriggered.current = true;
     window.print();
   }, [pendingPrintDate]);
 
@@ -408,12 +411,14 @@ export default function DynamicBudgetPage() {
                   className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}
                   data-print-dashboard="true"
                 >
-                  <div data-print-header="true" className="hidden print:block mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Generated {pendingPrintDate ?? ''} · Client-side estimate for planning only
-                    </p>
-                  </div>
+                  {pendingPrintDate ? (
+                    <div data-print-header="true" className="hidden print:block mb-6">
+                      <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Generated {pendingPrintDate} · Client-side estimate for planning only
+                      </p>
+                    </div>
+                  ) : null}
                   <BudgetDashboard
                     breakdown={breakdown}
                     inputs={inputs}
