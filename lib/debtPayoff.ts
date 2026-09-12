@@ -134,7 +134,7 @@ export function calculateDebtPayoffProjection(
     schedule.push({
       month,
       remainingBalance,
-      principalPaid: roundCents(monthPrincipal),
+      principalPaid: monthPrincipalReduction,
       interestPaid: roundCents(monthInterest),
       extraPaymentTargetDebtId,
     });

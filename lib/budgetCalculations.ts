@@ -224,7 +224,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   const totalInvestments = isSavingsByPercentage ? 0 : inputs.taxableInvestments;
   const debtMinimumPayments = isSavingsByPercentage
     ? 0
-    : (inputs.debtAccounts ?? []).reduce((sum, d) => sum + (d.minimumPayment ?? 0), 0);
+    : (inputs.debts ?? []).reduce((sum, d) => sum + (d.minimumPayment ?? 0), 0);
   const totalDebtPayoff = isSavingsByPercentage ? 0 : debtMinimumPayments + inputs.extraDebtPayoff;
 
   // ── Aggregates ────────────────────────────────────────────────────────────
