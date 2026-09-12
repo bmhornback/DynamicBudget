@@ -67,11 +67,11 @@ describe('budgetCalculations', () => {
       const result = calculateBudgetBreakdown(inputs);
 
       expect(result.totalHousing).toBeCloseTo(3420, 0);
-      expect(result.rentAsPercentGross).toBeCloseTo(
+      expect(result.primaryHousingPaymentAsPercentGross).toBeCloseTo(
         inputs.mortgagePayment / (inputs.annualSalary / 12),
         2
       );
-      expect(result.rentAsPercentTakeHome).toBeCloseTo(
+      expect(result.primaryHousingPaymentAsPercentTakeHome).toBeCloseTo(
         inputs.mortgagePayment / result.netMonthlyIncome,
         2
       );
@@ -385,7 +385,7 @@ describe('budgetCalculations', () => {
       const result = calculateBudgetBreakdown(inputs);
 
       const expectedPercent = 3000 / 10000; // 3000 / monthly gross
-      expect(result.rentAsPercentGross).toBeCloseTo(expectedPercent, 2);
+      expect(result.primaryHousingPaymentAsPercentGross).toBeCloseTo(expectedPercent, 2);
     });
 
     it('should calculate rent as percent of take-home correctly', () => {
@@ -394,7 +394,7 @@ describe('budgetCalculations', () => {
 
       const expectedPercent =
         inputs.rent / result.netMonthlyIncome;
-      expect(result.rentAsPercentTakeHome).toBeCloseTo(expectedPercent, 2);
+      expect(result.primaryHousingPaymentAsPercentTakeHome).toBeCloseTo(expectedPercent, 2);
     });
 
     it('should calculate retirement savings rate correctly', () => {

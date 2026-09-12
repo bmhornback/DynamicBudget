@@ -14,7 +14,7 @@ function clampScore(s: number): number {
  */
 export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHealthScore {
   const {
-    rentAsPercentGross,
+    primaryHousingPaymentAsPercentGross,
     retirement,
     grossMonthly,
     netMonthlyIncome,
@@ -29,10 +29,10 @@ export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHe
 
   // ── Rent affordability (0–20 pts) ─────────────────────────────────────────
   let rentScore = 20;
-  if (rentAsPercentGross > 0.40) rentScore = 0;
-  else if (rentAsPercentGross > 0.35) rentScore = 5;
-  else if (rentAsPercentGross > 0.30) rentScore = 10;
-  else if (rentAsPercentGross > 0.25) rentScore = 15;
+  if (primaryHousingPaymentAsPercentGross > 0.40) rentScore = 0;
+  else if (primaryHousingPaymentAsPercentGross > 0.35) rentScore = 5;
+  else if (primaryHousingPaymentAsPercentGross > 0.30) rentScore = 10;
+  else if (primaryHousingPaymentAsPercentGross > 0.25) rentScore = 15;
 
   // ── Retirement savings rate (0–20 pts) ───────────────────────────────────
   let retirementScore = 0;

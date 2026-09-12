@@ -25,8 +25,8 @@ export function generateRecommendations(
   const housingFundLabelTitleCase = inputs.housingMode === 'homeowner' ? 'Home equity fund' : 'House fund';
 
   const {
-    rentAsPercentGross,
-    rentAsPercentTakeHome,
+    primaryHousingPaymentAsPercentGross,
+    primaryHousingPaymentAsPercentTakeHome,
     retirement,
     remainingMonthlyBuffer,
     netMonthlyIncome,
@@ -63,20 +63,20 @@ export function generateRecommendations(
   }
 
   // ── Housing payment warnings ──────────────────────────────────────────────
-  if (rentAsPercentGross > BUDGET_THRESHOLDS.rentPercentGross) {
+  if (primaryHousingPaymentAsPercentGross > BUDGET_THRESHOLDS.rentPercentGross) {
     recs.push({
       id: 'housing_payment_high_gross',
       severity: 'warning',
-      message: `${housingPaymentLabel} is ${(rentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
+      message: `${housingPaymentLabel} is ${(primaryHousingPaymentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
       detail: 'High housing-cost-to-income ratios limit savings and financial flexibility.',
     });
   }
 
-  if (rentAsPercentTakeHome > BUDGET_THRESHOLDS.rentPercentTakeHome) {
+  if (primaryHousingPaymentAsPercentTakeHome > BUDGET_THRESHOLDS.rentPercentTakeHome) {
     recs.push({
       id: 'housing_payment_high_takehome',
       severity: 'warning',
-      message: `${housingPaymentLabel} is ${(rentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
+      message: `${housingPaymentLabel} is ${(primaryHousingPaymentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
       detail: 'Very high housing costs relative to take-home pay can make saving very difficult.',
     });
   }
@@ -165,7 +165,7 @@ export function generateRecommendations(
     !isOverBudget &&
     remainingMonthlyBuffer >= BUDGET_THRESHOLDS.minMonthlyBuffer &&
     retirement.isSaving15Percent &&
-    rentAsPercentGross <= BUDGET_THRESHOLDS.rentPercentGross
+    primaryHousingPaymentAsPercentGross <= BUDGET_THRESHOLDS.rentPercentGross
   ) {
     recs.push({
       id: 'budget_healthy',
@@ -176,7 +176,7 @@ export function generateRecommendations(
   }
 
   if (
-    rentAsPercentGross > 0.35 &&
+    primaryHousingPaymentAsPercentGross > 0.35 &&
     retirement.retirementSavingsRate < 0.10 &&
     remainingMonthlyBuffer < 200
   ) {

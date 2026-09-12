@@ -166,7 +166,7 @@ function CoreExpensesDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown;
       <DetailRow
         label={housingPaymentLabel}
         value={formatCurrency(inputs.housingMode === 'homeowner' ? inputs.mortgagePayment : inputs.rent)}
-        sub={`${formatPercent(breakdown.rentAsPercentGross)} of gross`}
+        sub={`${formatPercent(breakdown.primaryHousingPaymentAsPercentGross)} of gross`}
       />
       {inputs.housingMode === 'homeowner' ? (
         <>

@@ -292,8 +292,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       ? ((totalSavings + totalInvestments) / netMonthly)
       : 0;
 
-  const rentAsPercentGross = grossMonthly > 0 ? primaryHousingPayment / grossMonthly : 0;
-  const rentAsPercentTakeHome = netMonthly > 0 ? primaryHousingPayment / netMonthly : 0;
+  const primaryHousingPaymentAsPercentGross = grossMonthly > 0 ? primaryHousingPayment / grossMonthly : 0;
+  const primaryHousingPaymentAsPercentTakeHome = netMonthly > 0 ? primaryHousingPayment / netMonthly : 0;
   const petCostsAsPercentTakeHome = netMonthly > 0 ? totalPets / netMonthly : 0;
   const carCostsAsPercentTakeHome = netMonthly > 0 ? totalTransportation / netMonthly : 0;
 
@@ -330,8 +330,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalAnnualSavingsIncludingRetirement,
     savingsRateGross,
     savingsRateNet,
-    rentAsPercentGross,
-    rentAsPercentTakeHome,
+    primaryHousingPaymentAsPercentGross,
+    primaryHousingPaymentAsPercentTakeHome,
     petCostsAsPercentTakeHome,
     carCostsAsPercentTakeHome,
     essentialExpensesMonthly,

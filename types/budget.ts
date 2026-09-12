@@ -300,8 +300,8 @@ export interface BudgetBreakdown {
   // Rates
   savingsRateGross: number;
   savingsRateNet: number;
-  rentAsPercentGross: number;
-  rentAsPercentTakeHome: number;
+  primaryHousingPaymentAsPercentGross: number;
+  primaryHousingPaymentAsPercentTakeHome: number;
   petCostsAsPercentTakeHome: number;
   carCostsAsPercentTakeHome: number;
 

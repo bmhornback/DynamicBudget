@@ -49,8 +49,8 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
     totalLifestyle,
     totalAllocated,
     netMonthlyIncome,
-    rentAsPercentGross,
-    rentAsPercentTakeHome,
+    primaryHousingPaymentAsPercentGross,
+    primaryHousingPaymentAsPercentTakeHome,
     petCostsAsPercentTakeHome,
     carCostsAsPercentTakeHome,
   } = breakdown;
@@ -63,7 +63,7 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
           label="Housing"
           value={totalHousing}
           percent={netMonthlyIncome > 0 ? totalHousing / netMonthlyIncome : 0}
-          warning={rentAsPercentGross > 0.30}
+          warning={primaryHousingPaymentAsPercentGross > 0.30}
         />
         <SummaryRow
           label="Utilities & Phone"
@@ -109,14 +109,14 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
         <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-1 text-xs text-gray-500">
           <div className="flex justify-between">
             <span>{primaryHousingPaymentLabel} as % of gross</span>
-            <span className={rentAsPercentGross > 0.30 ? 'text-amber-600 font-medium' : ''}>
-              {formatPercent(rentAsPercentGross)}
+            <span className={primaryHousingPaymentAsPercentGross > 0.30 ? 'text-amber-600 font-medium' : ''}>
+              {formatPercent(primaryHousingPaymentAsPercentGross)}
             </span>
           </div>
           <div className="flex justify-between">
             <span>{primaryHousingPaymentLabel} as % of take-home</span>
-            <span className={rentAsPercentTakeHome > 0.40 ? 'text-red-600 font-medium' : ''}>
-              {formatPercent(rentAsPercentTakeHome)}
+            <span className={primaryHousingPaymentAsPercentTakeHome > 0.40 ? 'text-red-600 font-medium' : ''}>
+              {formatPercent(primaryHousingPaymentAsPercentTakeHome)}
             </span>
           </div>
         </div>
