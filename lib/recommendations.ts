@@ -5,7 +5,7 @@
 
 import type { BudgetBreakdown, BudgetInputs, Recommendation } from '@/types/budget';
 import { BUDGET_THRESHOLDS, ANNUAL_401K_LIMIT } from './budgetCalculations';
-import { calculateLongTermGoalProjections } from './longTermGoals';
+import { calculateLongTermGoalProjections, MONTHLY_COMPARISON_EPSILON } from './longTermGoals';
 import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
@@ -151,7 +151,7 @@ export function generateRecommendations(
     });
   }
 
-  if (generalGoals.length >= 1 && totalGeneralRequired > inputs.generalCashSavings + 0.005) {
+  if (generalGoals.length >= 1 && totalGeneralRequired > inputs.generalCashSavings + MONTHLY_COMPARISON_EPSILON) {
     recs.push({
       id: 'goal_pool_underfunded',
       severity: 'info',

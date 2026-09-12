@@ -7,7 +7,7 @@ import type {
 } from '@/types/budget';
 
 const GENERAL_GOAL_CATEGORIES = new Set(['vacation', 'kids', 'major_purchase', 'custom']);
-const MONTHLY_COMPARISON_EPSILON = 0.005;
+export const MONTHLY_COMPARISON_EPSILON = 0.005;
 
 function parseGoalMonth(targetDate: string): { year: number; month: number } | null {
   const match = /^(\d{4})-(\d{2})$/.exec(targetDate);
@@ -28,10 +28,7 @@ function getMonthsRemaining(targetDate: string, now = new Date()): number | null
 
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
-  const diff = (parsed.year - currentYear) * 12 + (parsed.month - currentMonth);
-
-  if (diff < 0) return 0;
-  return diff;
+  return (parsed.year - currentYear) * 12 + (parsed.month - currentMonth);
 }
 
 function getGoalFundingSource(goal: LongTermSavingsGoal, inputs: BudgetInputs, breakdown: BudgetBreakdown): number {
@@ -109,7 +106,7 @@ export function calculateLongTermGoalProjections(
       status = 'funded';
     } else if (item.monthsRemaining === null) {
       status = 'no_deadline';
-    } else if (item.monthsRemaining === 0) {
+    } else if (item.monthsRemaining <= 0) {
       status = 'past_due';
     } else {
       status =
