@@ -72,8 +72,40 @@ describe('longTermGoals', () => {
 
     const goals = calculateLongTermGoalProjections(inputs, calculateBudgetBreakdown(inputs));
 
-    expect(goals[0].currentMonthlyFunding).toBeCloseTo(300, 0);
-    expect(goals[1].currentMonthlyFunding).toBeCloseTo(600, 0);
+    expect(goals[0].currentMonthlyFunding).toBeCloseTo(goals[0].requiredMonthlySavings, 2);
+    expect(goals[1].currentMonthlyFunding).toBeCloseTo(goals[1].requiredMonthlySavings, 2);
+  });
+
+  it('sends leftover general savings to open-ended goals after timed goals are covered', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      generalCashSavings: 500,
+      longTermGoals: [
+        {
+          id: 'vacation',
+          name: 'Vacation',
+          category: 'vacation' as const,
+          targetAmount: 1200,
+          currentAmount: 0,
+          targetDate: '2030-09',
+        },
+        {
+          id: 'custom',
+          name: 'Boat',
+          category: 'custom' as const,
+          targetAmount: 10000,
+          currentAmount: 0,
+          targetDate: '',
+        },
+      ],
+    };
+
+    const goals = calculateLongTermGoalProjections(inputs, calculateBudgetBreakdown(inputs));
+    const timedGoal = goals.find((goal) => goal.id === 'vacation');
+    const openEndedGoal = goals.find((goal) => goal.id === 'custom');
+
+    expect(timedGoal?.currentMonthlyFunding).toBeCloseTo(timedGoal?.requiredMonthlySavings ?? 0, 2);
+    expect(openEndedGoal?.currentMonthlyFunding).toBeGreaterThan(0);
   });
 
   it('generates literacy guidance for weak retirement, no emergency fund, and behind goals', () => {
