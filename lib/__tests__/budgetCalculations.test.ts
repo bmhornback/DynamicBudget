@@ -168,7 +168,8 @@ describe('budgetCalculations', () => {
       };
       const result = calculateBudgetBreakdown(inputs);
 
-      expect(result.totalInvestments).toBeCloseTo(500, 0);
+      expect(result.totalInvestments).toBeCloseTo(400, 0);
+      expect(result.totalDebtPayoff).toBeCloseTo(100, 0);
     });
 
     it('should keep fixed savings and investments separate in fixed savings mode', () => {
@@ -185,7 +186,8 @@ describe('budgetCalculations', () => {
 
       expect(result.calculatedSavingsFromPercentage).toBe(0);
       expect(result.totalSavings).toBeCloseTo(750, 0);
-      expect(result.totalInvestments).toBeCloseTo(400, 0);
+      expect(result.totalInvestments).toBeCloseTo(250, 0);
+      expect(result.totalDebtPayoff).toBeCloseTo(150, 0);
       expect(result.totalAllocated).toBeCloseTo(
         result.totalHousing +
           result.totalUtilities +
@@ -195,7 +197,8 @@ describe('budgetCalculations', () => {
           result.totalHealth +
           result.totalLifestyle +
           750 +
-          400,
+          250 +
+          150,
         0
       );
     });
@@ -219,6 +222,7 @@ describe('budgetCalculations', () => {
         expect(result.calculatedSavingsFromPercentage).toBeCloseTo(expectedSavings, 2);
         expect(result.totalSavings).toBeCloseTo(expectedSavings, 2);
         expect(result.totalInvestments).toBe(0);
+        expect(result.totalDebtPayoff).toBe(0);
         expect(result.totalAllocated).toBeCloseTo(
           result.totalHousing +
             result.totalUtilities +
@@ -284,7 +288,28 @@ describe('budgetCalculations', () => {
           result.totalHealth +
           result.totalLifestyle +
           result.totalSavings +
-          result.totalInvestments,
+          result.totalInvestments +
+          result.totalDebtPayoff,
+        0
+      );
+    });
+
+    it('should not count debt payoff as investments or annual savings', () => {
+      const inputs = {
+        ...DEFAULT_INPUTS,
+        taxableInvestments: 200,
+        extraDebtPayoff: 300,
+      };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.totalInvestments).toBe(200);
+      expect(result.totalDebtPayoff).toBe(300);
+      expect(result.annualTaxableInvestments).toBe(2400);
+      expect(result.totalAnnualSavingsIncludingRetirement).toBeCloseTo(
+        (result.totalSavings + 200) * 12 +
+          result.retirement.annual401k +
+          result.retirement.annualIRA +
+          result.retirement.annualHSA,
         0
       );
     });

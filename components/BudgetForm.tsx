@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { BudgetInputs, CarSituation, FilingStatus, StateOfResidence } from '@/types/budget';
+import type { BudgetInputs, CarSituation, DebtAccount, FilingStatus, StateOfResidence } from '@/types/budget';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
@@ -152,6 +152,33 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
   const hasCarPayment =
     inputs.carSituation === 'car_loan' || inputs.carSituation === 'car_lease';
+
+  const updateDebt = (id: string, updates: Partial<DebtAccount>) => {
+    onChange({
+      debts: inputs.debts.map((debt) =>
+        debt.id === id ? { ...debt, ...updates } : debt
+      ),
+    });
+  };
+
+  const removeDebt = (id: string) => {
+    onChange({ debts: inputs.debts.filter((debt) => debt.id !== id) });
+  };
+
+  const addDebt = () => {
+    onChange({
+      debts: [
+        ...inputs.debts,
+        {
+          id: crypto.randomUUID(),
+          name: `Debt ${inputs.debts.length + 1}`,
+          balance: 0,
+          interestRate: 0,
+          minimumPayment: 0,
+        },
+      ],
+    });
+  };
 
   return (
     <div className="space-y-2">
@@ -387,6 +414,92 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         {field('personalSpending', 'Personal Spending')}
         {field('gifts', 'Gifts')}
         {field('miscBuffer', 'Miscellaneous Buffer')}
+      </BudgetSection>
+
+      {/* ── Debt Accounts ─────────────────────────────────────────────── */}
+      <BudgetSection title="Debt Accounts" icon="💳" defaultOpen={false}>
+        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-gray-700">Track balances to project payoff timing</p>
+            <button
+              type="button"
+              onClick={addDebt}
+              className="px-2.5 py-1 text-xs font-medium rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50"
+            >
+              + Add Debt
+            </button>
+          </div>
+        </div>
+
+        {inputs.debts.length === 0 ? (
+          <p className="text-xs text-gray-500 px-2">No debt accounts yet.</p>
+        ) : (
+          inputs.debts.map((debt) => (
+            <div key={debt.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor={`debt-name-${debt.id}`} className="text-sm text-gray-700">Debt Name</label>
+                <button
+                  type="button"
+                  onClick={() => removeDebt(debt.id)}
+                  className="text-xs font-medium text-red-600 hover:text-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+              <input
+                id={`debt-name-${debt.id}`}
+                type="text"
+                value={debt.name}
+                onChange={(e) => updateDebt(debt.id, { name: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                  <label htmlFor={`debt-balance-${debt.id}`} className="text-xs text-gray-500 block mb-1">Balance</label>
+                  <input
+                    id={`debt-balance-${debt.id}`}
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={debt.balance}
+                    onChange={(e) =>
+                      updateDebt(debt.id, { balance: Math.max(0, Number(e.target.value)) })
+                    }
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`debt-apr-${debt.id}`} className="text-xs text-gray-500 block mb-1">APR %</label>
+                  <input
+                    id={`debt-apr-${debt.id}`}
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={debt.interestRate}
+                    onChange={(e) =>
+                      updateDebt(debt.id, { interestRate: Math.max(0, Number(e.target.value)) })
+                    }
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`debt-min-${debt.id}`} className="text-xs text-gray-500 block mb-1">Min Payment</label>
+                  <input
+                    id={`debt-min-${debt.id}`}
+                    type="number"
+                    min="0"
+                    step="10"
+                    value={debt.minimumPayment}
+                    onChange={(e) =>
+                      updateDebt(debt.id, { minimumPayment: Math.max(0, Number(e.target.value)) })
+                    }
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </BudgetSection>
 
     </div>

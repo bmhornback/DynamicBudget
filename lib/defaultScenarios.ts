@@ -78,6 +78,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   hsaEligible: false,
   maxOutHSA: false,
   extraDebtPayoff: 0,
+  debts: [],
   generalCashSavings: 0,
   isSavingsByPercentage: false,
   savingsPercentOfNetIncome: 30,

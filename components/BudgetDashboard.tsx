@@ -3,6 +3,8 @@
 import React from 'react';
 import type { BudgetBreakdown, BudgetInputs, BudgetHealthScore as BudgetHealthScoreType, Recommendation, RebalanceResult } from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { MAX_DEBT_PAYOFF_YEARS } from '@/lib/debtPayoff';
+import type { DebtPayoffProjection } from '@/lib/debtPayoff';
 import IncomeSummary from './IncomeSummary';
 import ExpenseSummary from './ExpenseSummary';
 import SavingsSummary from './SavingsSummary';
@@ -16,6 +18,7 @@ interface BudgetDashboardProps {
   healthScore: BudgetHealthScoreType;
   recommendations: Recommendation[];
   rebalanceResult: RebalanceResult | null;
+  debtProjection: DebtPayoffProjection;
 }
 
 export default function BudgetDashboard({
@@ -23,6 +26,7 @@ export default function BudgetDashboard({
   inputs,
   healthScore,
   recommendations,
+  debtProjection,
 }: BudgetDashboardProps) {
   const { isOverBudget, deficit, surplus, remainingMonthlyBuffer, netMonthlyIncome } = breakdown;
 
@@ -102,6 +106,7 @@ export default function BudgetDashboard({
         <TransportationDetail breakdown={breakdown} inputs={inputs} />
         {inputs.petsEnabled && <PetsDetail inputs={inputs} breakdown={breakdown} />}
         <SavingsDetail breakdown={breakdown} inputs={inputs} />
+        <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} />
       </div>
 
       {/* Recommendations */}
@@ -259,7 +264,7 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
         value={formatCurrency(inputs.taxableInvestments)}
         sub={`${formatCurrency(breakdown.annualTaxableInvestments)}/year`}
       />
-      <DetailRow label="Debt Payoff" value={formatCurrency(inputs.extraDebtPayoff)} />
+      <DetailRow label="Debt Payoff" value={formatCurrency(breakdown.totalDebtPayoff)} />
       <DetailRow label="General Cash Savings" value={formatCurrency(inputs.generalCashSavings)} />
       <DividerLine />
       <DetailRow
@@ -267,6 +272,53 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
         value={formatCurrency(breakdown.totalAnnualSavingsIncludingRetirement)}
         sub={`${formatPercent(breakdown.savingsRateGross)} of gross income`}
       />
+    </BudgetCard>
+  );
+}
+
+function DebtPayoffDetail({
+  projection,
+  debtCount,
+}: {
+  projection: DebtPayoffProjection;
+  debtCount: number;
+}) {
+  const latestMonth = projection.schedule[projection.schedule.length - 1];
+  const latestBalance = latestMonth?.remainingBalance ?? 0;
+  const oneYearBalance = projection.schedule.find((entry) => entry.month === 12)?.remainingBalance;
+
+  return (
+    <BudgetCard title="Debt Payoff Timeline">
+      {debtCount === 0 ? (
+        <p className="text-sm text-gray-600">Add debt accounts in the form to calculate payoff timing.</p>
+      ) : projection.schedule.length === 0 ? (
+        <p className="text-sm text-gray-600">
+          Add a minimum payment or extra debt payoff amount to generate a timeline.
+        </p>
+      ) : (
+        <>
+          <DetailRow label="Tracked Debts" value={`${debtCount}`} />
+          <DetailRow label="Monthly Debt Budget" value={formatCurrency(projection.monthlyBudget)} />
+          <DetailRow
+            label="Debt-Free Timeline"
+            value={
+              projection.monthsToDebtFree === null
+                ? `Not reached in ${MAX_DEBT_PAYOFF_YEARS} years`
+                : `${projection.monthsToDebtFree} months`
+            }
+          />
+          <DividerLine />
+          <DetailRow label="Total Interest Paid" value={formatCurrency(projection.totalInterestPaid)} />
+          <DetailRow label="Total Principal Paid" value={formatCurrency(projection.totalPrincipalPaid)} />
+          <DetailRow
+            label="Projected Balance After 12 Months"
+            value={formatCurrency(oneYearBalance ?? latestBalance)}
+          />
+          {projection.monthsToDebtFree === null && (
+            <DetailRow label="Projected Ending Balance" value={formatCurrency(latestBalance)} />
+          )}
+        </>
+      )}
     </BudgetCard>
   );
 }

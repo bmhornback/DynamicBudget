@@ -387,6 +387,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Calculate time-to-payoff for each debt given extra payment allocation
 - Show a debt payoff timeline in a dedicated card
 - Integrate with the rebalance engine: "debt snowball" and "debt avalanche" strategies
+- **Kickoff progress:** Debt payoff is now tracked separately from investments in budget calculations and dashboard summaries, debt accounts can be added in the form, and a first-pass debt payoff timeline card is live using avalanche/snowball-ready projection logic.
 
 ### E5-T3 · Homeownership mode
 - Toggle: "Renter" vs "Homeowner"
@@ -709,7 +710,7 @@ States to add (in priority order based on population and no-income-tax interest)
 | TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | ✅ Resolved | E2-T4 |
 | TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | ✅ Resolved | E1-T9 |
 | TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (92 tests) | E1 |
-| TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | Open | E3 |
+| TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | ✅ Resolved | E5-T2 |
 | TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | Open | General |
 | TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | Open | E3-T2 |
 | TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | Open | E10-T1 |
@@ -731,4 +732,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-11 — Rebaselined roadmap to shipped features, closed core v1.0 gaps, and started v1.5 scenario comparison.*
+*Last updated: 2026-09-12 — Started E5-T2 debt payoff implementation with debt accounts, payoff projection, and dashboard timeline groundwork.*

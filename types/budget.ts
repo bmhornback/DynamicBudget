@@ -50,6 +50,14 @@ export type BudgetMode = 'manual' | 'auto';
 
 export type IRAType = 'traditional' | 'roth';
 
+export interface DebtAccount {
+  id: string;
+  name: string;
+  balance: number;
+  interestRate: number; // annual percentage rate
+  minimumPayment: number;
+}
+
 export interface BudgetField {
   id: string;
   value: number;
@@ -212,6 +220,7 @@ export interface BudgetInputs {
   hsaEligible: boolean; // Is user eligible for HSA?
   maxOutHSA: boolean; // Checkbox to maximize HSA contribution
   extraDebtPayoff: number;
+  debts: DebtAccount[];
   generalCashSavings: number;
   
   // Savings mode: percentage vs. fixed amounts
@@ -262,6 +271,7 @@ export interface BudgetBreakdown {
   // Savings totals
   totalSavings: number;
   totalInvestments: number;
+  totalDebtPayoff: number;
   calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
   effectiveEmergencyFundContribution: number;
   effectiveHouseDownPaymentContribution: number;
