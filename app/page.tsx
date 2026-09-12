@@ -100,7 +100,7 @@ export default function DynamicBudgetPage() {
   }, []);
 
   useEffect(() => {
-    if (!pendingPrintDate || typeof window === 'undefined') return;
+    if (!pendingPrintDate) return;
 
     window.print();
   }, [pendingPrintDate]);
@@ -411,7 +411,7 @@ export default function DynamicBudgetPage() {
                   <div data-print-header="true" className="hidden print:block mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
                     <p className="mt-1 text-sm text-gray-500">
-                      Generated {pendingPrintDate} · Client-side estimate for planning only
+                      Generated {pendingPrintDate ?? ''} · Client-side estimate for planning only
                     </p>
                   </div>
                   <BudgetDashboard
