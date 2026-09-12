@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
 import { DEFAULT_INPUTS, SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
@@ -38,6 +39,7 @@ const SAVINGS_FIELDS = [
   'extraDebtPayoff',
 ] as const;
 const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
+type ActiveTab = 'budget' | 'trends';
 
 export default function DynamicBudgetPage() {
   // Initialize from localStorage if available, otherwise use defaults
@@ -54,11 +56,18 @@ export default function DynamicBudgetPage() {
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
-  const [activeTab, setActiveTab] = useState<'budget' | 'trends'>('budget');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('budget');
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+  const [printHeaderDate, setPrintHeaderDate] = useState<string | null>(null);
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
+  const printTriggered = useRef(false);
+  const printRestoreState = useRef<{
+    activeTab: ActiveTab;
+    showForm: boolean;
+  } | null>(null);
 
   // ── Load from localStorage on mount ──────────────────────────────────────
   // (handled in useState initializer above)
@@ -76,6 +85,38 @@ export default function DynamicBudgetPage() {
 
     return () => clearTimeout(timer);
   }, [inputs]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleAfterPrint = () => {
+      if (!printRestoreState.current) return;
+      setActiveTab(printRestoreState.current.activeTab);
+      setShowForm(printRestoreState.current.showForm);
+      setIsPreparingPrint(false);
+      window.setTimeout(() => setPrintHeaderDate(null), 0);
+      printTriggered.current = false;
+      printRestoreState.current = null;
+    };
+
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, []);
+
+  useEffect(() => {
+    const printWindow = globalThis.window;
+    if (!isPreparingPrint || printTriggered.current || !printWindow) return;
+
+    printTriggered.current = true;
+    const timeoutId = printWindow.setTimeout(() => {
+      printWindow.print();
+    }, 0);
+
+    return () => {
+      printWindow.clearTimeout(timeoutId);
+      printTriggered.current = false;
+    };
+  }, [isPreparingPrint]);
 
   // ── Derived calculations (memoized) ────────────────────────────────────────
   const breakdown = useMemo(() => calculateBudgetBreakdown(inputs), [inputs]);
@@ -190,6 +231,20 @@ export default function DynamicBudgetPage() {
     setActivePreset(undefined);
   }, []);
 
+  const handleExportPDF = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    printRestoreState.current = { activeTab, showForm };
+    const printDate = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+    flushSync(() => {
+      setActiveTab('budget');
+      setShowForm(false);
+      setPrintHeaderDate(printDate);
+      setIsPreparingPrint(true);
+    });
+  }, [activeTab, showForm]);
+
   const handleToggleMode = useCallback(() => {
     setInputs((prev) => ({
       ...prev,
@@ -208,9 +263,12 @@ export default function DynamicBudgetPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900" data-print-root="true">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm">
+      <header
+        className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm"
+        data-print-hidden="true"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🧮</span>
@@ -223,7 +281,11 @@ export default function DynamicBudgetPage() {
           <div className="flex items-center gap-2">
             <MyBudgets currentInputs={inputs} onLoad={(newInputs) => { setInputs(newInputs); setRebalanceResult(null); setActivePreset(undefined); }} />
 
-            <ExportImport currentInputs={inputs} onImport={handleImport} />
+            <ExportImport
+              currentInputs={inputs}
+              onImport={handleImport}
+              onExportPDF={handleExportPDF}
+            />
 
             <DarkModeToggle />
 
@@ -288,7 +350,10 @@ export default function DynamicBudgetPage() {
       </header>
 
       {/* Scenario presets bar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-sm">
+      <div
+        className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-sm"
+        data-print-hidden="true"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400 shrink-0">Presets:</span>
@@ -302,27 +367,40 @@ export default function DynamicBudgetPage() {
       </div>
 
       {/* Main layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6" data-print-shell="true">
         <ErrorBoundary onReset={handleReset}>
           {activeTab === 'budget' ? (
-            <div id="budget-panel" role="tabpanel" aria-labelledby="budget-tab" className="space-y-6">
-              <OnboardingCard />
-              <ScenarioComparison
-                items={comparisonItems}
-                selectedPresetIds={comparisonPresetIds}
-                activePresetId={activePreset}
-                onSelectionChange={(presetIds) =>
-                  setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
-                }
-                onApplyPreset={(presetId) => {
-                  const preset = SCENARIO_PRESETS.find((item) => item.id === presetId);
-                  if (!preset) return;
-                  handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
-                }}
-              />
+            <div
+              id="budget-panel"
+              role="tabpanel"
+              aria-labelledby="budget-tab"
+              className="space-y-6"
+              data-print-budget="true"
+            >
+              <div data-print-hidden="true">
+                <OnboardingCard />
+              </div>
+              <div data-print-hidden="true">
+                <ScenarioComparison
+                  items={comparisonItems}
+                  selectedPresetIds={comparisonPresetIds}
+                  activePresetId={activePreset}
+                  onSelectionChange={(presetIds) =>
+                    setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
+                  }
+                  onApplyPreset={(presetId) => {
+                    const preset = SCENARIO_PRESETS.find((item) => item.id === presetId);
+                    if (!preset) return;
+                    handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
+                  }}
+                />
+              </div>
 
               <div className="flex flex-col md:flex-row gap-6">
-                <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
+                <aside
+                  className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}
+                  data-print-hidden="true"
+                >
                   <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
                     <RebalanceControls
                       inputs={inputs}
@@ -340,7 +418,18 @@ export default function DynamicBudgetPage() {
                   </div>
                 </aside>
 
-                <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
+                <div
+                  className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}
+                  data-print-dashboard="true"
+                >
+                  {printHeaderDate ? (
+                    <div data-print-header="true" data-print-only="true" className="hidden mb-6">
+                      <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Generated {printHeaderDate} · Client-side estimate for planning only
+                      </p>
+                    </div>
+                  ) : null}
                   <BudgetDashboard
                     breakdown={breakdown}
                     inputs={inputs}
@@ -375,7 +464,10 @@ export default function DynamicBudgetPage() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-12 border-t border-gray-200 dark:border-gray-700 py-6 bg-white dark:bg-gray-800">
+      <footer
+        className="mt-12 border-t border-gray-200 dark:border-gray-700 py-6 bg-white dark:bg-gray-800"
+        data-print-hidden="true"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-gray-400 dark:text-gray-500">
           <p>DynamicBudget — Personal finance planning tool. All calculations are client-side estimates only.</p>
           <p className="mt-1">Tax figures are simplified estimates and should not be used for tax filing purposes.</p>

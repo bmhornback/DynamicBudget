@@ -26,6 +26,7 @@ export default function BudgetCard({
 }: BudgetCardProps) {
   return (
     <div
+      data-print-card="true"
       className={`bg-white rounded-xl shadow-sm border border-gray-100 p-5 ${ACCENT_CLASSES[accent]} ${className}`}
     >
       {title && (
