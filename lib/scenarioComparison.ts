@@ -13,7 +13,7 @@ export interface ScenarioComparisonItem {
   annualSalary: number;
   state: StateOfResidence;
   housingMode: BudgetInputs['housingMode'];
-  housingPayment: number;
+  primaryHousingPayment: number;
   takeHomeMonthly: number;
   totalAllocatedMonthly: number;
   remainingMonthlyBuffer: number;
@@ -66,7 +66,7 @@ export function buildScenarioComparisonItems(
       annualSalary: inputs.annualSalary,
       state: inputs.state,
       housingMode: inputs.housingMode,
-      housingPayment: inputs.housingMode === 'homeowner' ? inputs.mortgagePayment : inputs.rent,
+      primaryHousingPayment: inputs.housingMode === 'homeowner' ? inputs.mortgagePayment : inputs.rent,
       takeHomeMonthly: breakdown.netMonthlyIncome,
       totalAllocatedMonthly: breakdown.totalAllocated,
       remainingMonthlyBuffer: breakdown.remainingMonthlyBuffer,

@@ -69,6 +69,7 @@ describe('budgetCalculations', () => {
 
       expect(result.totalHousing).toBeCloseTo(3420, 0);
       expect(result.rentAsPercentGross).toBeCloseTo(0.25, 2);
+      expect(result.rentAsPercentGross).not.toBeCloseTo(0.3, 2);
       expect(result.rentAsPercentTakeHome).toBeCloseTo(
         inputs.mortgagePayment / result.netMonthlyIncome,
         2

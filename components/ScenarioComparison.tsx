@@ -22,8 +22,8 @@ const METRIC_ROWS: Array<{
   { label: 'Annual Salary', value: (item) => formatCurrency(item.annualSalary) },
   { label: 'State', value: (item) => item.state },
   {
-    label: 'Housing Payment / Month',
-    value: (item) => `${item.housingMode === 'homeowner' ? 'Mortgage' : 'Rent'}: ${formatCurrency(item.housingPayment)}`,
+    label: 'Primary Housing Payment / Month',
+    value: (item) => `${item.housingMode === 'homeowner' ? 'Mortgage' : 'Rent'}: ${formatCurrency(item.primaryHousingPayment)}`,
   },
   { label: 'Take-Home / Month', value: (item) => formatCurrency(item.takeHomeMonthly) },
   {
