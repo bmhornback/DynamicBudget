@@ -257,7 +257,6 @@ export default function DynamicBudgetPage() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === 'budget'}
-                aria-controls="budget-panel"
                 onClick={() => setActiveTab('budget')}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'budget'
@@ -273,7 +272,6 @@ export default function DynamicBudgetPage() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === 'trends'}
-                aria-controls="trends-panel"
                 onClick={() => setActiveTab('trends')}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'trends'
@@ -289,7 +287,6 @@ export default function DynamicBudgetPage() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === 'business_expenses'}
-                aria-controls="business-expenses-panel"
                 onClick={() => setActiveTab('business_expenses')}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   activeTab === 'business_expenses'

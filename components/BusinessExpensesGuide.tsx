@@ -181,7 +181,11 @@ export default function BusinessExpensesGuide() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    } catch {
+      // localStorage may be unavailable (private mode, quota exceeded, etc.)
+    }
   }, [entries]);
 
   const totals = useMemo(() => {
