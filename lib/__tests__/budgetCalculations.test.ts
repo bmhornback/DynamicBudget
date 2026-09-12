@@ -57,7 +57,6 @@ describe('budgetCalculations', () => {
         ...DEFAULT_INPUTS,
         housingMode: 'homeowner' as const,
         annualSalary: 120000,
-        rent: 3000,
         mortgagePayment: 2500,
         propertyTax: 400,
         homeInsurance: 120,

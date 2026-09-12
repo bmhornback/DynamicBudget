@@ -185,6 +185,14 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
     });
   };
 
+  const validatePrimaryHousingPayment = (v: number) => {
+    const grossMonthly = inputs.annualSalary / 12;
+    if (grossMonthly <= 0) return null;
+    return v > grossMonthly * 0.5
+      ? `Housing payment is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
+      : null;
+  };
+
   return (
     <div className="space-y-2">
 
@@ -281,7 +289,15 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         />
         {inputs.housingMode === 'homeowner' ? (
           <>
-            {field('mortgagePayment', 'Monthly Mortgage Payment')}
+            <BudgetFieldInput
+              id="mortgagePayment"
+              label="Monthly Mortgage Payment"
+              value={inputs.mortgagePayment}
+              isLocked={inputs.lockedFields['mortgagePayment'] === true}
+              onChange={(v) => onChange({ mortgagePayment: v })}
+              onToggleLock={onToggleLock}
+              validate={validatePrimaryHousingPayment}
+            />
             {field('propertyTax', 'Property Tax')}
             {field('homeInsurance', 'Home Insurance')}
             {field('homeMaintenanceReserve', 'Maintenance Reserve')}
@@ -295,13 +311,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
               isLocked={inputs.lockedFields['rent'] === true}
               onChange={(v) => onChange({ rent: v })}
               onToggleLock={onToggleLock}
-              validate={(v) => {
-                const grossMonthly = inputs.annualSalary / 12;
-                if (grossMonthly <= 0) return null;
-                return v > grossMonthly * 0.5
-                  ? `Rent is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
-                  : null;
-              }}
+              validate={validatePrimaryHousingPayment}
             />
             {field('petRent', 'Pet Rent')}
             {field('rentersInsurance', 'Renters Insurance')}
