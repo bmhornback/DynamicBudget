@@ -18,6 +18,12 @@ type BusinessExpenseEntry = {
   notes: string;
 };
 
+type EntryStatus =
+  | 'Not tracked yet'
+  | 'No business use selected'
+  | 'Add documentation notes'
+  | 'Potential write-off identified';
+
 const STORAGE_KEY = 'dynamicbudget_business_expenses_v1';
 
 const BUSINESS_EXPENSE_CATEGORIES: BusinessExpenseCategory[] = [
@@ -130,6 +136,38 @@ function getInitialEntries(): Record<string, BusinessExpenseEntry> {
   }
 }
 
+function parseNumericInput(value: string, fallback: number): number {
+  if (value.trim() === '') return fallback;
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+}
+
+function getEntryStatus(entry: BusinessExpenseEntry): {
+  status: EntryStatus;
+  statusClass: string;
+} {
+  const status: EntryStatus =
+    entry.monthlyAmount <= 0
+      ? 'Not tracked yet'
+      : entry.businessUsePercent <= 0
+        ? 'No business use selected'
+        : entry.notes.trim().length === 0
+          ? 'Add documentation notes'
+          : 'Potential write-off identified';
+
+  const statusClasses: Record<EntryStatus, string> = {
+    'Potential write-off identified': 'bg-green-50 text-green-700 border-green-100',
+    'Add documentation notes': 'bg-amber-50 text-amber-700 border-amber-100',
+    'No business use selected': 'bg-gray-50 text-gray-600 border-gray-100',
+    'Not tracked yet': 'bg-gray-50 text-gray-600 border-gray-100',
+  };
+
+  return {
+    status,
+    statusClass: statusClasses[status],
+  };
+}
+
 export default function BusinessExpensesGuide() {
   const [entries, setEntries] = useState<Record<string, BusinessExpenseEntry>>(getInitialEntries);
 
@@ -184,20 +222,7 @@ export default function BusinessExpensesGuide() {
         {BUSINESS_EXPENSE_CATEGORIES.map((item) => {
           const entry = entries[item.id] ?? EMPTY_ENTRY;
           const categoryEstimate = entry.monthlyAmount * (entry.businessUsePercent / 100);
-          const status =
-            entry.monthlyAmount <= 0
-              ? 'Not tracked yet'
-              : entry.businessUsePercent <= 0
-                ? 'No business use selected'
-                : entry.notes.trim().length === 0
-                  ? 'Add documentation notes'
-                  : 'Potential write-off identified';
-          const statusClass =
-            status === 'Potential write-off identified'
-              ? 'bg-green-50 text-green-700 border-green-100'
-              : status === 'Add documentation notes'
-                ? 'bg-amber-50 text-amber-700 border-amber-100'
-                : 'bg-gray-50 text-gray-600 border-gray-100';
+          const { status, statusClass } = getEntryStatus(entry);
 
           return (
             <article
@@ -221,7 +246,10 @@ export default function BusinessExpensesGuide() {
                     min={0}
                     step={1}
                     value={entry.monthlyAmount}
-                    onChange={(event) => updateEntry(item.id, { monthlyAmount: Number(event.target.value) || 0 })}
+                    onChange={(event) =>
+                      updateEntry(item.id, {
+                        monthlyAmount: parseNumericInput(event.target.value, entry.monthlyAmount),
+                      })}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                   />
                 </label>
@@ -234,7 +262,10 @@ export default function BusinessExpensesGuide() {
                     max={100}
                     step={5}
                     value={entry.businessUsePercent}
-                    onChange={(event) => updateEntry(item.id, { businessUsePercent: Number(event.target.value) || 0 })}
+                    onChange={(event) =>
+                      updateEntry(item.id, {
+                        businessUsePercent: parseNumericInput(event.target.value, entry.businessUsePercent),
+                      })}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
                   />
                 </label>
