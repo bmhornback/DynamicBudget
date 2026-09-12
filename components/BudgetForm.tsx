@@ -189,7 +189,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
     const grossMonthly = inputs.annualSalary / 12;
     if (grossMonthly <= 0) return null;
     return v > grossMonthly * 0.5
-      ? `Housing payment is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
+      ? `Housing payment is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — above the 50% alert threshold`
       : null;
   };
 

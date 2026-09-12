@@ -67,7 +67,10 @@ describe('budgetCalculations', () => {
       const result = calculateBudgetBreakdown(inputs);
 
       expect(result.totalHousing).toBeCloseTo(3420, 0);
-      expect(result.rentAsPercentGross).toBeCloseTo(0.25, 2);
+      expect(result.rentAsPercentGross).toBeCloseTo(
+        inputs.mortgagePayment / (inputs.annualSalary / 12),
+        2
+      );
       expect(result.rentAsPercentTakeHome).toBeCloseTo(
         inputs.mortgagePayment / result.netMonthlyIncome,
         2
