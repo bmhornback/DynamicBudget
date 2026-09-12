@@ -22,6 +22,7 @@ export function generateRecommendations(
   const recs: Recommendation[] = [];
   const housingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Housing payment' : 'Rent';
   const housingFundLabel = inputs.housingMode === 'homeowner' ? 'home equity fund' : 'house fund';
+  const housingFundLabelTitleCase = inputs.housingMode === 'homeowner' ? 'Home equity fund' : 'House fund';
 
   const {
     rentAsPercentGross,
@@ -123,7 +124,7 @@ export function generateRecommendations(
     recs.push({
       id: 'house_fund_slow',
       severity: 'info',
-      message: `${inputs.housingMode === 'homeowner' ? 'Home equity fund' : 'House fund'} is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
+      message: `${housingFundLabelTitleCase} is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
       detail: 'In a high-cost market like San Diego, a larger monthly contribution may be needed.',
     });
   }
