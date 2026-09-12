@@ -22,7 +22,7 @@ export function generateRecommendations(
   const recs: Recommendation[] = [];
   const housingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Housing payment' : 'Rent';
   const housingFundLabel = inputs.housingMode === 'homeowner' ? 'home equity fund' : 'house fund';
-  const housingFundLabelTitleCase = inputs.housingMode === 'homeowner' ? 'Home equity fund' : 'House fund';
+  const housingFundLabelTitleCase = housingFundLabel.charAt(0).toUpperCase() + housingFundLabel.slice(1);
 
   const {
     primaryHousingPaymentAsPercentGross,
