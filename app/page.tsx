@@ -57,7 +57,8 @@ export default function DynamicBudgetPage() {
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>('budget');
-  const [pendingPrintDate, setPendingPrintDate] = useState<string | null>(null);
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+  const [printHeaderDate, setPrintHeaderDate] = useState<string | null>(null);
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
@@ -92,7 +93,7 @@ export default function DynamicBudgetPage() {
       if (!printRestoreState.current) return;
       setActiveTab(printRestoreState.current.activeTab);
       setShowForm(printRestoreState.current.showForm);
-      setPendingPrintDate(null);
+      setIsPreparingPrint(false);
       printTriggered.current = false;
       printRestoreState.current = null;
     };
@@ -102,11 +103,12 @@ export default function DynamicBudgetPage() {
   }, []);
 
   useEffect(() => {
-    if (!pendingPrintDate || printTriggered.current) return;
+    const printWindow = globalThis.window;
+    if (!isPreparingPrint || printTriggered.current || !printWindow) return;
 
     printTriggered.current = true;
-    window.print();
-  }, [pendingPrintDate]);
+    printWindow.print();
+  }, [isPreparingPrint]);
 
   // ── Derived calculations (memoized) ────────────────────────────────────────
   const breakdown = useMemo(() => calculateBudgetBreakdown(inputs), [inputs]);
@@ -230,7 +232,8 @@ export default function DynamicBudgetPage() {
     flushSync(() => {
       setActiveTab('budget');
       setShowForm(false);
-      setPendingPrintDate(printDate);
+      setPrintHeaderDate(printDate);
+      setIsPreparingPrint(true);
     });
   }, [activeTab, showForm]);
 
@@ -411,11 +414,11 @@ export default function DynamicBudgetPage() {
                   className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}
                   data-print-dashboard="true"
                 >
-                  {pendingPrintDate ? (
+                  {printHeaderDate ? (
                     <div data-print-header="true" className="hidden print:block mb-6">
                       <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
                       <p className="mt-1 text-sm text-gray-500">
-                        Generated {pendingPrintDate} · Client-side estimate for planning only
+                        Generated {printHeaderDate} · Client-side estimate for planning only
                       </p>
                     </div>
                   ) : null}
