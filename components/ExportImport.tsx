@@ -43,8 +43,12 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const text = event.target?.result as string;
-      const imported = importBudgetFromJSON(text);
+      const result = event.target?.result;
+      if (typeof result !== 'string') {
+        setImportError('Could not read the file. Please try again.');
+        return;
+      }
+      const imported = importBudgetFromJSON(result);
       if (imported) {
         onImport(imported);
         setOpen(false);
@@ -69,7 +73,7 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
         onClick={() => { setOpen((v) => !v); setImportError(null); }}
         aria-label="Export or import budget"
         aria-expanded={open}
-        aria-haspopup="menu"
+        aria-haspopup="true"
         className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all"
       >
         ↕ Export / Import
@@ -85,14 +89,13 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
           />
 
           {/* Dropdown panel */}
-          <div role="menu" aria-label="Export / Import options" className="absolute right-0 top-full mt-2 z-50 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-3 space-y-2">
+          <div aria-label="Export / Import options" className="absolute right-0 top-full mt-2 z-50 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-3 space-y-2">
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-1 mb-1">
               Export
             </p>
 
             <button
               type="button"
-              role="menuitem"
               onClick={handleExportJSON}
               className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-800 dark:text-gray-200 transition-colors"
             >
@@ -102,7 +105,6 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
 
             <button
               type="button"
-              role="menuitem"
               onClick={handleExportCSV}
               className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-800 dark:text-gray-200 transition-colors"
             >
@@ -117,7 +119,6 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
 
               <button
                 type="button"
-                role="menuitem"
                 onClick={handleImportClick}
                 className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 text-gray-800 dark:text-gray-200 transition-colors"
               >

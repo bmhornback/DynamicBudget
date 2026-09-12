@@ -42,16 +42,16 @@ export function loadBudgetInputs(): BudgetInputs | null {
     let stored = localStorage.getItem(STORAGE_KEY);
 
     // One-time migration from legacy key
-    if (!stored) {
+    if (stored === null) {
       const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (legacy) {
+      if (legacy !== null) {
         localStorage.setItem(STORAGE_KEY, legacy);
         localStorage.removeItem(LEGACY_STORAGE_KEY);
         stored = legacy;
       }
     }
 
-    if (!stored) return null;
+    if (stored === null || stored.trim() === '') return null;
 
     const data = JSON.parse(stored);
 
@@ -121,6 +121,9 @@ export function todayDateStr(): string {
 /**
  * Export budget line items as a CSV string.
  * Includes both Monthly and Annual columns for every numeric field.
+ * Covers all income, housing, utilities, transportation, pets, food, health,
+ * savings & investing (with IRA/HSA/targets), retirement settings (401k %,
+ * type, max-out, employer match), debts[], and longTermGoals[].
  */
 export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   const date = todayDateStr();
@@ -224,12 +227,48 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     sep,
     section('SAVINGS & INVESTING'),
     row('Emergency Fund Contribution', inputs.emergencyFundContribution),
+    row('Emergency Fund Target', inputs.emergencyFundTarget),
     row('House Down Payment / Home Equity', inputs.houseDownPaymentContribution),
+    row('House Down Payment Target', inputs.houseDownPaymentTarget),
     row('Taxable Investments', inputs.taxableInvestments),
     row('IRA Contribution', inputs.iraContribution),
+    title(`  IRA Type: ${inputs.iraType === 'traditional' ? 'Traditional (pre-tax)' : 'Roth (after-tax)'}`),
+    title(`  Max Out IRA: ${inputs.maxOutIRA ? 'Yes' : 'No'}`),
     row('HSA Contribution', inputs.hsaContribution),
+    title(`  Max Out HSA: ${inputs.maxOutHSA ? 'Yes' : 'No'}`),
     row('Extra Debt Payoff', inputs.extraDebtPayoff),
     row('General Cash Savings', inputs.generalCashSavings),
+    sep,
+    section('RETIREMENT SETTINGS'),
+    title(`  401k Contribution: ${inputs.retirementContributionPercent}% of gross`),
+    title(`  401k Type: ${inputs.is401kRoth ? 'Roth (after-tax)' : 'Traditional (pre-tax)'}`),
+    title(`  Max Out 401k: ${inputs.maxOut401k ? 'Yes' : 'No'}`),
+    title(`  Employer Match: ${inputs.employerMatchPercent}% (capped at ${inputs.employerMatchCapPercent}%)`),
+  );
+
+  if (inputs.debts.length > 0) {
+    lines.push(sep, section('DEBTS'));
+    for (const debt of inputs.debts) {
+      lines.push(title(`  ${debt.name}`));
+      lines.push(`  Balance,${esc(debt.balance.toFixed(2))},`);
+      lines.push(`  Interest Rate,${esc(debt.interestRate.toFixed(2))}%,`);
+      lines.push(`  Minimum Payment,${esc(debt.minimumPayment.toFixed(2))},${esc((debt.minimumPayment * 12).toFixed(2))}`);
+    }
+  }
+
+  if (inputs.longTermGoals.length > 0) {
+    lines.push(sep, section('LONG-TERM GOALS'));
+    for (const goal of inputs.longTermGoals) {
+      lines.push(title(`  ${goal.name} (${goal.category})`));
+      lines.push(`  Target Amount,${esc(goal.targetAmount.toFixed(2))},`);
+      lines.push(`  Current Amount,${esc(goal.currentAmount.toFixed(2))},`);
+      if (goal.targetDate) {
+        lines.push(`  Target Date,${esc(goal.targetDate)},`);
+      }
+    }
+  }
+
+  lines.push(
     sep,
     section('LIFESTYLE'),
     row('Fun / Entertainment', inputs.funEntertainment),
@@ -308,15 +347,15 @@ export function loadNamedBudgets(): NamedBudget[] {
   if (typeof window === 'undefined') return [];
   try {
     let stored = localStorage.getItem(NAMED_BUDGETS_KEY);
-    if (!stored) {
+    if (stored === null) {
       const legacy = localStorage.getItem(LEGACY_NAMED_BUDGETS_KEY);
-      if (legacy) {
+      if (legacy !== null) {
         localStorage.setItem(NAMED_BUDGETS_KEY, legacy);
         localStorage.removeItem(LEGACY_NAMED_BUDGETS_KEY);
         stored = legacy;
       }
     }
-    if (!stored) return [];
+    if (stored === null || stored.trim() === '') return [];
     return JSON.parse(stored) as NamedBudget[];
   } catch {
     return [];
@@ -364,15 +403,15 @@ export function loadCustomPresets(): CustomPreset[] {
   if (typeof window === 'undefined') return [];
   try {
     let stored = localStorage.getItem(CUSTOM_PRESETS_KEY);
-    if (!stored) {
+    if (stored === null) {
       const legacy = localStorage.getItem(LEGACY_CUSTOM_PRESETS_KEY);
-      if (legacy) {
+      if (legacy !== null) {
         localStorage.setItem(CUSTOM_PRESETS_KEY, legacy);
         localStorage.removeItem(LEGACY_CUSTOM_PRESETS_KEY);
         stored = legacy;
       }
     }
-    if (!stored) return [];
+    if (stored === null || stored.trim() === '') return [];
     return JSON.parse(stored) as CustomPreset[];
   } catch {
     return [];
