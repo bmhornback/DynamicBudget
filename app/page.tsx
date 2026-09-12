@@ -57,6 +57,7 @@ export default function DynamicBudgetPage() {
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>('budget');
+  const [pendingPrintDate, setPendingPrintDate] = useState<string | null>(null);
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
@@ -90,12 +91,19 @@ export default function DynamicBudgetPage() {
       if (!printRestoreState.current) return;
       setActiveTab(printRestoreState.current.activeTab);
       setShowForm(printRestoreState.current.showForm);
+      setPendingPrintDate(null);
       printRestoreState.current = null;
     };
 
     window.addEventListener('afterprint', handleAfterPrint);
     return () => window.removeEventListener('afterprint', handleAfterPrint);
   }, []);
+
+  useEffect(() => {
+    if (!pendingPrintDate || typeof window === 'undefined') return;
+
+    window.print();
+  }, [pendingPrintDate]);
 
   // ── Derived calculations (memoized) ────────────────────────────────────────
   const breakdown = useMemo(() => calculateBudgetBreakdown(inputs), [inputs]);
@@ -214,16 +222,12 @@ export default function DynamicBudgetPage() {
     if (typeof window === 'undefined') return;
 
     printRestoreState.current = { activeTab, showForm };
+    const printDate = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
     flushSync(() => {
       setActiveTab('budget');
       setShowForm(false);
-    });
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        window.print();
-      });
+      setPendingPrintDate(printDate);
     });
   }, [activeTab, showForm]);
 
@@ -407,7 +411,7 @@ export default function DynamicBudgetPage() {
                   <div data-print-header="true" className="hidden print:block mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
                     <p className="mt-1 text-sm text-gray-500">
-                      Generated {new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} · Client-side estimate for planning only
+                      Generated {pendingPrintDate} · Client-side estimate for planning only
                     </p>
                   </div>
                   <BudgetDashboard
