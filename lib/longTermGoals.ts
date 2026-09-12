@@ -31,7 +31,7 @@ function getMonthsRemaining(targetDate: string, now = new Date()): number | null
   const diff = (parsed.year - currentYear) * 12 + (parsed.month - currentMonth);
 
   if (diff < 0) return 0;
-  return diff + 1;
+  return diff;
 }
 
 function getGoalFundingSource(goal: LongTermSavingsGoal, inputs: BudgetInputs, breakdown: BudgetBreakdown): number {
@@ -89,13 +89,19 @@ export function calculateLongTermGoalProjections(
   const totalGeneralRequired = baseProjections
     .filter(({ goal }) => GENERAL_GOAL_CATEGORIES.has(goal.category))
     .reduce((sum, item) => sum + item.requiredMonthlySavings, 0);
+  const activeGeneralGoalCount = baseProjections.filter(
+    ({ goal, remainingAmount }) =>
+      GENERAL_GOAL_CATEGORIES.has(goal.category) && remainingAmount > 0
+  ).length;
 
   return baseProjections.map((item) => {
     const isGeneralGoal = GENERAL_GOAL_CATEGORIES.has(item.goal.category);
     const currentMonthlyFunding = isGeneralGoal
       ? totalGeneralRequired > 0
         ? (inputs.generalCashSavings * item.requiredMonthlySavings) / totalGeneralRequired
-        : inputs.generalCashSavings / Math.max(1, baseProjections.filter(({ goal }) => GENERAL_GOAL_CATEGORIES.has(goal.category)).length)
+        : item.remainingAmount > 0
+          ? inputs.generalCashSavings / Math.max(1, activeGeneralGoalCount)
+          : 0
       : item.baseFunding;
 
     let status: LongTermGoalProjection['status'];

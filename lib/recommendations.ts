@@ -151,7 +151,7 @@ export function generateRecommendations(
     });
   }
 
-  if (generalGoals.length > 1 && totalGeneralRequired > inputs.generalCashSavings) {
+  if (generalGoals.length >= 1 && totalGeneralRequired > inputs.generalCashSavings + 0.005) {
     recs.push({
       id: 'goal_pool_underfunded',
       severity: 'info',
