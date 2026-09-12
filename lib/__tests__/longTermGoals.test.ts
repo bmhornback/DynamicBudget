@@ -107,4 +107,30 @@ describe('longTermGoals', () => {
     expect(insightIds).toContain('emergency_fund_foundation');
     expect(insightIds).toContain('goal_tradeoffs');
   });
+
+  it('flags high-interest debt when only minimum payments are covered', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      debts: [
+        {
+          id: 'card',
+          name: 'Credit Card',
+          balance: 8000,
+          interestRate: 22,
+          minimumPayment: 200,
+        },
+      ],
+      extraDebtPayoff: 0,
+      longTermGoals: [],
+    };
+
+    const breakdown = calculateBudgetBreakdown(inputs);
+    const insights = generateFinancialLiteracyInsights(
+      inputs,
+      breakdown,
+      calculateLongTermGoalProjections(inputs, breakdown)
+    );
+
+    expect(insights.map((insight) => insight.id)).toContain('debt_vs_savings');
+  });
 });

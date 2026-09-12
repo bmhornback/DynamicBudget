@@ -139,15 +139,16 @@ export function generateRecommendations(
   const totalGeneralRequired = generalGoals.reduce((sum, goal) => sum + goal.requiredMonthlySavings, 0);
 
   if (behindGoals.length > 0) {
-    const goal = behindGoals[0];
-    recs.push({
-      id: `goal_behind_${goal.id}`,
-      severity: goal.status === 'past_due' ? 'warning' : 'info',
-      message:
-        goal.status === 'past_due'
-          ? `${goal.name} is past its target date and still needs ${formatCurrency(goal.remainingAmount)}.`
-          : `${goal.name} needs ${formatCurrency(goal.requiredMonthlySavings)}/month to stay on pace.`,
-      detail: `Current funding from ${goal.fundingSourceLabel} is about ${formatCurrency(goal.currentMonthlyFunding)}/month.`,
+    behindGoals.slice(0, 3).forEach((goal) => {
+      recs.push({
+        id: `goal_behind_${goal.id}`,
+        severity: goal.status === 'past_due' ? 'warning' : 'info',
+        message:
+          goal.status === 'past_due'
+            ? `${goal.name} is past its target date and still needs ${formatCurrency(goal.remainingAmount)}.`
+            : `${goal.name} needs ${formatCurrency(goal.requiredMonthlySavings)}/month to stay on pace.`,
+        detail: `Current funding from ${goal.fundingSourceLabel} is about ${formatCurrency(goal.currentMonthlyFunding)}/month.`,
+      });
     });
   }
 

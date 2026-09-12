@@ -141,7 +141,11 @@ export function generateFinancialLiteracyInsights(
 ): FinancialLiteracyInsight[] {
   const insights: FinancialLiteracyInsight[] = [];
   const behindGoals = goals.filter((goal) => goal.status === 'behind' || goal.status === 'past_due');
-  const hasHighInterestDebt = (inputs.debts ?? []).some((debt) => (debt.interestRate ?? 0) >= 8);
+  const highInterestDebts = (inputs.debts ?? []).filter((debt) => (debt.interestRate ?? 0) >= 8);
+  const totalHighInterestMinimumPayments = highInterestDebts.reduce(
+    (sum, debt) => sum + (debt.minimumPayment ?? 0),
+    0
+  );
 
   if (breakdown.retirement.retirementSavingsRate < 0.15) {
     insights.push({
@@ -189,7 +193,10 @@ export function generateFinancialLiteracyInsights(
     });
   }
 
-  if (hasHighInterestDebt && breakdown.totalDebtPayoff <= 0) {
+  if (
+    highInterestDebts.length > 0 &&
+    breakdown.totalDebtPayoff <= totalHighInterestMinimumPayments + MONTHLY_COMPARISON_EPSILON
+  ) {
     insights.push({
       id: 'debt_vs_savings',
       priority: 'medium',
