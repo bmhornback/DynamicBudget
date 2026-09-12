@@ -122,7 +122,7 @@ export function generateRecommendations(
   // ── House fund ────────────────────────────────────────────────────────────
   if (inputs.houseDownPaymentContribution > 0 && annualHouseFund < 12000) {
     recs.push({
-      id: 'house_fund_slow',
+      id: 'housing_fund_slow',
       severity: 'info',
       message: `${housingFundLabelTitleCase} is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
       detail: 'In a high-cost market like San Diego, a larger monthly contribution may be needed.',
