@@ -48,6 +48,9 @@ export function loadBudgetInputs(): BudgetInputs | null {
     if (!data.inputs.spendingHistory) {
       data.inputs.spendingHistory = initializeSpendingHistory();
     }
+    if (!Array.isArray(data.inputs.debts)) {
+      data.inputs.debts = [];
+    }
 
     return data.inputs as BudgetInputs;
   } catch (error) {
@@ -97,6 +100,9 @@ export function importBudgetFromJSON(jsonString: string): BudgetInputs | null {
     // Initialize spending history if missing
     if (!data.inputs.spendingHistory) {
       data.inputs.spendingHistory = initializeSpendingHistory();
+    }
+    if (!Array.isArray(data.inputs.debts)) {
+      data.inputs.debts = [];
     }
 
     return data.inputs as BudgetInputs;

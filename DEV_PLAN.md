@@ -387,7 +387,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Calculate time-to-payoff for each debt given extra payment allocation
 - Show a debt payoff timeline in a dedicated card
 - Integrate with the rebalance engine: "debt snowball" and "debt avalanche" strategies
-- **Kickoff progress:** Debt payoff is now tracked separately from investments in budget calculations and dashboard summaries, establishing a clean baseline for amortization logic.
+- **Kickoff progress:** Debt payoff is now tracked separately from investments in budget calculations and dashboard summaries, debt accounts can be added in the form, and a first-pass debt payoff timeline card is live using avalanche/snowball-ready projection logic.
 
 ### E5-T3 · Homeownership mode
 - Toggle: "Renter" vs "Homeowner"
@@ -732,4 +732,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-12 — Started E5-T2 debt payoff groundwork by separating debt payoff from investment totals.*
+*Last updated: 2026-09-12 — Started E5-T2 debt payoff implementation with debt accounts, payoff projection, and dashboard timeline groundwork.*

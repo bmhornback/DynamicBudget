@@ -12,6 +12,7 @@ import {
   getDefaultComparisonPresetIds,
   normalizeComparisonPresetIds,
 } from '@/lib/scenarioComparison';
+import { calculateDebtPayoffProjection } from '@/lib/debtPayoff';
 import { initializeSpendingHistory } from '@/lib/spendingTrends';
 import { saveBudgetInputs, loadBudgetInputs } from '@/lib/storage';
 import BudgetForm from '@/components/BudgetForm';
@@ -85,6 +86,10 @@ export default function MoveMathPage() {
   const comparisonItems = useMemo(
     () => buildScenarioComparisonItems(inputs, comparisonPresetIds, activePreset),
     [inputs, comparisonPresetIds, activePreset]
+  );
+  const debtProjection = useMemo(
+    () => calculateDebtPayoffProjection(inputs.debts, inputs.extraDebtPayoff),
+    [inputs.debts, inputs.extraDebtPayoff]
   );
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -333,6 +338,7 @@ export default function MoveMathPage() {
                     healthScore={healthScore}
                     recommendations={recommendations}
                     rebalanceResult={rebalanceResult}
+                    debtProjection={debtProjection}
                   />
                 </div>
               </div>

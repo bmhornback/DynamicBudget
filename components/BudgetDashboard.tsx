@@ -3,6 +3,7 @@
 import React from 'react';
 import type { BudgetBreakdown, BudgetInputs, BudgetHealthScore as BudgetHealthScoreType, Recommendation, RebalanceResult } from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
+import type { DebtPayoffProjection } from '@/lib/debtPayoff';
 import IncomeSummary from './IncomeSummary';
 import ExpenseSummary from './ExpenseSummary';
 import SavingsSummary from './SavingsSummary';
@@ -16,6 +17,7 @@ interface BudgetDashboardProps {
   healthScore: BudgetHealthScoreType;
   recommendations: Recommendation[];
   rebalanceResult: RebalanceResult | null;
+  debtProjection: DebtPayoffProjection;
 }
 
 export default function BudgetDashboard({
@@ -23,6 +25,7 @@ export default function BudgetDashboard({
   inputs,
   healthScore,
   recommendations,
+  debtProjection,
 }: BudgetDashboardProps) {
   const { isOverBudget, deficit, surplus, remainingMonthlyBuffer, netMonthlyIncome } = breakdown;
 
@@ -102,6 +105,7 @@ export default function BudgetDashboard({
         <TransportationDetail breakdown={breakdown} inputs={inputs} />
         {inputs.petsEnabled && <PetsDetail inputs={inputs} breakdown={breakdown} />}
         <SavingsDetail breakdown={breakdown} inputs={inputs} />
+        <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} />
       </div>
 
       {/* Recommendations */}
@@ -251,6 +255,44 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
           inputs.houseDownPaymentContribution > 0
             ? `~${Math.ceil(inputs.houseDownPaymentTarget / inputs.houseDownPaymentContribution)} months to goal`
             : undefined
+        }
+
+        function DebtPayoffDetail({
+          projection,
+          debtCount,
+        }: {
+          projection: DebtPayoffProjection;
+          debtCount: number;
+        }) {
+          const latestMonth = projection.schedule[projection.schedule.length - 1];
+          const latestBalance = latestMonth?.remainingBalance ?? 0;
+          const oneYearBalance = projection.schedule.find((entry) => entry.month === 12)?.remainingBalance;
+
+          return (
+            <BudgetCard title="Debt Payoff Timeline">
+              {debtCount === 0 ? (
+                <p className="text-sm text-gray-600">Add debt accounts in the form to calculate payoff timing.</p>
+              ) : (
+                <>
+                  <DetailRow label="Tracked Debts" value={`${debtCount}`} />
+                  <DetailRow label="Monthly Debt Budget" value={formatCurrency(projection.monthlyBudget)} />
+                  <DetailRow
+                    label="Debt-Free Timeline"
+                    value={
+                      projection.monthsToDebtFree === null
+                        ? 'Not reached in 50 years'
+                        : `${projection.monthsToDebtFree} months`
+                    }
+                  />
+                  <DividerLine />
+                  <DetailRow label="Total Interest Paid" value={formatCurrency(projection.totalInterestPaid)} />
+                  <DetailRow label="Total Principal Paid" value={formatCurrency(projection.totalPrincipalPaid)} />
+                  <DetailRow label="Projected Balance After 12 Months" value={formatCurrency(oneYearBalance ?? latestBalance)} />
+                  <DetailRow label="Projected Ending Balance" value={formatCurrency(latestBalance)} />
+                </>
+              )}
+            </BudgetCard>
+          );
         }
       />
       <DividerLine />

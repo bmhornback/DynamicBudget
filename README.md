@@ -164,7 +164,7 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** finish the v1.0 closeout work (stability, accessibility, and documentation), then expand v1.5 starting with scenario comparison.
+**Current focus:** expand v1.5 with multi-scenario enhancements and debt payoff amortization groundwork.
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
