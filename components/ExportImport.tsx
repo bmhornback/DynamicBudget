@@ -53,6 +53,9 @@ export default function ExportImport({ currentInputs, onImport }: ExportImportPr
         setImportError('The file is incompatible or from a different version. Please export a fresh copy.');
       }
     };
+    reader.onerror = () => {
+      setImportError('Could not read the file. Please try again.');
+    };
     reader.readAsText(file);
 
     // Reset so the same file can be re-selected if needed

@@ -136,8 +136,10 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
 
   const section = (title: string): string => `${esc(title)},,`;
 
+  const title = (label: string): string => [esc(label), '', ''].join(',');
+
   const lines: string[] = [
-    `DynamicBudget Export - ${date},,`,
+    title(`DynamicBudget Export - ${date}`),
     '',
     'Category,Monthly ($),Annual ($)',
     '',
