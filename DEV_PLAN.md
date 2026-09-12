@@ -51,6 +51,7 @@
 | Charts / visualization (Recharts) | ✅ Done |
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
+| Export as CSV | ✅ Done |
 | Test suite | ✅ Jest (92 tests passing) |
 | CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
@@ -271,10 +272,11 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Allow deleting custom presets
 - **Implemented:** `CustomPreset` type in `budget.ts`; `saveCustomPreset`, `loadCustomPresets`, `deleteCustomPreset` in `storage.ts`; updated `ScenarioPresets.tsx` with ⭐ badge + inline delete
 
-### E2-T5 · Import / export JSON
+### E2-T5 · Import / export JSON ✅ Done
 - "Export as JSON" button: downloads `dynamicbudget-budget-YYYY-MM-DD.json`
 - "Import JSON" button: parses and validates a previously exported file, replaces current inputs
 - Validate schema on import; show an error if the file is incompatible
+- **Implemented:** `exportBudgetAsJSON`, `importBudgetFromJSON`, `triggerDownload` in `storage.ts`; `components/ExportImport.tsx` dropdown in header
 
 ---
 
@@ -487,10 +489,11 @@ States to add (in priority order based on population and no-income-tax interest)
 - Alternatively, use `jsPDF` or `react-pdf` for programmatic generation
 - Output: 1-page budget summary with all categories, health score, and recommendations
 
-### E7-T2 · CSV export
+### E7-T2 · CSV export ✅ Done
 - Export all budget line items and calculated totals as a CSV
-- Two formats: "Monthly" and "Annual"
+- Two formats: Monthly and Annual columns per row
 - Filename: `dynamicbudget-budget-YYYY-MM-DD.csv`
+- **Implemented:** `exportBudgetAsCSV` in `storage.ts`; wired into `components/ExportImport.tsx` dropdown
 
 ### E7-T3 · Shareable URL / link
 - Encode budget inputs as a compressed Base64 URL parameter (e.g., `?b=<encoded>`)
@@ -733,4 +736,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-12 — Continued Epic 5 with E5-T3 homeowner mode toggle, homeowner housing fields, and home-equity-aware UI/calculation updates.*
+*Last updated: 2026-09-12 — Implemented E2-T5 (Export/Import JSON) and E7-T2 (CSV export) with ExportImport dropdown component in header. Also completed full MoveMath → DynamicBudget rename across all docs and source.*

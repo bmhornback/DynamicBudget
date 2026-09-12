@@ -26,6 +26,7 @@ import TrendAnalysis from '@/components/TrendAnalysis';
 import MyBudgets from '@/components/MyBudgets';
 import OnboardingCard from '@/components/OnboardingCard';
 import { DarkModeToggle } from '@/components/ThemeProvider';
+import ExportImport from '@/components/ExportImport';
 
 // ─── Module-level constants ───────────────────────────────────────────────────
 // Savings fields that should be locked/unlocked when toggling percentage mode
@@ -183,6 +184,12 @@ export default function DynamicBudgetPage() {
     setComparisonPresetIds(getDefaultComparisonPresetIds('san_diego_baseline'));
   }, []);
 
+  const handleImport = useCallback((newInputs: BudgetInputs) => {
+    setInputs(newInputs);
+    setRebalanceResult(null);
+    setActivePreset(undefined);
+  }, []);
+
   const handleToggleMode = useCallback(() => {
     setInputs((prev) => ({
       ...prev,
@@ -215,6 +222,8 @@ export default function DynamicBudgetPage() {
 
           <div className="flex items-center gap-2">
             <MyBudgets currentInputs={inputs} onLoad={(newInputs) => { setInputs(newInputs); setRebalanceResult(null); setActivePreset(undefined); }} />
+
+            <ExportImport currentInputs={inputs} onImport={handleImport} />
 
             <DarkModeToggle />
 
