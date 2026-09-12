@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { BudgetInputs, CarSituation, DebtAccount, FilingStatus, StateOfResidence } from '@/types/budget';
+import type { BudgetInputs, CarSituation, DebtAccount, FilingStatus, StateOfResidence, HousingMode } from '@/types/budget';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
@@ -28,6 +28,11 @@ const CAR_SITUATION_OPTIONS: Array<{ value: CarSituation; label: string }> = [
   { value: 'car_loan', label: 'Car loan' },
   { value: 'car_lease', label: 'Car lease' },
   { value: 'no_car', label: 'No car' },
+];
+
+const HOUSING_MODE_OPTIONS: Array<{ value: HousingMode; label: string }> = [
+  { value: 'renter', label: 'Renter' },
+  { value: 'homeowner', label: 'Homeowner' },
 ];
 
 function SelectField({
@@ -268,23 +273,40 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
       {/* ── Housing ──────────────────────────────────────────────────── */}
       <BudgetSection title="Housing" icon="🏠">
-        <BudgetFieldInput
-          id="rent"
-          label="Monthly Rent"
-          value={inputs.rent}
-          isLocked={inputs.lockedFields['rent'] === true}
-          onChange={(v) => onChange({ rent: v })}
-          onToggleLock={onToggleLock}
-          validate={(v) => {
-            const grossMonthly = inputs.annualSalary / 12;
-            if (grossMonthly <= 0) return null;
-            return v > grossMonthly * 0.5
-              ? `Rent is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
-              : null;
-          }}
+        <SelectField
+          label="Housing Mode"
+          value={inputs.housingMode}
+          options={HOUSING_MODE_OPTIONS}
+          onChange={(v) => onChange({ housingMode: v as HousingMode })}
         />
-        {field('petRent', 'Pet Rent')}
-        {field('rentersInsurance', 'Renters Insurance')}
+        {inputs.housingMode === 'homeowner' ? (
+          <>
+            {field('mortgagePayment', 'Monthly Mortgage Payment')}
+            {field('propertyTax', 'Property Tax')}
+            {field('homeInsurance', 'Home Insurance')}
+            {field('homeMaintenanceReserve', 'Maintenance Reserve')}
+          </>
+        ) : (
+          <>
+            <BudgetFieldInput
+              id="rent"
+              label="Monthly Rent"
+              value={inputs.rent}
+              isLocked={inputs.lockedFields['rent'] === true}
+              onChange={(v) => onChange({ rent: v })}
+              onToggleLock={onToggleLock}
+              validate={(v) => {
+                const grossMonthly = inputs.annualSalary / 12;
+                if (grossMonthly <= 0) return null;
+                return v > grossMonthly * 0.5
+                  ? `Rent is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
+                  : null;
+              }}
+            />
+            {field('petRent', 'Pet Rent')}
+            {field('rentersInsurance', 'Renters Insurance')}
+          </>
+        )}
         {field('parkingFee', 'Parking Fee')}
         {field('hoaFee', 'HOA Fee')}
       </BudgetSection>
@@ -396,8 +418,18 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           <>
             {field('emergencyFundContribution', 'Emergency Fund Monthly Contribution')}
             {field('emergencyFundTarget', 'Emergency Fund Target', '0 = auto-calculate (6 months)')}
-            {field('houseDownPaymentContribution', 'House Down Payment Monthly')}
-            {field('houseDownPaymentTarget', 'Down Payment Target')}
+            {field(
+              'houseDownPaymentContribution',
+              inputs.housingMode === 'homeowner'
+                ? 'Home Equity Monthly Contribution'
+                : 'House Down Payment Monthly'
+            )}
+            {field(
+              'houseDownPaymentTarget',
+              inputs.housingMode === 'homeowner'
+                ? 'Home Equity Target'
+                : 'Down Payment Target'
+            )}
             {field('taxableInvestments', 'Taxable Investments')}
             {field('extraDebtPayoff', 'Extra Debt Payoff')}
             {field('generalCashSavings', 'General Cash Savings')}

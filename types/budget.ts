@@ -47,6 +47,7 @@ export type SurplusAllocation =
   | 'leave_as_buffer';
 
 export type BudgetMode = 'manual' | 'auto';
+export type HousingMode = 'renter' | 'homeowner';
 
 export type IRAType = 'traditional' | 'roth';
 
@@ -161,9 +162,14 @@ export interface BudgetInputs {
   otherMonthlyIncome: number;
 
   // Housing
+  housingMode: HousingMode;
   rent: number;
   petRent: number;
   rentersInsurance: number;
+  mortgagePayment: number;
+  propertyTax: number;
+  homeInsurance: number;
+  homeMaintenanceReserve: number;
   parkingFee: number;
   hoaFee: number;
 

@@ -15,6 +15,8 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
 - 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset scenarios
+- 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
+- 💳 **Debt payoff timeline** — Track debt accounts with projected payoff timeline and interest totals
 - 💾 **Data persistence** — Auto-save your budget to your browser (no account needed)
 - 📦 **JSON import/export** — Backup and restore budgets locally
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
@@ -32,7 +34,6 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ### Upcoming Features
 - 📤 Export to PDF/CSV, share budgets via link
 - 📋 Named saved budgets and deeper multi-scenario workflows
-- 🏠 Debt amortization and homeowner modes
 - 📊 Cost-of-living comparisons for move planning
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 

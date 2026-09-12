@@ -52,6 +52,25 @@ describe('budgetCalculations', () => {
       expect(result.totalHousing).toBeCloseTo(1650, 0);
     });
 
+    it('should calculate homeowner housing total and payment ratios from mortgage', () => {
+      const inputs = {
+        ...DEFAULT_INPUTS,
+        housingMode: 'homeowner' as const,
+        annualSalary: 120000,
+        rent: 3000,
+        mortgagePayment: 2500,
+        propertyTax: 400,
+        homeInsurance: 120,
+        homeMaintenanceReserve: 200,
+        parkingFee: 50,
+        hoaFee: 150,
+      };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.totalHousing).toBeCloseTo(3420, 0);
+      expect(result.rentAsPercentGross).toBeCloseTo(0.25, 2);
+    });
+
     it('should calculate utilities expense total correctly', () => {
       const inputs = {
         ...DEFAULT_INPUTS,

@@ -116,7 +116,7 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
         {!isPercentageMode && (
           <>
             <SavingsRow
-              label="House Fund"
+              label={inputs?.housingMode === 'homeowner' ? 'Home Equity' : 'House Fund'}
               monthly={annualHouseFund / 12}
               annual={annualHouseFund}
             />

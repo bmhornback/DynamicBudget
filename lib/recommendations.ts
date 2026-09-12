@@ -20,6 +20,8 @@ export function generateRecommendations(
   breakdown: BudgetBreakdown
 ): Recommendation[] {
   const recs: Recommendation[] = [];
+  const housingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Housing payment' : 'Rent';
+  const housingFundLabel = inputs.housingMode === 'homeowner' ? 'home equity fund' : 'house fund';
 
   const {
     rentAsPercentGross,
@@ -55,7 +57,7 @@ export function generateRecommendations(
       id: 'surplus',
       severity: 'success',
       message: `You have a $${surplus.toFixed(0)}/month surplus.`,
-      detail: 'Consider allocating the surplus to savings, investments, or your house fund.',
+      detail: `Consider allocating the surplus to savings, investments, or your ${housingFundLabel}.`,
     });
   }
 
@@ -64,8 +66,8 @@ export function generateRecommendations(
     recs.push({
       id: 'rent_high_gross',
       severity: 'warning',
-      message: `Rent is ${(rentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
-      detail: 'High rent-to-income ratios limit savings and financial flexibility.',
+      message: `${housingPaymentLabel} is ${(rentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
+      detail: 'High housing-cost-to-income ratios limit savings and financial flexibility.',
     });
   }
 
@@ -73,8 +75,8 @@ export function generateRecommendations(
     recs.push({
       id: 'rent_high_takehome',
       severity: 'warning',
-      message: `Rent is ${(rentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
-      detail: 'Very high rent relative to take-home pay can make saving very difficult.',
+      message: `${housingPaymentLabel} is ${(rentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
+      detail: 'Very high housing costs relative to take-home pay can make saving very difficult.',
     });
   }
 
@@ -121,7 +123,7 @@ export function generateRecommendations(
     recs.push({
       id: 'house_fund_slow',
       severity: 'info',
-      message: `House fund is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
+      message: `${inputs.housingMode === 'homeowner' ? 'Home equity fund' : 'House fund'} is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
       detail: 'In a high-cost market like San Diego, a larger monthly contribution may be needed.',
     });
   }
@@ -180,8 +182,8 @@ export function generateRecommendations(
     recs.push({
       id: 'budget_risky',
       severity: 'warning',
-      message: 'This salary may be too tight for this rent and savings goal.',
-      detail: 'Consider increasing salary, reducing rent, or scaling back savings targets temporarily.',
+      message: 'This salary may be too tight for this housing and savings goal.',
+      detail: `Consider increasing salary, reducing ${inputs.housingMode === 'homeowner' ? 'housing costs' : 'rent'}, or scaling back savings targets temporarily.`,
     });
   }
 

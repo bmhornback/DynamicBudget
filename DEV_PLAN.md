@@ -394,6 +394,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Homeowner adds: mortgage payment, property tax, HOA, home insurance, maintenance reserve
 - Replace "House Down Payment Fund" with "Home Equity" tracking once in homeowner mode
 - Mortgage calculator: loan amount, rate, term → monthly payment
+- **Progress:** Added renter/homeowner housing mode toggle, homeowner housing fields (mortgage/property tax/home insurance/maintenance reserve), and homeowner-aware labels for housing payment + home equity tracking in savings/dashboard/comparison surfaces.
 
 ### E5-T4 · Cost-of-living index comparison
 - Integrate a static COLI dataset (e.g., NerdWallet / MIT Living Wage data)
@@ -732,4 +733,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-12 — Started E5-T2 debt payoff implementation with debt accounts, payoff projection, and dashboard timeline groundwork.*
+*Last updated: 2026-09-12 — Continued Epic 5 with E5-T3 homeowner mode toggle, homeowner housing fields, and home-equity-aware UI/calculation updates.*
