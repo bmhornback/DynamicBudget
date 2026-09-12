@@ -112,7 +112,10 @@ export default function DynamicBudgetPage() {
       printWindow.print();
     }, 0);
 
-    return () => printWindow.clearTimeout(timeoutId);
+    return () => {
+      printWindow.clearTimeout(timeoutId);
+      printTriggered.current = false;
+    };
   }, [isPreparingPrint]);
 
   // ── Derived calculations (memoized) ────────────────────────────────────────
@@ -420,7 +423,7 @@ export default function DynamicBudgetPage() {
                   data-print-dashboard="true"
                 >
                   {printHeaderDate ? (
-                    <div data-print-header="true" className="hidden print:block mb-6">
+                    <div data-print-header="true" data-print-only="true" className="hidden mb-6">
                       <h2 className="text-2xl font-bold text-gray-900">DynamicBudget Summary</h2>
                       <p className="mt-1 text-sm text-gray-500">
                         Generated {printHeaderDate} · Client-side estimate for planning only
