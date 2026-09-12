@@ -134,6 +134,7 @@ export default function BusinessExpensesGuide() {
   const [entries, setEntries] = useState<Record<string, BusinessExpenseEntry>>(getInitialEntries);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }, [entries]);
 
