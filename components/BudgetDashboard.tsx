@@ -160,10 +160,27 @@ function DividerLine() {
 }
 
 function CoreExpensesDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inputs: BudgetInputs }) {
+  const housingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Mortgage' : 'Rent';
   return (
     <BudgetCard title="Core Living Expenses">
-      <DetailRow label="Rent" value={formatCurrency(inputs.rent)} sub={`${formatPercent(breakdown.rentAsPercentGross)} of gross`} />
-      <DetailRow label="Utilities" value={formatCurrency(breakdown.totalUtilities - inputs.phone)} />
+      <DetailRow
+        label={housingPaymentLabel}
+        value={formatCurrency(inputs.housingMode === 'homeowner' ? inputs.mortgagePayment : inputs.rent)}
+        sub={`${formatPercent(breakdown.primaryHousingPaymentAsPercentGross)} of gross`}
+      />
+      {inputs.housingMode === 'homeowner' ? (
+        <>
+          <DetailRow label="Property Tax" value={formatCurrency(inputs.propertyTax)} />
+          <DetailRow label="Home Insurance" value={formatCurrency(inputs.homeInsurance)} />
+          <DetailRow label="Maintenance Reserve" value={formatCurrency(inputs.homeMaintenanceReserve)} />
+        </>
+      ) : (
+        <>
+          <DetailRow label="Pet Rent" value={formatCurrency(inputs.petRent)} />
+          <DetailRow label="Renters Insurance" value={formatCurrency(inputs.rentersInsurance)} />
+        </>
+      )}
+      <DetailRow label="Utilities (excl. phone)" value={formatCurrency(breakdown.totalUtilities - inputs.phone)} />
       <DetailRow label="Phone" value={formatCurrency(inputs.phone)} />
       <DetailRow label="Groceries" value={formatCurrency(inputs.groceries)} />
       <DetailRow label="Household Basics" value={formatCurrency(inputs.householdBasics)} />
@@ -245,12 +262,12 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
       />
       <DividerLine />
       <DetailRow
-        label="House Fund Monthly"
+        label={inputs.housingMode === 'homeowner' ? 'Home Equity Monthly' : 'House Fund Monthly'}
         value={formatCurrency(inputs.houseDownPaymentContribution)}
         sub={`${formatCurrency(breakdown.annualHouseFund)}/year`}
       />
       <DetailRow
-        label="Down Payment Target"
+        label={inputs.housingMode === 'homeowner' ? 'Home Equity Target' : 'Down Payment Target'}
         value={formatCurrency(inputs.houseDownPaymentTarget)}
         sub={
           inputs.houseDownPaymentContribution > 0

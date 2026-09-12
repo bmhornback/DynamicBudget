@@ -47,6 +47,7 @@ export type SurplusAllocation =
   | 'leave_as_buffer';
 
 export type BudgetMode = 'manual' | 'auto';
+export type HousingMode = 'renter' | 'homeowner';
 
 export type IRAType = 'traditional' | 'roth';
 
@@ -161,9 +162,14 @@ export interface BudgetInputs {
   otherMonthlyIncome: number;
 
   // Housing
+  housingMode: HousingMode;
   rent: number;
   petRent: number;
   rentersInsurance: number;
+  mortgagePayment: number;
+  propertyTax: number;
+  homeInsurance: number;
+  homeMaintenanceReserve: number;
   parkingFee: number;
   hoaFee: number;
 
@@ -294,8 +300,8 @@ export interface BudgetBreakdown {
   // Rates
   savingsRateGross: number;
   savingsRateNet: number;
-  rentAsPercentGross: number;
-  rentAsPercentTakeHome: number;
+  primaryHousingPaymentAsPercentGross: number;
+  primaryHousingPaymentAsPercentTakeHome: number;
   petCostsAsPercentTakeHome: number;
   carCostsAsPercentTakeHome: number;
 
@@ -324,7 +330,7 @@ export interface BudgetHealthScore {
   score: number;
   label: HealthScoreLabel;
   breakdown: {
-    rentAffordability: number;
+    housingAffordability: number;
     retirementRate: number;
     emergencyFundContrib: number;
     houseFundContrib: number;

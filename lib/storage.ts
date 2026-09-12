@@ -1,5 +1,6 @@
 import type { BudgetInputs, NamedBudget, CustomPreset } from '@/types/budget';
 import { initializeSpendingHistory } from './spendingTrends';
+import { DEFAULT_INPUTS } from './defaultScenarios';
 
 const STORAGE_KEY = 'movemath_budget_inputs';
 const NAMED_BUDGETS_KEY = 'movemath_named_budgets';
@@ -44,15 +45,21 @@ export function loadBudgetInputs(): BudgetInputs | null {
       return null;
     }
 
+    const mergedInputs = {
+      ...DEFAULT_INPUTS,
+      ...data.inputs,
+      lockedFields: data.inputs.lockedFields ?? {},
+    } as BudgetInputs;
+
     // Initialize spending history if missing
-    if (!data.inputs.spendingHistory) {
-      data.inputs.spendingHistory = initializeSpendingHistory();
+    if (!mergedInputs.spendingHistory) {
+      mergedInputs.spendingHistory = initializeSpendingHistory();
     }
-    if (!Array.isArray(data.inputs.debts)) {
-      data.inputs.debts = [];
+    if (!Array.isArray(mergedInputs.debts)) {
+      mergedInputs.debts = [];
     }
 
-    return data.inputs as BudgetInputs;
+    return mergedInputs;
   } catch (error) {
     console.warn('Failed to load budget inputs:', error);
     return null;
@@ -97,15 +104,21 @@ export function importBudgetFromJSON(jsonString: string): BudgetInputs | null {
       return null;
     }
 
+    const mergedInputs = {
+      ...DEFAULT_INPUTS,
+      ...data.inputs,
+      lockedFields: data.inputs.lockedFields ?? {},
+    } as BudgetInputs;
+
     // Initialize spending history if missing
-    if (!data.inputs.spendingHistory) {
-      data.inputs.spendingHistory = initializeSpendingHistory();
+    if (!mergedInputs.spendingHistory) {
+      mergedInputs.spendingHistory = initializeSpendingHistory();
     }
-    if (!Array.isArray(data.inputs.debts)) {
-      data.inputs.debts = [];
+    if (!Array.isArray(mergedInputs.debts)) {
+      mergedInputs.debts = [];
     }
 
-    return data.inputs as BudgetInputs;
+    return mergedInputs;
   } catch (error) {
     console.warn('Failed to import budget data:', error);
     return null;

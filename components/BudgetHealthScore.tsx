@@ -10,7 +10,7 @@ interface BudgetHealthScoreProps {
 }
 
 const BREAKDOWN_LABELS: Record<string, string> = {
-  rentAffordability: 'Rent Affordability',
+  housingAffordability: 'Housing Affordability',
   retirementRate: 'Retirement Savings',
   emergencyFundContrib: 'Emergency Fund',
   houseFundContrib: 'House Fund',
@@ -21,7 +21,7 @@ const BREAKDOWN_LABELS: Record<string, string> = {
 };
 
 const BREAKDOWN_MAX: Record<string, number> = {
-  rentAffordability: 20,
+  housingAffordability: 20,
   retirementRate: 20,
   emergencyFundContrib: 15,
   houseFundContrib: 10,

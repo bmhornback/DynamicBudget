@@ -14,7 +14,7 @@ function clampScore(s: number): number {
  */
 export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHealthScore {
   const {
-    rentAsPercentGross,
+    primaryHousingPaymentAsPercentGross,
     retirement,
     grossMonthly,
     netMonthlyIncome,
@@ -27,12 +27,12 @@ export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHe
     effectiveHouseDownPaymentContribution,
   } = breakdown;
 
-  // ── Rent affordability (0–20 pts) ─────────────────────────────────────────
-  let rentScore = 20;
-  if (rentAsPercentGross > 0.40) rentScore = 0;
-  else if (rentAsPercentGross > 0.35) rentScore = 5;
-  else if (rentAsPercentGross > 0.30) rentScore = 10;
-  else if (rentAsPercentGross > 0.25) rentScore = 15;
+  // ── Housing affordability (0–20 pts) ──────────────────────────────────────
+  let housingScore = 20;
+  if (primaryHousingPaymentAsPercentGross > 0.40) housingScore = 0;
+  else if (primaryHousingPaymentAsPercentGross > 0.35) housingScore = 5;
+  else if (primaryHousingPaymentAsPercentGross > 0.30) housingScore = 10;
+  else if (primaryHousingPaymentAsPercentGross > 0.25) housingScore = 15;
 
   // ── Retirement savings rate (0–20 pts) ───────────────────────────────────
   let retirementScore = 0;
@@ -94,7 +94,7 @@ export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHe
   else if (totalSavingsRate >= 0.10) savingsScore = 1;
 
   const totalScore = clampScore(
-    rentScore +
+    housingScore +
     retirementScore +
     efScore +
     houseFundScore +
@@ -115,7 +115,7 @@ export function calculateBudgetHealthScore(breakdown: BudgetBreakdown): BudgetHe
     score: totalScore,
     label,
     breakdown: {
-      rentAffordability: rentScore,
+      housingAffordability: housingScore,
       retirementRate: retirementScore,
       emergencyFundContrib: efScore,
       houseFundContrib: houseFundScore,

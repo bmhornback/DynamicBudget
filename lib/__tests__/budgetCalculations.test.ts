@@ -52,6 +52,31 @@ describe('budgetCalculations', () => {
       expect(result.totalHousing).toBeCloseTo(1650, 0);
     });
 
+    it('should calculate homeowner housing total and payment ratios from mortgage', () => {
+      const inputs = {
+        ...DEFAULT_INPUTS,
+        housingMode: 'homeowner' as const,
+        annualSalary: 120000,
+        mortgagePayment: 2500,
+        propertyTax: 400,
+        homeInsurance: 120,
+        homeMaintenanceReserve: 200,
+        parkingFee: 50,
+        hoaFee: 150,
+      };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.totalHousing).toBeCloseTo(3420, 0);
+      expect(result.primaryHousingPaymentAsPercentGross).toBeCloseTo(
+        inputs.mortgagePayment / (inputs.annualSalary / 12),
+        2
+      );
+      expect(result.primaryHousingPaymentAsPercentTakeHome).toBeCloseTo(
+        inputs.mortgagePayment / result.netMonthlyIncome,
+        2
+      );
+    });
+
     it('should calculate utilities expense total correctly', () => {
       const inputs = {
         ...DEFAULT_INPUTS,
@@ -360,7 +385,7 @@ describe('budgetCalculations', () => {
       const result = calculateBudgetBreakdown(inputs);
 
       const expectedPercent = 3000 / 10000; // 3000 / monthly gross
-      expect(result.rentAsPercentGross).toBeCloseTo(expectedPercent, 2);
+      expect(result.primaryHousingPaymentAsPercentGross).toBeCloseTo(expectedPercent, 2);
     });
 
     it('should calculate rent as percent of take-home correctly', () => {
@@ -369,7 +394,7 @@ describe('budgetCalculations', () => {
 
       const expectedPercent =
         inputs.rent / result.netMonthlyIncome;
-      expect(result.rentAsPercentTakeHome).toBeCloseTo(expectedPercent, 2);
+      expect(result.primaryHousingPaymentAsPercentTakeHome).toBeCloseTo(expectedPercent, 2);
     });
 
     it('should calculate retirement savings rate correctly', () => {

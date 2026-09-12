@@ -20,10 +20,13 @@ export function generateRecommendations(
   breakdown: BudgetBreakdown
 ): Recommendation[] {
   const recs: Recommendation[] = [];
+  const housingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Housing payment' : 'Rent';
+  const housingFundLabel = inputs.housingMode === 'homeowner' ? 'home equity fund' : 'house fund';
+  const housingFundLabelTitleCase = housingFundLabel.charAt(0).toUpperCase() + housingFundLabel.slice(1);
 
   const {
-    rentAsPercentGross,
-    rentAsPercentTakeHome,
+    primaryHousingPaymentAsPercentGross,
+    primaryHousingPaymentAsPercentTakeHome,
     retirement,
     remainingMonthlyBuffer,
     netMonthlyIncome,
@@ -55,26 +58,26 @@ export function generateRecommendations(
       id: 'surplus',
       severity: 'success',
       message: `You have a $${surplus.toFixed(0)}/month surplus.`,
-      detail: 'Consider allocating the surplus to savings, investments, or your house fund.',
+      detail: `Consider allocating the surplus to savings, investments, or your ${housingFundLabel}.`,
     });
   }
 
-  // ── Rent warnings ─────────────────────────────────────────────────────────
-  if (rentAsPercentGross > BUDGET_THRESHOLDS.rentPercentGross) {
+  // ── Housing payment warnings ──────────────────────────────────────────────
+  if (primaryHousingPaymentAsPercentGross > BUDGET_THRESHOLDS.rentPercentGross) {
     recs.push({
-      id: 'rent_high_gross',
+      id: 'housing_payment_high_gross',
       severity: 'warning',
-      message: `Rent is ${(rentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
-      detail: 'High rent-to-income ratios limit savings and financial flexibility.',
+      message: `${housingPaymentLabel} is ${(primaryHousingPaymentAsPercentGross * 100).toFixed(1)}% of gross income — above the 30% guideline.`,
+      detail: 'High housing-cost-to-income ratios limit savings and financial flexibility.',
     });
   }
 
-  if (rentAsPercentTakeHome > BUDGET_THRESHOLDS.rentPercentTakeHome) {
+  if (primaryHousingPaymentAsPercentTakeHome > BUDGET_THRESHOLDS.rentPercentTakeHome) {
     recs.push({
-      id: 'rent_high_takehome',
+      id: 'housing_payment_high_takehome',
       severity: 'warning',
-      message: `Rent is ${(rentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
-      detail: 'Very high rent relative to take-home pay can make saving very difficult.',
+      message: `${housingPaymentLabel} is ${(primaryHousingPaymentAsPercentTakeHome * 100).toFixed(1)}% of take-home pay — above 40%.`,
+      detail: 'Very high housing costs relative to take-home pay can make saving very difficult.',
     });
   }
 
@@ -119,9 +122,9 @@ export function generateRecommendations(
   // ── House fund ────────────────────────────────────────────────────────────
   if (inputs.houseDownPaymentContribution > 0 && annualHouseFund < 12000) {
     recs.push({
-      id: 'house_fund_slow',
+      id: 'housing_fund_slow',
       severity: 'info',
-      message: `House fund is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
+      message: `${housingFundLabelTitleCase} is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
       detail: 'In a high-cost market like San Diego, a larger monthly contribution may be needed.',
     });
   }
@@ -162,7 +165,7 @@ export function generateRecommendations(
     !isOverBudget &&
     remainingMonthlyBuffer >= BUDGET_THRESHOLDS.minMonthlyBuffer &&
     retirement.isSaving15Percent &&
-    rentAsPercentGross <= BUDGET_THRESHOLDS.rentPercentGross
+    primaryHousingPaymentAsPercentGross <= BUDGET_THRESHOLDS.rentPercentGross
   ) {
     recs.push({
       id: 'budget_healthy',
@@ -173,15 +176,15 @@ export function generateRecommendations(
   }
 
   if (
-    rentAsPercentGross > 0.35 &&
+    primaryHousingPaymentAsPercentGross > 0.35 &&
     retirement.retirementSavingsRate < 0.10 &&
     remainingMonthlyBuffer < 200
   ) {
     recs.push({
       id: 'budget_risky',
       severity: 'warning',
-      message: 'This salary may be too tight for this rent and savings goal.',
-      detail: 'Consider increasing salary, reducing rent, or scaling back savings targets temporarily.',
+      message: 'This salary may be too tight for this housing and savings goal.',
+      detail: `Consider increasing salary, reducing ${inputs.housingMode === 'homeowner' ? 'housing costs' : 'rent'}, or scaling back savings targets temporarily.`,
     });
   }
 

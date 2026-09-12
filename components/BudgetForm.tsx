@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { BudgetInputs, CarSituation, DebtAccount, FilingStatus, StateOfResidence } from '@/types/budget';
+import type { BudgetInputs, CarSituation, DebtAccount, FilingStatus, StateOfResidence, HousingMode } from '@/types/budget';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
@@ -30,23 +30,31 @@ const CAR_SITUATION_OPTIONS: Array<{ value: CarSituation; label: string }> = [
   { value: 'no_car', label: 'No car' },
 ];
 
-function SelectField({
+const HOUSING_MODE_OPTIONS: Array<{ value: HousingMode; label: string }> = [
+  { value: 'renter', label: 'Renter' },
+  { value: 'homeowner', label: 'Homeowner' },
+];
+
+function SelectField<T extends string>({
   label,
   value,
   options,
   onChange,
 }: {
   label: string;
-  value: string;
-  options: Array<{ value: string; label: string }>;
-  onChange: (v: string) => void;
+  value: T;
+  options: Array<{ value: T; label: string }>;
+  onChange: (v: T) => void;
 }) {
+  const selectId = React.useId();
+
   return (
     <div className="flex items-center gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200">
-      <label className="flex-1 text-sm text-gray-700">{label}</label>
+      <label htmlFor={selectId} className="flex-1 text-sm text-gray-700">{label}</label>
       <select
+        id={selectId}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value as T)}
         className="text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
         {options.map((opt) => (
@@ -180,6 +188,15 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
     });
   };
 
+  const validatePrimaryHousingPayment = (v: number) => {
+    const grossMonthly = inputs.annualSalary / 12;
+    const primaryHousingPaymentLabel = inputs.housingMode === 'homeowner' ? 'Housing payment' : 'Rent';
+    if (grossMonthly <= 0) return null;
+    return v > grossMonthly * 0.5
+      ? `${primaryHousingPaymentLabel} is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
+      : null;
+  };
+
   return (
     <div className="space-y-2">
 
@@ -268,23 +285,42 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
       {/* ── Housing ──────────────────────────────────────────────────── */}
       <BudgetSection title="Housing" icon="🏠">
-        <BudgetFieldInput
-          id="rent"
-          label="Monthly Rent"
-          value={inputs.rent}
-          isLocked={inputs.lockedFields['rent'] === true}
-          onChange={(v) => onChange({ rent: v })}
-          onToggleLock={onToggleLock}
-          validate={(v) => {
-            const grossMonthly = inputs.annualSalary / 12;
-            if (grossMonthly <= 0) return null;
-            return v > grossMonthly * 0.5
-              ? `Rent is ${Math.round((v / grossMonthly) * 100)}% of gross monthly income — typically recommended under 30%`
-              : null;
-          }}
+        <SelectField
+          label="Housing Mode"
+          value={inputs.housingMode}
+          options={HOUSING_MODE_OPTIONS}
+          onChange={(v) => onChange({ housingMode: v })}
         />
-        {field('petRent', 'Pet Rent')}
-        {field('rentersInsurance', 'Renters Insurance')}
+        {inputs.housingMode === 'homeowner' ? (
+          <>
+            <BudgetFieldInput
+              id="mortgagePayment"
+              label="Monthly Mortgage Payment"
+              value={inputs.mortgagePayment}
+              isLocked={inputs.lockedFields['mortgagePayment'] === true}
+              onChange={(v) => onChange({ mortgagePayment: v })}
+              onToggleLock={onToggleLock}
+              validate={validatePrimaryHousingPayment}
+            />
+            {field('propertyTax', 'Property Tax')}
+            {field('homeInsurance', 'Home Insurance')}
+            {field('homeMaintenanceReserve', 'Maintenance Reserve')}
+          </>
+        ) : (
+          <>
+            <BudgetFieldInput
+              id="rent"
+              label="Monthly Rent"
+              value={inputs.rent}
+              isLocked={inputs.lockedFields['rent'] === true}
+              onChange={(v) => onChange({ rent: v })}
+              onToggleLock={onToggleLock}
+              validate={validatePrimaryHousingPayment}
+            />
+            {field('petRent', 'Pet Rent')}
+            {field('rentersInsurance', 'Renters Insurance')}
+          </>
+        )}
         {field('parkingFee', 'Parking Fee')}
         {field('hoaFee', 'HOA Fee')}
       </BudgetSection>
@@ -396,8 +432,18 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           <>
             {field('emergencyFundContribution', 'Emergency Fund Monthly Contribution')}
             {field('emergencyFundTarget', 'Emergency Fund Target', '0 = auto-calculate (6 months)')}
-            {field('houseDownPaymentContribution', 'House Down Payment Monthly')}
-            {field('houseDownPaymentTarget', 'Down Payment Target')}
+            {field(
+              'houseDownPaymentContribution',
+              inputs.housingMode === 'homeowner'
+                ? 'Home Equity Monthly Contribution'
+                : 'House Down Payment Monthly'
+            )}
+            {field(
+              'houseDownPaymentTarget',
+              inputs.housingMode === 'homeowner'
+                ? 'Home Equity Target'
+                : 'Down Payment Target'
+            )}
             {field('taxableInvestments', 'Taxable Investments')}
             {field('extraDebtPayoff', 'Extra Debt Payoff')}
             {field('generalCashSavings', 'General Cash Savings')}

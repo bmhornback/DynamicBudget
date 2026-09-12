@@ -19,9 +19,14 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   otherMonthlyIncome: 0,
 
   // Housing
+  housingMode: 'renter',
   rent: 3000,
   petRent: 75,
   rentersInsurance: 20,
+  mortgagePayment: 0,
+  propertyTax: 0,
+  homeInsurance: 0,
+  homeMaintenanceReserve: 0,
   parkingFee: 100,
   hoaFee: 0,
 
