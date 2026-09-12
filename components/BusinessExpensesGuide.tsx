@@ -94,7 +94,7 @@ const EMPTY_ENTRY: BusinessExpenseEntry = {
 };
 
 function normalizeEntry(value: Partial<BusinessExpenseEntry> | undefined): BusinessExpenseEntry {
-  if (!value) return EMPTY_ENTRY;
+  if (!value) return { ...EMPTY_ENTRY };
   const monthlyAmount = Number.isFinite(value.monthlyAmount) ? Math.max(0, value.monthlyAmount as number) : 0;
   const businessUsePercent = Number.isFinite(value.businessUsePercent)
     ? Math.min(100, Math.max(0, value.businessUsePercent as number))
@@ -108,7 +108,7 @@ function normalizeEntry(value: Partial<BusinessExpenseEntry> | undefined): Busin
 
 function getDefaultEntries(): Record<string, BusinessExpenseEntry> {
   return BUSINESS_EXPENSE_CATEGORIES.reduce<Record<string, BusinessExpenseEntry>>((acc, item) => {
-    acc[item.id] = EMPTY_ENTRY;
+    acc[item.id] = { ...EMPTY_ENTRY };
     return acc;
   }, {});
 }
