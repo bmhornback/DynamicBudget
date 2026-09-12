@@ -5,7 +5,7 @@ import { DEFAULT_INPUTS } from './defaultScenarios';
 const STORAGE_KEY = 'dynamicbudget_budget_inputs';
 const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
 const CUSTOM_PRESETS_KEY = 'dynamicbudget_custom_presets';
-const SHARE_PARAM_KEY = 'b';
+export const SHARE_PARAM_KEY = 'b';
 const STORAGE_VERSION = 1;
 
 // Legacy keys used before the DynamicBudget rename — kept for one-time migration only
@@ -350,10 +350,8 @@ function decodeBase64Url(value: string): string {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
     const binary = atob(padded);
-    const percentEncoded = Array.from(binary)
-      .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
-      .join('');
-    return decodeURIComponent(percentEncoded);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
   }
 
   throw new Error('No base64 decoder available');

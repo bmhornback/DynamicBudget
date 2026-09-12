@@ -56,7 +56,6 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
       const shareUrl = createShareableBudgetUrl(currentInputs, window.location.href);
       await navigator.clipboard.writeText(shareUrl);
       setShareMessage('Share link copied.');
-      setOpen(false);
     } catch {
       setShareMessage('Copy failed. Please try again.');
     }
@@ -154,6 +153,18 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
               <span className="block text-xs text-gray-400 dark:text-gray-500">Loads this budget directly from URL</span>
             </button>
 
+            {shareMessage && (
+              <p
+                className={`px-1 text-xs ${
+                  shareMessage.toLowerCase().includes('failed')
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-emerald-600 dark:text-emerald-400'
+                }`}
+              >
+                {shareMessage}
+              </p>
+            )}
+
             <div className="border-t border-gray-100 dark:border-gray-700 pt-2">
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-1 mb-1">
                 Import
@@ -184,18 +195,6 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
             />
           </div>
         </>
-      )}
-
-      {shareMessage && (
-        <p
-          className={`mt-1 text-xs ${
-            shareMessage.toLowerCase().includes('failed')
-              ? 'text-red-600 dark:text-red-400'
-              : 'text-emerald-600 dark:text-emerald-400'
-          }`}
-        >
-          {shareMessage}
-        </p>
       )}
     </div>
   );

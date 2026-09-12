@@ -5,6 +5,7 @@ import {
   encodeBudgetInputsForShare,
   loadBudgetInputsFromShareUrl,
 } from '../storage';
+import { Buffer as NodeBuffer } from 'node:buffer';
 
 describe('shareable budget URL helpers', () => {
   it('round-trips budget inputs through encoded payload', () => {
@@ -26,5 +27,25 @@ describe('shareable budget URL helpers', () => {
   it('returns null for malformed payloads', () => {
     expect(decodeBudgetInputsFromShare('%%%')).toBeNull();
     expect(loadBudgetInputsFromShareUrl('https://example.com/app?b=%%%')).toBeNull();
+  });
+
+  it('supports browser btoa/atob fallback when Buffer is unavailable', () => {
+    const originalBuffer = (globalThis as unknown as { Buffer?: typeof NodeBuffer }).Buffer;
+    const originalBtoa = globalThis.btoa;
+    const originalAtob = globalThis.atob;
+
+    (globalThis as unknown as { Buffer?: typeof NodeBuffer }).Buffer = undefined;
+    globalThis.btoa = (value: string) => NodeBuffer.from(value, 'binary').toString('base64');
+    globalThis.atob = (value: string) => NodeBuffer.from(value, 'base64').toString('binary');
+
+    try {
+      const encoded = encodeBudgetInputsForShare(DEFAULT_INPUTS);
+      const decoded = decodeBudgetInputsFromShare(encoded);
+      expect(decoded).toEqual(DEFAULT_INPUTS);
+    } finally {
+      (globalThis as unknown as { Buffer?: typeof NodeBuffer }).Buffer = originalBuffer;
+      globalThis.btoa = originalBtoa;
+      globalThis.atob = originalAtob;
+    }
   });
 });
