@@ -4,6 +4,7 @@ import { DEFAULT_INPUTS } from './defaultScenarios';
 import { calculateBudgetBreakdown } from './budgetCalculations';
 import { calculateBudgetHealthScore } from './budgetHealthScore';
 import { formatCurrency, formatPercent } from './formatters';
+import { STATE_LABELS } from './taxCalculations';
 
 const STORAGE_KEY = 'dynamicbudget_budget_inputs';
 const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
@@ -277,6 +278,10 @@ export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
   const breakdown = calculateBudgetBreakdown(inputs);
   const healthScore = calculateBudgetHealthScore(breakdown).score;
   const annualNetIncome = breakdown.netMonthlyIncome * 12;
+  const toReadableLabel = (value: string): string =>
+    value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   const row = (label: string, monthly: number, annual: number): string =>
     `| ${label} | ${formatCurrency(monthly)} | ${formatCurrency(annual)} |`;
 
@@ -287,7 +292,7 @@ export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
   return [
     `DynamicBudget Quick Summary (${todayDateStr()})`,
     '',
-    `State: ${inputs.state} · Filing: ${inputs.filingStatus.replace(/_/g, ' ')} · Housing: ${inputs.housingMode}`,
+    `State: ${STATE_LABELS[inputs.state] ?? inputs.state} · Filing: ${toReadableLabel(inputs.filingStatus)} · Housing: ${toReadableLabel(inputs.housingMode)}`,
     `Budget Health Score: ${healthScore}/100 (${formatPercent(breakdown.savingsRateNet, 1)} net savings rate)`,
     '',
     '| Category | Monthly | Annual |',

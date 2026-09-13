@@ -48,29 +48,23 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
   };
 
   const handleCopyShareLink = async () => {
-    if (typeof window === 'undefined' || !navigator.clipboard) {
-      setShareMessage('Copy failed: clipboard not available.');
-      return;
-    }
-
-    try {
-      const shareUrl = createShareableBudgetUrl(currentInputs, window.location.href);
-      await navigator.clipboard.writeText(shareUrl);
-      setShareMessage('Share link copied.');
-    } catch {
-      setShareMessage('Copy failed. Please try again.');
-    }
+    const shareUrl = createShareableBudgetUrl(currentInputs, window.location.href);
+    await copyToClipboard(shareUrl, 'Share link copied.');
   };
 
   const handleCopySummary = async () => {
+    await copyToClipboard(exportBudgetQuickSummary(currentInputs), 'Summary copied.');
+  };
+
+  const copyToClipboard = async (text: string, successMessage: string) => {
     if (typeof window === 'undefined' || !navigator.clipboard) {
       setShareMessage('Copy failed: clipboard not available.');
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(exportBudgetQuickSummary(currentInputs));
-      setShareMessage('Summary copied.');
+      await navigator.clipboard.writeText(text);
+      setShareMessage(successMessage);
     } catch {
       setShareMessage('Copy failed. Please try again.');
     }
