@@ -1,8 +1,10 @@
 import { DEFAULT_INPUTS } from '../defaultScenarios';
+import { calculateBudgetBreakdown } from '../budgetCalculations';
 import {
   createShareableBudgetUrl,
   decodeBudgetInputsFromShare,
   encodeBudgetInputsForShare,
+  exportBudgetQuickSummary,
   loadBudgetInputsFromShareUrl,
 } from '../storage';
 import { Buffer as NodeBuffer } from 'node:buffer';
@@ -13,6 +15,35 @@ describe('shareable budget URL helpers', () => {
     const decoded = decodeBudgetInputsFromShare(encoded);
 
     expect(decoded).toEqual(DEFAULT_INPUTS);
+  });
+
+  describe('exportBudgetQuickSummary', () => {
+    it('returns a markdown-like plain-text summary with core totals', () => {
+      const summary = exportBudgetQuickSummary(DEFAULT_INPUTS);
+      const isOverBudget = calculateBudgetBreakdown(DEFAULT_INPUTS).isOverBudget;
+
+      expect(summary).toContain('DynamicBudget Quick Summary');
+      expect(summary).toContain('| Category | Monthly | Annual |');
+      expect(summary).toContain('| Net Monthly Income |');
+      expect(summary).toContain('| Total Allocated |');
+      expect(summary).toContain('| Remaining Buffer |');
+      expect(summary).toContain('State: California · Filing: Single · Housing: Renter');
+      expect(summary).toMatch(/Budget Health Score: \d+\/100 \((-?\d+(\.\d+)?)% net savings rate\)/);
+      expect(summary).toContain(isOverBudget ? '⚠️ Over budget by' : '✅ Under budget by');
+    });
+
+    it('formats state and enum labels for sharing', () => {
+      const summary = exportBudgetQuickSummary({
+        ...DEFAULT_INPUTS,
+        state: 'no_state_tax',
+        filingStatus: 'married_jointly',
+        housingMode: 'homeowner',
+      });
+
+      expect(summary).toContain('State: No State Income Tax · Filing: Married Jointly · Housing: Homeowner');
+      expect(summary).not.toContain('no_state_tax');
+      expect(summary).not.toContain('married_jointly');
+    });
   });
 
   it('creates a share URL and loads budget inputs back from it', () => {

@@ -9,6 +9,7 @@ import {
   triggerDownload,
   todayDateStr,
   createShareableBudgetUrl,
+  exportBudgetQuickSummary,
 } from '@/lib/storage';
 
 interface ExportImportProps {
@@ -46,19 +47,34 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
     fileInputRef.current?.click();
   };
 
-  const handleCopyShareLink = async () => {
+  const copyToClipboard = async (
+    getText: () => string,
+    successMessage: string,
+    failureMessage = 'Copy failed. Please try again.',
+  ) => {
     if (typeof window === 'undefined' || !navigator.clipboard) {
       setShareMessage('Copy failed: clipboard not available.');
       return;
     }
 
     try {
-      const shareUrl = createShareableBudgetUrl(currentInputs, window.location.href);
-      await navigator.clipboard.writeText(shareUrl);
-      setShareMessage('Share link copied.');
+      const text = getText();
+      await navigator.clipboard.writeText(text);
+      setShareMessage(successMessage);
     } catch {
-      setShareMessage('Copy failed. Please try again.');
+      setShareMessage(failureMessage);
     }
+  };
+
+  const handleCopyShareLink = async () => {
+    await copyToClipboard(
+      () => createShareableBudgetUrl(currentInputs, window.location.href),
+      'Share link copied.',
+    );
+  };
+
+  const handleCopySummary = async () => {
+    await copyToClipboard(() => exportBudgetQuickSummary(currentInputs), 'Summary copied.');
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,6 +167,15 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
             >
               🔗 Copy Share Link
               <span className="block text-xs text-gray-400 dark:text-gray-500">Loads this budget directly from URL</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCopySummary}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+            >
+              📝 Copy Summary
+              <span className="block text-xs text-gray-400 dark:text-gray-500">Plain-text budget summary for Slack/Notion</span>
             </button>
 
             {shareMessage && (

@@ -1,6 +1,10 @@
 import type { BudgetInputs, NamedBudget, CustomPreset } from '@/types/budget';
 import { initializeSpendingHistory } from './spendingTrends';
 import { DEFAULT_INPUTS } from './defaultScenarios';
+import { calculateBudgetBreakdown } from './budgetCalculations';
+import { calculateBudgetHealthScore } from './budgetHealthScore';
+import { formatCurrency, formatPercent } from './formatters';
+import { STATE_LABELS } from './taxCalculations';
 
 const STORAGE_KEY = 'dynamicbudget_budget_inputs';
 const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
@@ -265,6 +269,51 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   );
 
   return lines.join('\r\n');
+}
+
+/**
+ * Export a compact plain-text summary suitable for clipboard sharing.
+ */
+export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
+  const breakdown = calculateBudgetBreakdown(inputs);
+  const healthScore = calculateBudgetHealthScore(breakdown).score;
+  const annualNetIncome = breakdown.netMonthlyIncome * 12;
+  const toReadableLabel = (value: string): string =>
+    value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  const row = (label: string, monthly: number, annual: number): string =>
+    `| ${label} | ${formatCurrency(monthly)} | ${formatCurrency(annual)} |`;
+
+  const statusLine = breakdown.isOverBudget
+    ? `⚠️ Over budget by ${formatCurrency(breakdown.deficit)} per month`
+    : `✅ Under budget by ${formatCurrency(breakdown.surplus)} per month`;
+
+  return [
+    `DynamicBudget Quick Summary (${todayDateStr()})`,
+    '',
+    `State: ${STATE_LABELS[inputs.state] ?? toReadableLabel(inputs.state)} · Filing: ${toReadableLabel(inputs.filingStatus)} · Housing: ${toReadableLabel(inputs.housingMode)}`,
+    `Budget Health Score: ${healthScore}/100 (${formatPercent(breakdown.savingsRateNet, 1)} net savings rate)`,
+    '',
+    '| Category | Monthly | Annual |',
+    '|---|---:|---:|',
+    row('Net Monthly Income', breakdown.netMonthlyIncome, annualNetIncome),
+    row('Total Taxes', breakdown.taxes.totalTaxMonthly, breakdown.taxes.totalTaxAnnual),
+    row('Housing', breakdown.totalHousing, breakdown.totalHousing * 12),
+    row('Utilities', breakdown.totalUtilities, breakdown.totalUtilities * 12),
+    row('Transportation', breakdown.totalTransportation, breakdown.totalTransportation * 12),
+    row('Pets', breakdown.totalPets, breakdown.totalPets * 12),
+    row('Groceries & Food', breakdown.totalGroceriesFood, breakdown.totalGroceriesFood * 12),
+    row('Health', breakdown.totalHealth, breakdown.totalHealth * 12),
+    row('Lifestyle', breakdown.totalLifestyle, breakdown.totalLifestyle * 12),
+    row('Savings', breakdown.totalSavings, breakdown.totalSavings * 12),
+    row('Investments', breakdown.totalInvestments, breakdown.totalInvestments * 12),
+    row('Debt Payoff', breakdown.totalDebtPayoff, breakdown.totalDebtPayoff * 12),
+    row('Total Allocated', breakdown.totalAllocated, breakdown.totalAllocated * 12),
+    row('Remaining Buffer', breakdown.remainingMonthlyBuffer, breakdown.remainingMonthlyBuffer * 12),
+    '',
+    statusLine,
+  ].join('\n');
 }
 
 /**

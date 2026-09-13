@@ -24,6 +24,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 📦 **JSON import/export** — Backup and restore budgets locally
 - 📊 **CSV export** — Download monthly and annual budget line items for spreadsheet use
 - 🔗 **Shareable budget links** — Copy a URL that loads the current budget configuration
+- 📝 **Clipboard summary export** — Copy a markdown-like budget summary for Slack/Notion sharing
 - 📋 **Named budgets** — Save and reload custom budget snapshots locally
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
