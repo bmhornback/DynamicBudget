@@ -14,6 +14,7 @@ import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
 import { STATE_LABELS } from '@/lib/taxCalculations';
+import { adjustExpensesForColi, getColiIndex, getColiTierLabel } from '@/lib/coliData';
 
 interface BudgetFormProps {
   inputs: BudgetInputs;
@@ -158,9 +159,73 @@ function NumberSlider({
 }
 
 export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFormProps) {
+  const [coliBanner, setColiBanner] = React.useState<{
+    fromState: StateOfResidence;
+    toState: StateOfResidence;
+  } | null>(null);
+
+  function handleStateChange(newState: StateOfResidence) {
+    const fromState = inputs.state;
+    const fromIndex = getColiIndex(fromState);
+    const toIndex = getColiIndex(newState);
+    const diffPercent = fromIndex > 0 ? Math.abs(((toIndex - fromIndex) / fromIndex) * 100) : 0;
+    if (newState !== fromState && diffPercent >= 2) {
+      setColiBanner({ fromState, toState: newState });
+    } else {
+      setColiBanner(null);
+    }
+    onChange({ state: newState });
+  }
+
+  function applyColiAdjustment() {
+    if (!coliBanner) return;
+    const adjustments = adjustExpensesForColi(inputs, coliBanner.fromState, coliBanner.toState);
+    onChange(adjustments);
+    setColiBanner(null);
+  }
   const savingsPercentOfNetIncome = Number.isFinite(inputs.savingsPercentOfNetIncome)
     ? inputs.savingsPercentOfNetIncome
     : DEFAULT_INPUTS.savingsPercentOfNetIncome;
+  let coliBannerContent: React.ReactNode = null;
+  if (coliBanner) {
+    const fromLabel = STATE_LABELS[coliBanner.fromState] ?? coliBanner.fromState;
+    const toLabel = STATE_LABELS[coliBanner.toState] ?? coliBanner.toState;
+    const fromIndex = getColiIndex(coliBanner.fromState);
+    const toIndex = getColiIndex(coliBanner.toState);
+    const isMoreExpensive = toIndex > fromIndex;
+    const diffPercent = fromIndex > 0
+      ? Math.abs(((toIndex - fromIndex) / fromIndex) * 100).toFixed(1)
+      : '0';
+
+    coliBannerContent = (
+      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 p-3 text-sm">
+        <p className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+          📍 Cost of Living Change Detected
+        </p>
+        <p className="text-blue-700 dark:text-blue-300 text-xs mb-2">
+          {toLabel} ({getColiTierLabel(toIndex)}, index {toIndex.toFixed(0)}) is{' '}
+          <strong>{diffPercent}% {isMoreExpensive ? 'more expensive' : 'cheaper'}</strong>{' '}
+          than {fromLabel} (index {fromIndex.toFixed(0)}). Scale variable expenses to match?
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={applyColiAdjustment}
+            className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          >
+            Adjust Expenses
+          </button>
+          <button
+            type="button"
+            onClick={() => setColiBanner(null)}
+            className="text-xs px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Keep Current
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const field = (id: keyof BudgetInputs, label: string, description?: string) => (
     <BudgetFieldInput
@@ -268,8 +333,10 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           label="State of Residence"
           value={inputs.state}
           options={STATE_OPTIONS}
-          onChange={(v) => onChange({ state: v as StateOfResidence })}
+          onChange={(v) => handleStateChange(v as StateOfResidence)}
         />
+
+        {coliBannerContent}
 
         <SelectField
           label="Filing Status"

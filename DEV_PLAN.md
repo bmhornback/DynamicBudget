@@ -398,10 +398,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - Mortgage calculator: loan amount, rate, term → monthly payment
 - **Progress:** Added renter/homeowner housing mode toggle, homeowner housing fields (mortgage/property tax/home insurance/maintenance reserve), and homeowner-aware labels for housing payment + home equity tracking in savings/dashboard/comparison surfaces.
 
-### E5-T4 · Cost-of-living index comparison
-- Integrate a static COLI dataset (e.g., NerdWallet / MIT Living Wage data)
-- When switching states/cities, offer a "Adjust for cost of living" option that scales expenses proportionally
-- Show a "purchasing power" comparison: "$150k in Atlanta ≈ $X in San Diego"
+### E5-T4 · Cost-of-living index comparison ✅ Done
+- Integrated a static COLI dataset (MERIC 2023–2024 composite, all 50 states + DC, US avg = 100) in `lib/coliData.ts`
+- When switching states in the form, a banner offers to scale variable expenses proportionally to the new COLI ratio ✅
+- Dashboard `ColiCard` shows purchasing power equivalence ("$150k in Atlanta ≈ $X in San Diego") and COLI tier labels ✅
+- `adjustExpensesForColi` scales housing, utilities, food, transport, health, pets, and lifestyle fields by the COLI ratio ✅
+- 25 unit tests in `lib/__tests__/coliData.test.ts` ✅
 
 ### E5-T5 · Paycheck calculator mode
 - Input: pay frequency (bi-weekly, semi-monthly, monthly, weekly)
@@ -697,7 +699,7 @@ States to add (in priority order based on population and no-income-tax interest)
 ### v1.5 — "Grow It"
 - Epic 3 complete
 - Epic 4 complete (including projection chart, rebalance diff)
-- Epic 5-T1 through T4 (multi-scenario expansion, debt payoff, homeowner mode, COLI)
+- Epic 5-T1 through T4 (multi-scenario expansion, debt payoff, homeowner mode, COLI) ✅ T1–T4 complete
 - Epic 7 complete
 
 ### v2.0 — "Platform"

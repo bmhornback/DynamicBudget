@@ -20,6 +20,7 @@ import SavingsSummary from './SavingsSummary';
 import BudgetHealthScore from './BudgetHealthScore';
 import RecommendationList from './RecommendationList';
 import BudgetCard from './BudgetCard';
+import ColiCard from './ColiCard';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -120,6 +121,7 @@ export default function BudgetDashboard({
         <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} />
         <LongTermGoalsDetail goals={goalProjections} />
         <FinancialLiteracyDetail insights={literacyInsights} />
+        <ColiCard currentState={inputs.state} annualSalary={inputs.annualSalary} />
       </div>
 
       {/* Recommendations */}
