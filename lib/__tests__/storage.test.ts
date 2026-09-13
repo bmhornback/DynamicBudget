@@ -6,6 +6,7 @@ import {
   encodeBudgetInputsForShare,
   exportBudgetQuickSummary,
   loadBudgetInputsFromShareUrl,
+  SHARE_PAYLOAD_VERSION,
 } from '../storage';
 import { Buffer as NodeBuffer } from 'node:buffer';
 
@@ -15,6 +16,42 @@ describe('shareable budget URL helpers', () => {
     const decoded = decodeBudgetInputsFromShare(encoded);
 
     expect(decoded).toEqual(DEFAULT_INPUTS);
+  });
+
+  it('keeps share payload compact for mostly-default budgets', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      annualSalary: DEFAULT_INPUTS.annualSalary + 1000,
+      rent: DEFAULT_INPUTS.rent + 50,
+    };
+
+    const compactEncoded = encodeBudgetInputsForShare(inputs);
+    const legacyEncoded = NodeBuffer.from(JSON.stringify(inputs), 'utf-8').toString('base64url');
+
+    expect(compactEncoded.length).toBeLessThan(legacyEncoded.length);
+  });
+
+  it('decodes legacy full-input payloads for backward compatibility', () => {
+    const legacyEncoded = NodeBuffer.from(JSON.stringify(DEFAULT_INPUTS), 'utf-8').toString('base64url');
+    const decoded = decodeBudgetInputsFromShare(legacyEncoded);
+
+    expect(decoded).toEqual(DEFAULT_INPUTS);
+  });
+
+  it('returns null for unsupported versioned payloads', () => {
+    const encoded = NodeBuffer.from(
+      JSON.stringify({ v: SHARE_PAYLOAD_VERSION + 1, i: { annualSalary: 1 } }),
+      'utf-8'
+    ).toString('base64url');
+    expect(decodeBudgetInputsFromShare(encoded)).toBeNull();
+  });
+
+  it('returns null for versioned payloads with null inputs', () => {
+    const encoded = NodeBuffer.from(
+      JSON.stringify({ v: SHARE_PAYLOAD_VERSION, i: null }),
+      'utf-8'
+    ).toString('base64url');
+    expect(decodeBudgetInputsFromShare(encoded)).toBeNull();
   });
 
   describe('exportBudgetQuickSummary', () => {
