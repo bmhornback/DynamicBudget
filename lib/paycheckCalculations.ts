@@ -134,13 +134,31 @@ export function calculatePaycheckBreakdown(
     });
   }
 
-  // After-tax retirement (Roth 401k)
+  // IRA contributions (Traditional = pre-tax, Roth = after-tax)
+  const monthlyIRA = breakdown.retirement.monthlyIRA + breakdown.retirement.monthlyIRACatchUp;
+  const iraType = breakdown.retirement.iraType;
+  if (monthlyIRA > 0 && iraType === 'traditional') {
+    preTaxDeductions.push({
+      label: 'IRA (Traditional)',
+      perPaycheck: toPerPaycheck(monthlyIRA, frequency),
+      monthly: monthlyIRA,
+    });
+  }
+
+  // After-tax retirement (Roth 401k, Roth IRA)
   const afterTaxRetirement: PaycheckLineItem[] = [];
   if (monthly401k > 0 && !isTraditional401k) {
     afterTaxRetirement.push({
       label: '401(k) Roth',
       perPaycheck: toPerPaycheck(monthly401k, frequency),
       monthly: monthly401k,
+    });
+  }
+  if (monthlyIRA > 0 && iraType === 'roth') {
+    afterTaxRetirement.push({
+      label: 'IRA (Roth)',
+      perPaycheck: toPerPaycheck(monthlyIRA, frequency),
+      monthly: monthlyIRA,
     });
   }
 

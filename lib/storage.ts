@@ -371,7 +371,8 @@ function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
   if (!Array.isArray(mergedInputs.longTermGoals)) {
     mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
   }
-  if (!mergedInputs.payFrequency) {
+  const VALID_PAY_FREQUENCIES = new Set(['weekly', 'biweekly', 'semimonthly', 'monthly']);
+  if (!mergedInputs.payFrequency || !VALID_PAY_FREQUENCIES.has(mergedInputs.payFrequency)) {
     mergedInputs.payFrequency = DEFAULT_INPUTS.payFrequency;
   }
 

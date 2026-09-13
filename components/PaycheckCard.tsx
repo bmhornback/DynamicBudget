@@ -79,6 +79,8 @@ export default function PaycheckCard({ paycheckBreakdown }: PaycheckCardProps) {
       {/* View toggle */}
       <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 mb-4 text-sm">
         <button
+          type="button"
+          aria-pressed={viewMode === 'paycheck'}
           onClick={() => setViewMode('paycheck')}
           className={`flex-1 py-1.5 font-medium transition-colors ${
             viewMode === 'paycheck'
@@ -89,6 +91,8 @@ export default function PaycheckCard({ paycheckBreakdown }: PaycheckCardProps) {
           Paycheck Detail
         </button>
         <button
+          type="button"
+          aria-pressed={viewMode === 'allocation'}
           onClick={() => setViewMode('allocation')}
           className={`flex-1 py-1.5 font-medium transition-colors ${
             viewMode === 'allocation'

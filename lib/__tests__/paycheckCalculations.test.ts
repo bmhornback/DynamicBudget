@@ -250,6 +250,67 @@ describe('calculatePaycheckBreakdown', () => {
       const b = calculatePaycheckBreakdown(makeInputs({ payFrequency: 'monthly' }), makeBreakdown());
       expect(b.preTaxDeductions.find((d) => d.label === 'HSA')).toBeUndefined();
     });
+
+    it('Traditional IRA appears in preTaxDeductions', () => {
+      const overrideRetirement = {
+        ...makeBreakdown().retirement,
+        monthlyIRA: 500,
+        annualIRA: 6000,
+        iraType: 'traditional' as const,
+        isMaxingIRA: false,
+      };
+      const b = calculatePaycheckBreakdown(
+        makeInputs({ payFrequency: 'monthly' }),
+        makeBreakdown({ retirement: overrideRetirement }),
+      );
+      const entry = b.preTaxDeductions.find((d) => d.label === 'IRA (Traditional)');
+      expect(entry).toBeDefined();
+      expect(entry!.perPaycheck).toBeCloseTo(500, 5);
+      expect(b.afterTaxRetirement.find((d) => d.label === 'IRA (Roth)')).toBeUndefined();
+    });
+
+    it('Roth IRA appears in afterTaxRetirement, not preTaxDeductions', () => {
+      const overrideRetirement = {
+        ...makeBreakdown().retirement,
+        monthlyIRA: 500,
+        annualIRA: 6000,
+        iraType: 'roth' as const,
+        isMaxingIRA: false,
+      };
+      const b = calculatePaycheckBreakdown(
+        makeInputs({ payFrequency: 'monthly' }),
+        makeBreakdown({ retirement: overrideRetirement }),
+      );
+      const afterEntry = b.afterTaxRetirement.find((d) => d.label === 'IRA (Roth)');
+      expect(afterEntry).toBeDefined();
+      expect(afterEntry!.perPaycheck).toBeCloseTo(500, 5);
+      expect(b.preTaxDeductions.find((d) => d.label === 'IRA (Traditional)')).toBeUndefined();
+    });
+
+    it('IRA catch-up is included in the IRA line item', () => {
+      const overrideRetirement = {
+        ...makeBreakdown().retirement,
+        monthlyIRA: 500,
+        annualIRA: 6000,
+        monthlyIRACatchUp: 83.33,
+        annualIRACatchUp: 1000,
+        iraType: 'traditional' as const,
+        isMaxingIRA: true,
+      };
+      const b = calculatePaycheckBreakdown(
+        makeInputs({ payFrequency: 'monthly' }),
+        makeBreakdown({ retirement: overrideRetirement }),
+      );
+      const entry = b.preTaxDeductions.find((d) => d.label === 'IRA (Traditional)');
+      expect(entry).toBeDefined();
+      expect(entry!.perPaycheck).toBeCloseTo(583.33, 2);
+    });
+
+    it('no IRA entry when monthlyIRA=0', () => {
+      const b = calculatePaycheckBreakdown(makeInputs({ payFrequency: 'monthly' }), makeBreakdown());
+      expect(b.preTaxDeductions.find((d) => d.label === 'IRA (Traditional)')).toBeUndefined();
+      expect(b.afterTaxRetirement.find((d) => d.label === 'IRA (Roth)')).toBeUndefined();
+    });
   });
 
   describe('taxes', () => {
