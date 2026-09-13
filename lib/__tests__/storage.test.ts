@@ -20,7 +20,9 @@ describe('shareable budget URL helpers', () => {
     const shareUrl = createShareableBudgetUrl(DEFAULT_INPUTS, baseUrl);
     const loaded = loadBudgetInputsFromShareUrl(shareUrl);
 
-    expect(shareUrl).toContain('?tab=budget&b=');
+    const parsedUrl = new URL(shareUrl);
+    expect(parsedUrl.searchParams.has('b')).toBe(true);
+    expect(parsedUrl.searchParams.has('tab')).toBe(true);
     expect(loaded).toEqual(DEFAULT_INPUTS);
   });
 

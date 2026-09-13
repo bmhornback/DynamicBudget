@@ -155,6 +155,8 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
 
             {shareMessage && (
               <p
+                role="status"
+                aria-live="polite"
                 className={`px-1 text-xs ${
                   shareMessage.toLowerCase().includes('failed')
                     ? 'text-red-600 dark:text-red-400'
