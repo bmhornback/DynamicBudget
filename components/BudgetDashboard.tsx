@@ -44,7 +44,7 @@ export default function BudgetDashboard({
 
   // Buffer status banner
   const bufferBanner = isOverBudget ? (
-    <div role="status" aria-live="polite" className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+    <div role="status" aria-live="polite" aria-atomic="true" className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
       <span className="text-2xl">🚨</span>
       <div>
         <p className="font-bold text-red-800">Over Budget by {formatCurrency(deficit)}/month</p>
@@ -52,7 +52,7 @@ export default function BudgetDashboard({
       </div>
     </div>
   ) : remainingMonthlyBuffer < 250 ? (
-    <div role="status" aria-live="polite" className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+    <div role="status" aria-live="polite" aria-atomic="true" className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
       <span className="text-2xl">⚠️</span>
       <div>
         <p className="font-bold text-amber-800">Thin Buffer: {formatCurrency(remainingMonthlyBuffer)}/month</p>
@@ -60,7 +60,7 @@ export default function BudgetDashboard({
       </div>
     </div>
   ) : (
-    <div role="status" aria-live="polite" className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+    <div role="status" aria-live="polite" aria-atomic="true" className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
       <span className="text-2xl">✅</span>
       <div>
         <p className="font-bold text-green-800">Surplus: {formatCurrency(surplus)}/month</p>

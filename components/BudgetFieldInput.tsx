@@ -37,6 +37,8 @@ export default function BudgetFieldInput({
   const [raw, setRaw] = React.useState(value.toString());
   const [focused, setFocused] = React.useState(false);
   const [prevValue, setPrevValue] = React.useState(value);
+  const descriptionId = description ? `${id}-description` : undefined;
+  const validationId = validationMessageId(id);
 
   // Keep raw in sync when value changes from outside (e.g., rebalance)
   if (!focused && prevValue !== value) {
@@ -62,6 +64,9 @@ export default function BudgetFieldInput({
   };
 
   const validationMessage = validate ? validate(value) : null;
+  const describedBy = [descriptionId, validationMessage ? validationId : undefined]
+    .filter(Boolean)
+    .join(' ') || undefined;
 
   return (
     <div className={`flex flex-col rounded-lg transition-colors ${
@@ -73,6 +78,9 @@ export default function BudgetFieldInput({
           type="button"
           onClick={() => onToggleLock(id)}
           title={isLocked ? 'Unlock field' : 'Lock field'}
+          aria-label={`${isLocked ? 'Unlock' : 'Lock'} ${label}`}
+          aria-pressed={isLocked}
+          aria-controls={id}
           className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs transition-colors ${
             isLocked
               ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800'
@@ -91,7 +99,12 @@ export default function BudgetFieldInput({
         >
           {label}
           {description && (
-            <span className="block text-xs text-gray-400 dark:text-gray-500 truncate">{description}</span>
+            <span
+              id={descriptionId}
+              className="block text-xs text-gray-400 dark:text-gray-500 truncate"
+            >
+              {description}
+            </span>
           )}
         </label>
 
@@ -112,6 +125,7 @@ export default function BudgetFieldInput({
             min={min}
             max={max}
             step="1"
+            aria-describedby={describedBy}
             className={`w-28 text-right text-sm rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
               prefix ? 'pl-6' : ''
             } ${suffix ? 'pr-8' : ''} ${
@@ -132,9 +146,13 @@ export default function BudgetFieldInput({
       {validationMessage && (
         <div className="px-3 pb-2 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
           <span aria-hidden="true">⚠️</span>
-          <span role="alert">{validationMessage}</span>
+          <span id={validationId} role="alert">{validationMessage}</span>
         </div>
       )}
     </div>
   );
+}
+
+function validationMessageId(id: string) {
+  return `${id}-validation`;
 }
