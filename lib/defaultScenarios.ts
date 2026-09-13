@@ -144,6 +144,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   budgetMode: 'manual',
   rebalanceStrategy: 'reduce_lifestyle_first',
   surplusAllocation: 'house_fund',
+  payFrequency: 'semimonthly',
   spendingHistory: { entries: [], lastUpdated: '', version: 1 },
 };
 

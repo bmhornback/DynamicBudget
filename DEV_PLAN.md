@@ -58,6 +58,7 @@
 | Roth vs Traditional IRA | ✅ Done |
 | HSA / FSA | ✅ HSA modeled |
 | Multi-scenario comparison | ✅ Basic side-by-side comparison |
+| Paycheck calculator (per-paycheck budget allocation) | ✅ Done |
 | Named budget slots (save / load / delete by name) | ✅ Done |
 | Custom scenario presets (save current state as preset) | ✅ Done |
 | Dark mode (system + manual toggle, persisted) | ✅ Done |
@@ -405,10 +406,13 @@ States to add (in priority order based on population and no-income-tax interest)
 - `adjustExpensesForColi` scales housing, utilities, food, transport, health, pets, and lifestyle fields by the COLI ratio ✅
 - 25 unit tests in `lib/__tests__/coliData.test.ts` ✅
 
-### E5-T5 · Paycheck calculator mode
-- Input: pay frequency (bi-weekly, semi-monthly, monthly, weekly)
-- Output: per-paycheck net amount and per-paycheck allocation of each budget line
-- Useful for matching budget to actual paycheck deposits
+### E5-T5 · Paycheck calculator mode ✅ Done
+- Input: pay frequency (weekly, bi-weekly, semi-monthly, monthly) selectable in Income & Taxes form section
+- Output: per-paycheck net amount (gross → pre-tax deductions → taxes → after-tax deductions → take-home) and per-paycheck allocation of each budget line
+- `PayFrequency` type added to `types/budget.ts`; `payFrequency` field on `BudgetInputs`; default `semimonthly`
+- `lib/paycheckCalculations.ts` — `calculatePaycheckBreakdown`, `toPerPaycheck`, `monthlyToPaycheckMultiplier`, label maps
+- `components/PaycheckCard.tsx` — dashboard card with "Paycheck Detail" (deduction waterfall) and "Budget Allocation" (bar-chart allocation view) tabs
+- Backward-compatible migration in `lib/storage.ts`; 35+ unit tests in `lib/__tests__/paycheckCalculations.test.ts`
 
 ### E5-T6 · Irregular income support
 - For freelancers / variable-income users, add a "Monthly income variability" field

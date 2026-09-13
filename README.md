@@ -40,9 +40,10 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🧠 **Financial literacy tips** — Personalized education prompts around emergency funds, retirement, debt, and goal tradeoffs
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
+- 🏦 **Paycheck calculator** — Select your pay frequency (weekly, bi-weekly, semi-monthly, or monthly) and see every budget line translated into per-paycheck amounts; includes a deduction waterfall (gross → pre-tax → taxes → take-home) and a per-paycheck allocation view with spend-ratio bars
+
 ### Upcoming Features
 - 📋 Deeper multi-scenario workflows
-- 📊 Cost-of-living comparisons for move planning
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 
 ## Getting Started

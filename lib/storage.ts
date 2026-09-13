@@ -1,4 +1,4 @@
-import type { BudgetInputs, NamedBudget, CustomPreset } from '@/types/budget';
+import type { BudgetInputs, NamedBudget, CustomPreset, PayFrequency } from '@/types/budget';
 import { initializeSpendingHistory } from './spendingTrends';
 import { DEFAULT_INPUTS } from './defaultScenarios';
 import { calculateBudgetBreakdown } from './budgetCalculations';
@@ -11,6 +11,8 @@ const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
 const CUSTOM_PRESETS_KEY = 'dynamicbudget_custom_presets';
 export const SHARE_PARAM_KEY = 'b';
 const STORAGE_VERSION = 1;
+
+const VALID_PAY_FREQUENCIES = new Set<PayFrequency>(['weekly', 'biweekly', 'semimonthly', 'monthly']);
 
 // Legacy keys used before the DynamicBudget rename — kept for one-time migration only
 const LEGACY_STORAGE_KEY = 'movemath_budget_inputs';
@@ -370,6 +372,9 @@ function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
   }
   if (!Array.isArray(mergedInputs.longTermGoals)) {
     mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
+  }
+  if (!mergedInputs.payFrequency || !VALID_PAY_FREQUENCIES.has(mergedInputs.payFrequency)) {
+    mergedInputs.payFrequency = DEFAULT_INPUTS.payFrequency;
   }
 
   return mergedInputs;
