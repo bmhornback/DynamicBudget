@@ -13,6 +13,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
+- ♿ **Accessibility-minded UI** — Keyboard-operable controls, labeled form fields, and live status messaging for key budget updates
 - 🎯 **Long-term goal planner** — Track house, vacation, retirement, kids, and custom major-purchase targets
 - 🧾 **Business expense guide** — Categorize, track, and estimate potential business tax write-offs with recordkeeping prompts
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
@@ -175,7 +176,7 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** expand v1.5 with multi-scenario enhancements and debt payoff amortization groundwork.
+**Current focus:** finish accessibility closeout work, then continue the next v1.5 budgeting workflow expansions.
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 

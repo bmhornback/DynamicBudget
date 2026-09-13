@@ -90,7 +90,7 @@
 
 ### Known gaps / rough edges
 
-- Accessibility polish is improved but not complete — additional keyboard, contrast, and screen-reader audits are still desirable.
+- Accessibility polish is improved but not complete — keyboard and ARIA baselines are stronger now, but contrast audits and dedicated screen-reader validation are still desirable.
 - Multi-scenario comparison currently focuses on the live budget plus preset scenarios; named saved budgets are still future work.
 - 2027 tax brackets not yet published by IRS (typically available late 2026).
 - County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
@@ -436,11 +436,13 @@ States to add (in priority order based on population and no-income-tax interest)
 - Ensure all interactive elements are reachable and operable via keyboard
 - Focus ring visible on all focusable elements
 - Logical tab order in the form
+- **Kickoff progress:** Custom toggle cards now use keyboard-operable switch buttons, form section headers expose `aria-controls`, and slider labels are explicitly tied to inputs.
 
 ### E6-T2 · ARIA attributes and screen reader support
 - Add `aria-label`, `aria-describedby`, and `role` attributes to dynamic regions (health score, buffer banner, recommendations)
 - Test with VoiceOver (macOS) and NVDA (Windows)
 - Budget form fields should have descriptive labels, not just placeholder text
+- **Kickoff progress:** Salary/pet count inputs now have explicit labels, validation hints are connected with `aria-describedby`, lock buttons announce their target field, and the COLI/banner status regions use polite live announcements.
 
 ### E6-T3 · Color contrast audit
 - Run Lighthouse accessibility audit
