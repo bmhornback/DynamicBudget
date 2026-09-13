@@ -292,7 +292,7 @@ export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
   return [
     `DynamicBudget Quick Summary (${todayDateStr()})`,
     '',
-    `State: ${STATE_LABELS[inputs.state] ?? inputs.state} · Filing: ${toReadableLabel(inputs.filingStatus)} · Housing: ${toReadableLabel(inputs.housingMode)}`,
+    `State: ${STATE_LABELS[inputs.state] ?? toReadableLabel(inputs.state)} · Filing: ${toReadableLabel(inputs.filingStatus)} · Housing: ${toReadableLabel(inputs.housingMode)}`,
     `Budget Health Score: ${healthScore}/100 (${formatPercent(breakdown.savingsRateNet, 1)} net savings rate)`,
     '',
     '| Category | Monthly | Annual |',

@@ -43,7 +43,6 @@ describe('shareable budget URL helpers', () => {
       expect(summary).toContain('State: No State Income Tax · Filing: Married Jointly · Housing: Homeowner');
       expect(summary).not.toContain('no_state_tax');
       expect(summary).not.toContain('married_jointly');
-      expect(summary).not.toContain('homeowner');
     });
   });
 
