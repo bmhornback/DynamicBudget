@@ -8,6 +8,7 @@ import type {
   FilingStatus,
   HousingMode,
   LongTermGoalCategory,
+  PayFrequency,
   StateOfResidence,
 } from '@/types/budget';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
@@ -15,6 +16,7 @@ import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
 import { STATE_LABELS } from '@/lib/taxCalculations';
 import { adjustExpensesForColi, getColiIndex, getColiTierLabel } from '@/lib/coliData';
+import { PAY_FREQUENCY_LABELS } from '@/lib/paycheckCalculations';
 
 interface BudgetFormProps {
   inputs: BudgetInputs;
@@ -43,6 +45,10 @@ const HOUSING_MODE_OPTIONS: Array<{ value: HousingMode; label: string }> = [
   { value: 'renter', label: 'Renter' },
   { value: 'homeowner', label: 'Homeowner' },
 ];
+
+const PAY_FREQUENCY_OPTIONS: Array<{ value: PayFrequency; label: string }> = (
+  Object.entries(PAY_FREQUENCY_LABELS) as Array<[PayFrequency, string]>
+).map(([value, label]) => ({ value, label }));
 
 const LONG_TERM_GOAL_OPTIONS: Array<{ value: LongTermGoalCategory; label: string }> = [
   { value: 'house', label: 'House' },
@@ -421,6 +427,13 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         {field('bonusIncome', 'Annual Bonus Income')}
         {field('otherMonthlyIncome', 'Other Monthly Income')}
         {field('iraContribution', 'Monthly IRA Contribution', inputs.userAge >= 50 ? 'Capped at $8,000/year' : 'Capped at $7,000/year')}
+
+        <SelectField
+          label="Pay Frequency"
+          value={inputs.payFrequency}
+          options={PAY_FREQUENCY_OPTIONS}
+          onChange={(v) => onChange({ payFrequency: v as PayFrequency })}
+        />
       </BudgetSection>
 
       {/* ── Housing ──────────────────────────────────────────────────── */}

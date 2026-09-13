@@ -48,6 +48,7 @@ export type SurplusAllocation =
 
 export type BudgetMode = 'manual' | 'auto';
 export type HousingMode = 'renter' | 'homeowner';
+export type PayFrequency = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
 
 export type IRAType = 'traditional' | 'roth';
 export type LongTermGoalCategory =
@@ -290,6 +291,7 @@ export interface BudgetInputs {
   budgetMode: BudgetMode;
   rebalanceStrategy: RebalanceStrategy;
   surplusAllocation: SurplusAllocation;
+  payFrequency: PayFrequency;
 
   // Spending history for trend tracking
   spendingHistory?: SpendingHistory;

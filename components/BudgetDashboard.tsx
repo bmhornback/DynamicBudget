@@ -21,6 +21,8 @@ import BudgetHealthScore from './BudgetHealthScore';
 import RecommendationList from './RecommendationList';
 import BudgetCard from './BudgetCard';
 import ColiCard from './ColiCard';
+import PaycheckCard from './PaycheckCard';
+import { calculatePaycheckBreakdown } from '@/lib/paycheckCalculations';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -41,6 +43,7 @@ export default function BudgetDashboard({
   const { isOverBudget, deficit, surplus, remainingMonthlyBuffer, netMonthlyIncome } = breakdown;
   const goalProjections = calculateLongTermGoalProjections(inputs, breakdown);
   const literacyInsights = generateFinancialLiteracyInsights(inputs, breakdown, goalProjections);
+  const paycheckBreakdown = calculatePaycheckBreakdown(inputs, breakdown);
 
   // Buffer status banner
   const bufferBanner = isOverBudget ? (
@@ -121,6 +124,7 @@ export default function BudgetDashboard({
         <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} />
         <LongTermGoalsDetail goals={goalProjections} />
         <FinancialLiteracyDetail insights={literacyInsights} />
+        <PaycheckCard paycheckBreakdown={paycheckBreakdown} />
         <ColiCard currentState={inputs.state} annualSalary={inputs.annualSalary} />
       </div>
 
