@@ -207,7 +207,7 @@ export default function PaycheckCard({ paycheckBreakdown }: PaycheckCardProps) {
           </div>
 
           <p className="mt-3 text-xs text-gray-400 dark:text-gray-500 text-center">
-            {paychecksPerYear} paychecks / year · monthly ÷ {paychecksPerYear / 12 !== 1 ? `(${paychecksPerYear}/12)` : '1'}
+            {paychecksPerYear} paychecks / year · monthly ÷ {paychecksPerYear !== 12 ? `(${paychecksPerYear}/12)` : '1'}
           </p>
         </div>
       )}

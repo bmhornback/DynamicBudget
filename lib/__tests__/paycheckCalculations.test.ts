@@ -213,6 +213,20 @@ describe('calculatePaycheckBreakdown', () => {
       expect(entry).toBeDefined();
     });
 
+    it('Roth 401k reduces netPerPaycheck (not already deducted by tax engine)', () => {
+      const traditional = calculatePaycheckBreakdown(
+        makeInputs({ payFrequency: 'monthly', is401kRoth: false }),
+        makeBreakdown(),
+      );
+      const roth = calculatePaycheckBreakdown(
+        makeInputs({ payFrequency: 'monthly', is401kRoth: true }),
+        makeBreakdown(),
+      );
+      // Roth 401k monthly = 750; netMonthlyIncome = 7000
+      expect(roth.netPerPaycheck).toBeCloseTo(7000 - 750, 5);
+      expect(traditional.netPerPaycheck).toBeCloseTo(7000, 5);
+    });
+
     it('HSA appears in preTaxDeductions when present', () => {
       const overrideRetirement = {
         ...makeBreakdown().retirement,
