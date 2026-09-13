@@ -216,7 +216,8 @@ export default function PaycheckCard({ paycheckBreakdown }: PaycheckCardProps) {
 }
 
 function AllocationRow({ item, netPerPaycheck }: { item: PaycheckLineItem; netPerPaycheck: number }) {
-  const pct = netPerPaycheck > 0 ? Math.round((item.perPaycheck / netPerPaycheck) * 100) : 0;
+  const rawPct = netPerPaycheck > 0 ? Math.round((item.perPaycheck / netPerPaycheck) * 100) : 0;
+  const clampedPct = Math.min(Math.max(rawPct, 0), 100);
   return (
     <div className="py-1.5">
       <div className="flex justify-between items-baseline mb-0.5">
@@ -227,10 +228,10 @@ function AllocationRow({ item, netPerPaycheck }: { item: PaycheckLineItem; netPe
         <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
           <div
             className="bg-green-400 dark:bg-green-500 rounded-full h-1.5 transition-all"
-            style={{ width: `${Math.min(Math.max(pct, 0), 100)}%` }}
+            style={{ width: `${clampedPct}%` }}
           />
         </div>
-        <span className="text-xs text-gray-400 dark:text-gray-500 w-7 text-right">{pct}%</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 w-7 text-right">{clampedPct}%</span>
       </div>
     </div>
   );

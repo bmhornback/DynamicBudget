@@ -213,7 +213,9 @@ describe('calculatePaycheckBreakdown', () => {
       expect(entry).toBeDefined();
     });
 
-    it('Roth 401k reduces netPerPaycheck (not already deducted by tax engine)', () => {
+    it('netPerPaycheck equals netMonthlyIncome scaled to frequency (already net of all deductions)', () => {
+      // breakdown.netMonthlyIncome is post-tax, post-401k (both Traditional and Roth),
+      // post-HSA, post-IRA — no further deduction needed in paycheckCalculations.
       const traditional = calculatePaycheckBreakdown(
         makeInputs({ payFrequency: 'monthly', is401kRoth: false }),
         makeBreakdown(),
@@ -222,9 +224,10 @@ describe('calculatePaycheckBreakdown', () => {
         makeInputs({ payFrequency: 'monthly', is401kRoth: true }),
         makeBreakdown(),
       );
-      // Roth 401k monthly = 750; netMonthlyIncome = 7000
-      expect(roth.netPerPaycheck).toBeCloseTo(7000 - 750, 5);
+      // Both use the same mocked netMonthlyIncome = 7000; in real usage the tax engine
+      // already accounts for the 401k type before producing netMonthlyIncome.
       expect(traditional.netPerPaycheck).toBeCloseTo(7000, 5);
+      expect(roth.netPerPaycheck).toBeCloseTo(7000, 5);
     });
 
     it('HSA appears in preTaxDeductions when present', () => {

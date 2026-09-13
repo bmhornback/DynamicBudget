@@ -155,11 +155,10 @@ export function calculatePaycheckBreakdown(
         }
       : null;
 
-  // Net take-home = monthly net income minus Roth 401k (after-tax deduction not already removed).
-  // breakdown.netMonthlyIncome is post-tax but does not deduct Roth 401k contributions, since Roth
-  // contributions are made from after-tax dollars and the budget engine treats them as a savings line.
-  const roth401kMonthly = !isTraditional401k ? monthly401k : 0;
-  const netPerPaycheck = (breakdown.netMonthlyIncome - roth401kMonthly) * multiplier;
+  // breakdown.netMonthlyIncome is already net of all taxes, Traditional 401k pre-tax deductions,
+  // Roth 401k after-tax deductions, HSA, and IRA (see taxCalculations.ts calculateNetMonthlyIncome).
+  // No further deductions are needed here.
+  const netPerPaycheck = breakdown.netMonthlyIncome * multiplier;
 
   // Budget allocations grouped by category
   const allocations: PaycheckLineItem[] = [
