@@ -94,16 +94,23 @@ function ToggleField({
   onChange: (v: boolean) => void;
   description?: string;
 }) {
+  const descriptionId = React.useId();
+
   return (
-    <div
-      className="flex items-center justify-between gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-gray-200"
+    <button
+      type="button"
+      role="switch"
+      aria-checked={value}
+      aria-describedby={description ? descriptionId : undefined}
       onClick={() => onChange(!value)}
+      className="w-full flex items-center justify-between gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-gray-200 text-left"
     >
       <div>
         <p className="text-sm text-gray-700">{label}</p>
-        {description && <p className="text-xs text-gray-400">{description}</p>}
+        {description && <p id={descriptionId} className="text-xs text-gray-400">{description}</p>}
       </div>
       <div
+        aria-hidden="true"
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
           value ? 'bg-blue-600' : 'bg-gray-200'
         }`}
@@ -114,7 +121,7 @@ function ToggleField({
           }`}
         />
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -135,13 +142,16 @@ function NumberSlider({
   onChange: (v: number) => void;
   suffix?: string;
 }) {
+  const sliderId = React.useId();
+
   return (
     <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
       <div className="flex justify-between mb-1">
-        <label className="text-sm text-gray-700">{label}</label>
+        <label htmlFor={sliderId} className="text-sm text-gray-700">{label}</label>
         <span className="text-sm font-medium text-gray-900">{value}{suffix}</span>
       </div>
       <input
+        id={sliderId}
         type="range"
         min={min}
         max={max}
@@ -198,7 +208,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       : '0';
 
     coliBannerContent = (
-      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 p-3 text-sm">
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 p-3 text-sm"
+      >
         <p className="font-medium text-blue-800 dark:text-blue-200 mb-1">
           📍 Cost of Living Change Detected
         </p>
@@ -315,10 +329,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       {/* ── Income & Tax ─────────────────────────────────────────────── */}
       <BudgetSection title="Income & Taxes" icon="💰">
         <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-          <label className="text-sm text-gray-700 block mb-1">Annual Gross Salary</label>
+          <label htmlFor="annualSalary" className="text-sm text-gray-700 block mb-1">Annual Gross Salary</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
             <input
+              id="annualSalary"
               type="number"
               value={inputs.annualSalary}
               onChange={(e) => onChange({ annualSalary: Math.max(0, Number(e.target.value)) })}
@@ -487,8 +502,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         {inputs.petsEnabled && (
           <>
             <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-              <label className="text-sm text-gray-700 block mb-1">Number of Pets</label>
+              <label htmlFor="numberOfPets" className="text-sm text-gray-700 block mb-1">Number of Pets</label>
               <input
+                id="numberOfPets"
                 type="number"
                 value={inputs.numberOfPets}
                 onChange={(e) => onChange({ numberOfPets: Math.max(0, Number(e.target.value)) })}

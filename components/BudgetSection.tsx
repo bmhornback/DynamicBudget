@@ -19,13 +19,18 @@ export default function BudgetSection({
 }: BudgetSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const sectionId = React.useId();
+  const headingId = `${sectionId}-heading`;
+  const panelId = `${sectionId}-panel`;
 
   return (
     <div className={`mb-6 ${className}`}>
       <button
+        id={headingId}
         type="button"
         onClick={() => setIsOpen((o) => !o)}
         aria-expanded={isOpen}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between py-2 px-1 text-left group"
       >
         <div className="flex items-center gap-2">
@@ -45,6 +50,9 @@ export default function BudgetSection({
       <div className="h-px bg-gray-200 dark:bg-gray-700 mb-4" />
       <div
         ref={contentRef}
+        id={panelId}
+        role="region"
+        aria-labelledby={headingId}
         aria-hidden={!isOpen}
         className="overflow-hidden transition-all duration-200 ease-in-out"
         style={{ maxHeight: isOpen ? '9999px' : '0px', opacity: isOpen ? 1 : 0, visibility: isOpen ? 'visible' : 'hidden', pointerEvents: isOpen ? 'auto' : 'none' }}
@@ -54,4 +62,3 @@ export default function BudgetSection({
     </div>
   );
 }
-
