@@ -51,8 +51,8 @@ export default function BudgetSection({
       <div
         ref={contentRef}
         id={panelId}
-        role={isOpen ? 'region' : undefined}
-        aria-labelledby={isOpen ? headingId : undefined}
+        role="region"
+        aria-labelledby={headingId}
         aria-hidden={!isOpen}
         className="overflow-hidden transition-all duration-200 ease-in-out"
         style={{ maxHeight: isOpen ? '9999px' : '0px', opacity: isOpen ? 1 : 0, visibility: isOpen ? 'visible' : 'hidden', pointerEvents: isOpen ? 'auto' : 'none' }}

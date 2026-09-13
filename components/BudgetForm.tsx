@@ -96,15 +96,23 @@ function ToggleField({
 }) {
   const labelId = React.useId();
   const descriptionId = React.useId();
+  const toggleValue = () => onChange(!value);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    event.preventDefault();
+    toggleValue();
+  };
 
   return (
-    <button
-      type="button"
+    <div
       role="switch"
       aria-labelledby={labelId}
       aria-checked={value}
       aria-describedby={description ? descriptionId : undefined}
-      onClick={() => onChange(!value)}
+      tabIndex={0}
+      onClick={toggleValue}
+      onKeyDown={handleKeyDown}
       className="w-full flex items-center justify-between gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-gray-200 text-left"
     >
       <div>
@@ -123,7 +131,7 @@ function ToggleField({
           }`}
         />
       </div>
-    </button>
+    </div>
   );
 }
 
