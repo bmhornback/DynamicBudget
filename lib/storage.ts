@@ -434,7 +434,10 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
         console.warn('Unsupported shared budget payload version:', version);
         return null;
       }
-      if (version !== SHARE_PAYLOAD_VERSION) return null;
+      if (version !== SHARE_PAYLOAD_VERSION) {
+        console.warn('Unsupported shared budget payload version:', version);
+        return null;
+      }
       if (
         'i' in parsed &&
         (parsed as { i?: unknown }).i !== null &&
@@ -446,6 +449,7 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
     }
 
     // Backward compatibility for legacy full-input payloads.
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
     return normalizeBudgetInputs(parsed);
   } catch (error) {
     console.warn('Failed to decode shared budget:', error);
@@ -461,6 +465,8 @@ function createCompactShareInputs(inputs: BudgetInputs): Partial<BudgetInputs> {
   const compact: Partial<BudgetInputs> = {};
 
   for (const key of Object.keys(DEFAULT_INPUTS) as Array<keyof BudgetInputs>) {
+    if (key === 'spendingHistory') continue;
+
     const currentValue = inputs[key];
     const defaultValue = DEFAULT_INPUTS[key];
 
