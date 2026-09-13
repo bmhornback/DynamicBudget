@@ -100,6 +100,7 @@ function ToggleField({
     <button
       type="button"
       role="switch"
+      aria-label={label}
       aria-checked={value}
       aria-describedby={description ? descriptionId : undefined}
       onClick={() => onChange(!value)}
