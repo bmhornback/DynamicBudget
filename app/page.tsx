@@ -15,7 +15,12 @@ import {
 } from '@/lib/scenarioComparison';
 import { calculateDebtPayoffProjection } from '@/lib/debtPayoff';
 import { initializeSpendingHistory } from '@/lib/spendingTrends';
-import { saveBudgetInputs, loadBudgetInputs } from '@/lib/storage';
+import {
+  saveBudgetInputs,
+  loadBudgetInputs,
+  loadBudgetInputsFromShareUrl,
+  SHARE_PARAM_KEY,
+} from '@/lib/storage';
 import BudgetForm from '@/components/BudgetForm';
 import BudgetDashboard from '@/components/BudgetDashboard';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -43,16 +48,25 @@ const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
 type ActiveTab = 'budget' | 'trends' | 'business_expenses';
 
 export default function DynamicBudgetPage() {
-  // Initialize from localStorage if available, otherwise use defaults
-  const [inputs, setInputs] = useState<BudgetInputs>(() => {
+  const [initialLoad] = useState(() => {
+    const fromShareUrl =
+      typeof window !== 'undefined' ? loadBudgetInputsFromShareUrl(window.location.href) : null;
+    if (fromShareUrl) {
+      return { sharedInputs: fromShareUrl, initialInputs: fromShareUrl };
+    }
+
     const stored = loadBudgetInputs();
-    if (stored) return stored;
+    if (stored) {
+      return { sharedInputs: null, initialInputs: stored };
+    }
+
     const defaults = { ...DEFAULT_INPUTS };
     if (!defaults.spendingHistory) {
       defaults.spendingHistory = initializeSpendingHistory();
     }
-    return defaults;
+    return { sharedInputs: null, initialInputs: defaults };
   });
+  const [inputs, setInputs] = useState<BudgetInputs>(initialLoad.initialInputs);
   
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
@@ -86,6 +100,17 @@ export default function DynamicBudgetPage() {
 
     return () => clearTimeout(timer);
   }, [inputs]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !initialLoad.sharedInputs) return;
+    const currentUrl = new URL(window.location.href);
+    if (!currentUrl.searchParams.has(SHARE_PARAM_KEY)) return;
+
+    currentUrl.searchParams.delete(SHARE_PARAM_KEY);
+    const query = currentUrl.searchParams.toString();
+    const nextUrl = `${currentUrl.pathname}${query ? `?${query}` : ''}${currentUrl.hash}`;
+    window.history.replaceState(null, '', nextUrl);
+  }, [initialLoad.sharedInputs]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

@@ -23,6 +23,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🖨️ **PDF export** — Save a print-friendly dashboard summary to PDF from the Export / Import menu
 - 📦 **JSON import/export** — Backup and restore budgets locally
 - 📊 **CSV export** — Download monthly and annual budget line items for spreadsheet use
+- 🔗 **Shareable budget links** — Copy a URL that loads the current budget configuration
 - 📋 **Named budgets** — Save and reload custom budget snapshots locally
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
@@ -38,7 +39,6 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 ### Upcoming Features
-- 🔗 Share budgets via link
 - 📋 Deeper multi-scenario workflows
 - 📊 Cost-of-living comparisons for move planning
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)

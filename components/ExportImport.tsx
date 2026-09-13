@@ -8,6 +8,7 @@ import {
   importBudgetFromJSON,
   triggerDownload,
   todayDateStr,
+  createShareableBudgetUrl,
 } from '@/lib/storage';
 
 interface ExportImportProps {
@@ -19,6 +20,7 @@ interface ExportImportProps {
 export default function ExportImport({ currentInputs, onImport, onExportPDF }: ExportImportProps) {
   const [open, setOpen] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExportJSON = () => {
@@ -40,7 +42,23 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
 
   const handleImportClick = () => {
     setImportError(null);
+    setShareMessage(null);
     fileInputRef.current?.click();
+  };
+
+  const handleCopyShareLink = async () => {
+    if (typeof window === 'undefined' || !navigator.clipboard) {
+      setShareMessage('Copy failed: clipboard not available.');
+      return;
+    }
+
+    try {
+      const shareUrl = createShareableBudgetUrl(currentInputs, window.location.href);
+      await navigator.clipboard.writeText(shareUrl);
+      setShareMessage('Share link copied.');
+    } catch {
+      setShareMessage('Copy failed. Please try again.');
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +94,7 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
     <div className="relative">
       <button
         type="button"
-        onClick={() => { setOpen((v) => !v); setImportError(null); }}
+        onClick={() => { setOpen((v) => !v); setImportError(null); setShareMessage(null); }}
         aria-label="Export or import budget"
         aria-expanded={open}
         className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all"
@@ -125,6 +143,29 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
               📊 Export as CSV
               <span className="block text-xs text-gray-400 dark:text-gray-500">Monthly &amp; annual columns</span>
             </button>
+
+            <button
+              type="button"
+              onClick={handleCopyShareLink}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+            >
+              🔗 Copy Share Link
+              <span className="block text-xs text-gray-400 dark:text-gray-500">Loads this budget directly from URL</span>
+            </button>
+
+            {shareMessage && (
+              <p
+                role="status"
+                aria-live="polite"
+                className={`px-1 text-xs ${
+                  shareMessage.toLowerCase().includes('failed')
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-emerald-600 dark:text-emerald-400'
+                }`}
+              >
+                {shareMessage}
+              </p>
+            )}
 
             <div className="border-t border-gray-100 dark:border-gray-700 pt-2">
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-1 mb-1">
