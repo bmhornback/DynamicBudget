@@ -429,19 +429,20 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
     const parsed = JSON.parse(decoded) as unknown;
     if (parsed && typeof parsed === 'object' && 'v' in parsed) {
       const version = (parsed as { v?: unknown }).v;
-      if (typeof version !== 'number' || version < 1 || version > SHARE_PAYLOAD_VERSION) {
-        // Invalid or future payload version.
-        console.warn('Unsupported shared budget payload version:', version);
+      if (typeof version !== 'number') {
+        console.warn('Invalid shared budget payload version (not a number):', version);
         return null;
       }
       if (version !== SHARE_PAYLOAD_VERSION) {
+        // Outdated or future payload version.
         console.warn('Unsupported shared budget payload version:', version);
         return null;
       }
       if (
         'i' in parsed &&
         (parsed as { i?: unknown }).i !== null &&
-        typeof (parsed as { i?: unknown }).i === 'object'
+        typeof (parsed as { i?: unknown }).i === 'object' &&
+        !Array.isArray((parsed as { i?: unknown }).i)
       ) {
         return normalizeBudgetInputs((parsed as { i: unknown }).i);
       }
