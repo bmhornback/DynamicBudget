@@ -54,7 +54,6 @@ export default function ColiCard({ currentState, annualSalary }: ColiCardProps) 
   const compareLabel = STATE_LABELS[compareState] ?? compareState;
 
   const equivalentSalaryInCompare = calculatePurchasingPower(annualSalary, currentState, compareState);
-  const equivalentSalaryBackToCurrent = calculatePurchasingPower(annualSalary, compareState, currentState);
 
   const diff = compareIndex - currentIndex;
   const diffPercent = currentIndex > 0 ? Math.abs(((compareIndex - currentIndex) / currentIndex) * 100) : 0;
@@ -159,8 +158,8 @@ export default function ColiCard({ currentState, annualSalary }: ColiCardProps) 
           highlight={isSame ? undefined : isMoreExpensive ? 'red' : 'green'}
         />
         <DetailRow
-          label={`${formatCurrency(annualSalary)} in ${compareLabel} equals`}
-          value={`${formatCurrency(equivalentSalaryBackToCurrent)} in ${currentLabel}`}
+          label={`${formatCurrency(equivalentSalaryInCompare)} in ${compareLabel} equals`}
+          value={`${formatCurrency(annualSalary)} in ${currentLabel}`}
           highlight={isSame ? undefined : isMoreExpensive ? 'green' : 'red'}
         />
       </div>

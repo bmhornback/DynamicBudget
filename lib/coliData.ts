@@ -93,7 +93,7 @@ export function getColiTierLabel(index: number): string {
 
 /**
  * Calculate the equivalent salary in `toState` that provides the same
- * purchasing power as `salary` in `fromState`, after accounting for taxes.
+ * purchasing power as `salary` in `fromState`.
  *
  * Uses a simple COLI ratio: equivalent = salary × (toColi / fromColi).
  */
