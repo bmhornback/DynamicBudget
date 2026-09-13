@@ -173,6 +173,8 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
     fromState: StateOfResidence;
     toState: StateOfResidence;
   } | null>(null);
+  const annualSalaryId = React.useId();
+  const numberOfPetsId = React.useId();
 
   function handleStateChange(newState: StateOfResidence) {
     const fromState = inputs.state;
@@ -208,11 +210,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       : '0';
 
     coliBannerContent = (
-      <div
-        role="status"
-        aria-live="polite"
-        className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 p-3 text-sm"
-      >
+      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 p-3 text-sm">
         <p className="font-medium text-blue-800 dark:text-blue-200 mb-1">
           📍 Cost of Living Change Detected
         </p>
@@ -329,11 +327,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       {/* ── Income & Tax ─────────────────────────────────────────────── */}
       <BudgetSection title="Income & Taxes" icon="💰">
         <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-          <label htmlFor="annualSalary" className="text-sm text-gray-700 block mb-1">Annual Gross Salary</label>
+          <label htmlFor={annualSalaryId} className="text-sm text-gray-700 block mb-1">Annual Gross Salary</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
             <input
-              id="annualSalary"
+              id={annualSalaryId}
               type="number"
               value={inputs.annualSalary}
               onChange={(e) => onChange({ annualSalary: Math.max(0, Number(e.target.value)) })}
@@ -351,7 +349,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           onChange={(v) => handleStateChange(v as StateOfResidence)}
         />
 
-        {coliBannerContent}
+        <div aria-live="polite" role="status">
+          {coliBannerContent}
+        </div>
 
         <SelectField
           label="Filing Status"
@@ -502,9 +502,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         {inputs.petsEnabled && (
           <>
             <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-              <label htmlFor="numberOfPets" className="text-sm text-gray-700 block mb-1">Number of Pets</label>
+              <label htmlFor={numberOfPetsId} className="text-sm text-gray-700 block mb-1">Number of Pets</label>
               <input
-                id="numberOfPets"
+                id={numberOfPetsId}
                 type="number"
                 value={inputs.numberOfPets}
                 onChange={(e) => onChange({ numberOfPets: Math.max(0, Number(e.target.value)) })}
