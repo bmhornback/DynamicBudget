@@ -94,20 +94,21 @@ function ToggleField({
   onChange: (v: boolean) => void;
   description?: string;
 }) {
+  const labelId = React.useId();
   const descriptionId = React.useId();
 
   return (
     <button
       type="button"
       role="switch"
-      aria-label={label}
+      aria-labelledby={labelId}
       aria-checked={value}
       aria-describedby={description ? descriptionId : undefined}
       onClick={() => onChange(!value)}
       className="w-full flex items-center justify-between gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-gray-200 text-left"
     >
       <div>
-        <p className="text-sm text-gray-700">{label}</p>
+        <p id={labelId} className="text-sm text-gray-700">{label}</p>
         {description && <p id={descriptionId} className="text-xs text-gray-400">{description}</p>}
       </div>
       <div
