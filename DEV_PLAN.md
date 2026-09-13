@@ -503,9 +503,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Max URL length: ~2,000 chars (compress with `pako` / `lz-string`)
 - **Kickoff progress:** Added URL-safe Base64 budget encoding/decoding helpers, wired URL preload (`?b=`) into app initialization, and added a "Copy Share Link" action in Export/Import.
 
-### E7-T4 · Clipboard copy — quick summary
+### E7-T4 · Clipboard copy — quick summary ✅ Done
 - "Copy Summary" button that puts a formatted plain-text budget summary in the clipboard
 - Format: markdown-like table suitable for pasting into Slack/Notion
+- **Implemented:** Added `exportBudgetQuickSummary` helper in `lib/storage.ts` and wired a "Copy Summary" action into `components/ExportImport.tsx`
 
 ---
 
@@ -738,4 +739,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-12 — Started E7-T3 (shareable URL links) by adding URL-safe Base64 share helpers, URL preload support, a "Copy Share Link" action, tests, and refreshed README/roadmap notes.*
+*Last updated: 2026-09-13 — Completed E7-T4 by adding a clipboard-ready markdown-style budget summary export action and tests, and refreshed README/roadmap notes.*

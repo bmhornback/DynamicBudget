@@ -1,6 +1,9 @@
 import type { BudgetInputs, NamedBudget, CustomPreset } from '@/types/budget';
 import { initializeSpendingHistory } from './spendingTrends';
 import { DEFAULT_INPUTS } from './defaultScenarios';
+import { calculateBudgetBreakdown } from './budgetCalculations';
+import { calculateBudgetHealthScore } from './budgetHealthScore';
+import { formatCurrency, formatPercent } from './formatters';
 
 const STORAGE_KEY = 'dynamicbudget_budget_inputs';
 const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
@@ -265,6 +268,47 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
   );
 
   return lines.join('\r\n');
+}
+
+/**
+ * Export a compact plain-text summary suitable for clipboard sharing.
+ */
+export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
+  const breakdown = calculateBudgetBreakdown(inputs);
+  const healthScore = calculateBudgetHealthScore(breakdown);
+  const monthlyToAnnual = (monthly: number): number => monthly * 12;
+  const row = (label: string, monthly: number): string =>
+    `| ${label} | ${formatCurrency(monthly)} | ${formatCurrency(monthlyToAnnual(monthly))} |`;
+
+  const statusLine = breakdown.isOverBudget
+    ? `⚠️ Over budget by ${formatCurrency(breakdown.deficit)} per month`
+    : `✅ Under budget by ${formatCurrency(breakdown.surplus)} per month`;
+
+  return [
+    `DynamicBudget Quick Summary (${todayDateStr()})`,
+    '',
+    `State: ${inputs.state} · Filing: ${inputs.filingStatus.replace('_', ' ')} · Housing: ${inputs.housingMode}`,
+    `Budget Health Score: ${healthScore.score}/100 (${formatPercent(breakdown.savingsRateNet, 1)} net savings rate)`,
+    '',
+    '| Category | Monthly | Annual |',
+    '|---|---:|---:|',
+    row('Net Monthly Income', breakdown.netMonthlyIncome),
+    row('Total Taxes', breakdown.taxes.totalTaxMonthly),
+    row('Housing', breakdown.totalHousing),
+    row('Utilities', breakdown.totalUtilities),
+    row('Transportation', breakdown.totalTransportation),
+    row('Pets', breakdown.totalPets),
+    row('Groceries & Food', breakdown.totalGroceriesFood),
+    row('Health', breakdown.totalHealth),
+    row('Lifestyle', breakdown.totalLifestyle),
+    row('Savings', breakdown.totalSavings),
+    row('Investments', breakdown.totalInvestments),
+    row('Debt Payoff', breakdown.totalDebtPayoff),
+    row('Total Allocated', breakdown.totalAllocated),
+    row('Remaining Buffer', breakdown.remainingMonthlyBuffer),
+    '',
+    statusLine,
+  ].join('\n');
 }
 
 /**

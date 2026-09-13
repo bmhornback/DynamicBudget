@@ -3,6 +3,7 @@ import {
   createShareableBudgetUrl,
   decodeBudgetInputsFromShare,
   encodeBudgetInputsForShare,
+  exportBudgetQuickSummary,
   loadBudgetInputsFromShareUrl,
 } from '../storage';
 import { Buffer as NodeBuffer } from 'node:buffer';
@@ -13,6 +14,19 @@ describe('shareable budget URL helpers', () => {
     const decoded = decodeBudgetInputsFromShare(encoded);
 
     expect(decoded).toEqual(DEFAULT_INPUTS);
+  });
+
+  describe('exportBudgetQuickSummary', () => {
+    it('returns a markdown-like plain-text summary with core totals', () => {
+      const summary = exportBudgetQuickSummary(DEFAULT_INPUTS);
+
+      expect(summary).toContain('DynamicBudget Quick Summary');
+      expect(summary).toContain('| Category | Monthly | Annual |');
+      expect(summary).toContain('| Net Monthly Income |');
+      expect(summary).toContain('| Total Allocated |');
+      expect(summary).toContain('| Remaining Buffer |');
+      expect(summary).toContain('Budget Health Score:');
+    });
   });
 
   it('creates a share URL and loads budget inputs back from it', () => {
