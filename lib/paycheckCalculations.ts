@@ -55,7 +55,7 @@ export interface PaycheckBreakdown {
   paychecksPerYear: number;
   /** Gross pay before any deductions */
   grossPerPaycheck: number;
-  /** Pre-tax deductions (401k traditional, HSA) */
+  /** Pre-tax deductions (401k traditional, Traditional IRA, HSA) */
   preTaxDeductions: PaycheckLineItem[];
   /** Federal + state + FICA taxes */
   taxes: PaycheckLineItem[];
