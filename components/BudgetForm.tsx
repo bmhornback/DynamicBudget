@@ -100,6 +100,7 @@ function ToggleField({
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== ' ' && event.key !== 'Enter') return;
+    if (event.repeat) return;
     event.preventDefault();
     toggleValue();
   };

@@ -125,7 +125,6 @@ export default function BudgetFieldInput({
             min={min}
             max={max}
             step="1"
-            aria-invalid={validationMessage ? true : undefined}
             aria-describedby={describedBy}
             className={`w-28 text-right text-sm rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
               prefix ? 'pl-6' : ''
