@@ -1,4 +1,5 @@
 import { DEFAULT_INPUTS } from '../defaultScenarios';
+import { calculateBudgetBreakdown } from '../budgetCalculations';
 import {
   createShareableBudgetUrl,
   decodeBudgetInputsFromShare,
@@ -19,13 +20,15 @@ describe('shareable budget URL helpers', () => {
   describe('exportBudgetQuickSummary', () => {
     it('returns a markdown-like plain-text summary with core totals', () => {
       const summary = exportBudgetQuickSummary(DEFAULT_INPUTS);
+      const isOverBudget = calculateBudgetBreakdown(DEFAULT_INPUTS).isOverBudget;
 
       expect(summary).toContain('DynamicBudget Quick Summary');
       expect(summary).toContain('| Category | Monthly | Annual |');
       expect(summary).toContain('| Net Monthly Income |');
       expect(summary).toContain('| Total Allocated |');
       expect(summary).toContain('| Remaining Buffer |');
-      expect(summary).toContain('Budget Health Score:');
+      expect(summary).toMatch(/Budget Health Score: \d+\/100 \((-?\d+(\.\d+)?)% net savings rate\)/);
+      expect(summary).toContain(isOverBudget ? '⚠️ Over budget by' : '✅ Under budget by');
     });
   });
 
