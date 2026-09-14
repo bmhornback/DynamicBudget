@@ -90,7 +90,7 @@ export default function ExpenseThresholdChart({ breakdown, inputs }: ExpenseThre
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 0, right: 48, left: 88, bottom: 0 }}
+            margin={{ top: 0, right: 64, left: 88, bottom: 0 }}
             barSize={14}
           >
             <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -119,6 +119,7 @@ export default function ExpenseThresholdChart({ breakdown, inputs }: ExpenseThre
                 strokeDasharray="4 3"
                 strokeWidth={1.5}
                 ifOverflow="visible"
+                label={{ value: formatPercent(threshold), position: 'right', fontSize: 10, fill: '#94a3b8' }}
               />
             ))}
             <Bar dataKey="value" radius={[0, 4, 4, 0]}>
