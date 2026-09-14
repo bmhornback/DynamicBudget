@@ -298,6 +298,18 @@ export interface BudgetInputs {
   surplusAllocation: SurplusAllocation;
   payFrequency: PayFrequency;
 
+  // Partner / dual-income mode (E5-T7)
+  // Enabled when filingStatus === 'married_jointly' and the user opts in.
+  partnerEnabled: boolean;
+  partnerAnnualSalary: number;
+  partnerBonusIncome: number;
+  partnerRetirementContributionPercent: number;
+  partnerIs401kRoth: boolean;
+  partnerMaxOut401k: boolean;
+  partnerEmployerMatchPercent: number;
+  partnerEmployerMatchCapPercent: number;
+  partnerAge: number;
+
   // Spending history for trend tracking
   spendingHistory?: SpendingHistory;
 }
@@ -361,6 +373,17 @@ export interface BudgetBreakdown {
   isOverBudget: boolean;
   surplus: number;
   deficit: number;
+
+  // Partner / dual-income breakdown (only populated when partnerEnabled === true, filing status
+  // is married_jointly, and partnerAnnualSalary > 0 or partnerBonusIncome > 0 — i.e., when
+  // dual-income is fully active)
+  partnerGrossMonthly: number;
+  partnerNetMonthly: number;
+  partnerRetirement: RetirementBreakdown | null;
+  householdGrossMonthly: number;
+  householdNetMonthly: number;
+  /** True when partner income is active and influencing the household tax/income calculation. */
+  isDualIncome: boolean;
 }
 
 export type RecommendationSeverity = 'warning' | 'info' | 'success';

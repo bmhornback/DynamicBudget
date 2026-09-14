@@ -425,7 +425,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Card rendered conditionally (only when variabilityPercent > 0) in `BudgetDashboard.tsx` ✅
 - 18 unit tests in `lib/__tests__/irregularIncome.test.ts` (211 total passing) ✅
 
-### E5-T7 · Partner / dual-income mode
+### E5-T7 · Partner / dual-income mode ✅ Done
 - Add income fields for a second earner
 - Combined household budget with individual tax calculations
 - "Married Filing Jointly" triggers combined calculations
@@ -753,4 +753,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-14 — Completed E5-T6 (Irregular Income Support): added `incomeVariabilityPercent` field + slider, `lib/irregularIncome.ts` with P25/P50/P75 scenario engine, `IrregularIncomeCard` dashboard card (scenario columns + at-risk expense list), and 18 new tests (211 total passing).*
+*Last updated: 2026-09-14 — Completed E5-T7 (Partner / Dual-Income Mode): added `partnerEnabled` + 8 partner income fields to `BudgetInputs`; `calculateCombinedNetMonthlyIncome` in `taxCalculations.ts` combines household income for MFJ federal/state taxes while keeping SS payroll tax per earner; `budgetCalculations.ts` computes household combined take-home + partner retirement breakdown; Partner Income section in `BudgetForm` (shown when filing status = Married Filing Jointly); `IncomeSummary` updated for household view; 9 new tests (220 total passing).*

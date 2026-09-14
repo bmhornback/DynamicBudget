@@ -593,4 +593,81 @@ describe('budgetCalculations', () => {
       expect(BUDGET_THRESHOLDS.minRetirementRate).toBe(0.15);
     });
   });
+
+  describe('partner / dual-income mode (E5-T7)', () => {
+    const dualIncomeBase = {
+      ...DEFAULT_INPUTS,
+      annualSalary: 100000,
+      bonusIncome: 0,
+      filingStatus: 'married_jointly' as const,
+      partnerEnabled: true,
+      partnerAnnualSalary: 80000,
+      partnerBonusIncome: 0,
+      partnerRetirementContributionPercent: 0,
+      partnerIs401kRoth: false,
+      partnerMaxOut401k: false,
+      partnerEmployerMatchPercent: 0,
+      partnerEmployerMatchCapPercent: 100,
+      partnerAge: 0,
+    };
+
+    it('should produce higher combined gross monthly than single income', () => {
+      const single = calculateBudgetBreakdown({ ...DEFAULT_INPUTS, annualSalary: 100000, filingStatus: 'married_jointly' });
+      const dual = calculateBudgetBreakdown(dualIncomeBase);
+      expect(dual.grossMonthly).toBeGreaterThan(single.grossMonthly);
+    });
+
+    it('combined gross monthly should equal sum of both incomes divided by 12', () => {
+      const result = calculateBudgetBreakdown(dualIncomeBase);
+      expect(result.grossMonthly).toBeCloseTo((100000 + 80000) / 12, 0);
+    });
+
+    it('combined household tax should be higher than single income tax', () => {
+      const single = calculateBudgetBreakdown({ ...DEFAULT_INPUTS, annualSalary: 100000, filingStatus: 'married_jointly' });
+      const dual = calculateBudgetBreakdown(dualIncomeBase);
+      expect(dual.taxes.totalTaxAnnual).toBeGreaterThan(single.taxes.totalTaxAnnual);
+    });
+
+    it('household net monthly income should be positive', () => {
+      const result = calculateBudgetBreakdown(dualIncomeBase);
+      expect(result.netMonthlyIncome).toBeGreaterThan(0);
+    });
+
+    it('householdGrossMonthly should match grossMonthly when dual-income is active', () => {
+      const result = calculateBudgetBreakdown(dualIncomeBase);
+      expect(result.householdGrossMonthly).toBeCloseTo(result.grossMonthly, 2);
+    });
+
+    it('partnerRetirement should be populated when partner has 401k', () => {
+      const inputs = { ...dualIncomeBase, partnerRetirementContributionPercent: 10 };
+      const result = calculateBudgetBreakdown(inputs);
+      expect(result.partnerRetirement).not.toBeNull();
+      expect(result.partnerRetirement!.monthly401k).toBeGreaterThan(0);
+    });
+
+    it('partner disabled should produce same result as single income MFJ', () => {
+      const noPartner = calculateBudgetBreakdown({
+        ...DEFAULT_INPUTS,
+        annualSalary: 100000,
+        filingStatus: 'married_jointly',
+        partnerEnabled: false,
+      });
+      const partnerOff = calculateBudgetBreakdown({
+        ...dualIncomeBase,
+        partnerEnabled: false,
+      });
+      expect(partnerOff.grossMonthly).toBeCloseTo(noPartner.grossMonthly, 2);
+    });
+
+    it('partnerGrossMonthly should be 0 when partner is disabled', () => {
+      const result = calculateBudgetBreakdown({ ...dualIncomeBase, partnerEnabled: false });
+      expect(result.partnerGrossMonthly).toBe(0);
+      expect(result.partnerRetirement).toBeNull();
+    });
+
+    it('taxes.grossAnnual should equal combined salaries in dual-income mode', () => {
+      const result = calculateBudgetBreakdown(dualIncomeBase);
+      expect(result.taxes.grossAnnual).toBeCloseTo(180000, 0);
+    });
+  });
 });

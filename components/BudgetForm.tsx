@@ -14,7 +14,7 @@ import type {
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
-import { STATE_LABELS } from '@/lib/taxCalculations';
+import { STATE_LABELS, get401kLimit, ANNUAL_401K_CATCHUP_LIMIT } from '@/lib/taxCalculations';
 import { adjustExpensesForColi, getColiIndex, getColiTierLabel } from '@/lib/coliData';
 import { PAY_FREQUENCY_LABELS } from '@/lib/paycheckCalculations';
 
@@ -381,7 +381,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           label="Max Out 401(k)"
           value={inputs.maxOut401k}
           onChange={(v) => onChange({ maxOut401k: v })}
-          description="Cap at $24,500/year employee contribution"
+          description={`Cap at $${get401kLimit(inputs.userAge).toLocaleString()}/year employee contribution`}
         />
 
         {!inputs.maxOut401k && (
@@ -453,6 +453,91 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           onChange={(v) => onChange({ payFrequency: v as PayFrequency })}
         />
       </BudgetSection>
+
+      {/* ── Partner Income (E5-T7) ───────────────────────────────────── */}
+      {inputs.filingStatus === 'married_jointly' && (
+        <BudgetSection title="Partner Income" icon="👥">
+          <ToggleField
+            label="Enable Partner / Dual-Income Mode"
+            value={inputs.partnerEnabled}
+            onChange={(v) => onChange({ partnerEnabled: v })}
+            description="Add a second earner's income for combined household tax calculations (MFJ)"
+          />
+
+          {inputs.partnerEnabled && (
+            <>
+              <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+                <label htmlFor="partnerAnnualSalaryInput" className="text-sm text-gray-700 block mb-1">Partner Annual Gross Salary</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                  <input
+                    id="partnerAnnualSalaryInput"
+                    type="number"
+                    value={inputs.partnerAnnualSalary}
+                    onChange={(e) => onChange({ partnerAnnualSalary: Math.max(0, Number(e.target.value)) })}
+                    className="w-full pl-7 pr-4 py-2 text-lg font-bold border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    step="1000"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              {field('partnerBonusIncome', 'Partner Annual Bonus Income')}
+
+              <ToggleField
+                label="Partner Max Out 401(k)"
+                value={inputs.partnerMaxOut401k}
+                onChange={(v) => onChange({ partnerMaxOut401k: v })}
+                description={`Cap at $${get401kLimit(inputs.partnerAge).toLocaleString()}/year`}
+              />
+
+              {!inputs.partnerMaxOut401k && (
+                <NumberSlider
+                  label="Partner Retirement Contribution %"
+                  value={inputs.partnerRetirementContributionPercent}
+                  min={0}
+                  max={30}
+                  step={0.5}
+                  onChange={(v) => onChange({ partnerRetirementContributionPercent: v })}
+                  suffix="%"
+                />
+              )}
+
+              <ToggleField
+                label="Partner Roth 401(k)"
+                value={inputs.partnerIs401kRoth}
+                onChange={(v) => onChange({ partnerIs401kRoth: v })}
+                description="After-tax 401(k) for partner"
+              />
+
+              {field('partnerEmployerMatchPercent', 'Partner Employer Match %')}
+
+              <NumberSlider
+                label="Partner Employer Match Cap %"
+                value={inputs.partnerEmployerMatchCapPercent}
+                min={0}
+                max={100}
+                step={1}
+                onChange={(v) => onChange({ partnerEmployerMatchCapPercent: v })}
+                suffix="%"
+              />
+
+              <NumberSlider
+                label={`Partner Age${inputs.partnerAge >= 50 ? ` ✓ Eligible for $${ANNUAL_401K_CATCHUP_LIMIT.toLocaleString()} catch-up` : ''}`}
+                value={inputs.partnerAge}
+                min={0}
+                max={100}
+                step={1}
+                onChange={(v) => onChange({ partnerAge: v })}
+              />
+
+              <div className="mt-1 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">
+                📊 Federal and state taxes are calculated on combined household income using Married Filing Jointly brackets. Social Security tax is applied individually.
+              </div>
+            </>
+          )}
+        </BudgetSection>
+      )}
 
       {/* ── Housing ──────────────────────────────────────────────────── */}
       <BudgetSection title="Housing" icon="🏠">
