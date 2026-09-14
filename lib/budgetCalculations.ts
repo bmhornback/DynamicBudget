@@ -9,6 +9,7 @@ import { clamp } from './formatters';
 import {
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
+  calculateCombinedNetMonthlyIncome,
   ANNUAL_401K_LIMIT,
   ANNUAL_IRA_LIMIT,
   ANNUAL_IRA_CATCHUP_LIMIT,
@@ -41,6 +42,15 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     maxOutHSA,
     isSavingsByPercentage,
     savingsPercentOfNetIncome,
+    partnerEnabled,
+    partnerAnnualSalary,
+    partnerBonusIncome,
+    partnerRetirementContributionPercent,
+    partnerIs401kRoth,
+    partnerMaxOut401k,
+    partnerEmployerMatchPercent,
+    partnerEmployerMatchCapPercent,
+    partnerAge,
   } = inputs;
 
   // ── Retirement ────────────────────────────────────────────────────────────
@@ -118,33 +128,143 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     isSaving15Percent: annualSalary > 0 ? totalEmployeeRetirementAnnual / annualSalary >= 0.15 : false,
   };
 
-  // ── Net Monthly Income ────────────────────────────────────────────────────
-  const netCalc = calculateNetMonthlyIncome(
-    annualSalary,
-    filingStatus,
-    state,
-    retCalc.annual401k,
-    annualIRA,
-    bonusIncome,
-    otherMonthlyIncome,
-    iraType,
-    annualHSA,
-    is401kRoth
-  );
+  // ── Partner Income (E5-T7) ────────────────────────────────────────────────
+  const isDualIncome = partnerEnabled && filingStatus === 'married_jointly' &&
+    (partnerAnnualSalary > 0 || partnerBonusIncome > 0);
 
-  const taxBreakdown: TaxBreakdown = {
-    grossAnnual: annualSalary + bonusIncome,
-    grossMonthly: netCalc.grossMonthly,
-    federalAnnual: netCalc.federalTaxAnnual,
-    federalMonthly: netCalc.federalTaxMonthly,
-    stateAnnual: netCalc.stateTaxAnnual,
-    stateMonthly: netCalc.stateTaxMonthly,
-    payrollAnnual: netCalc.payrollTaxAnnual,
-    payrollMonthly: netCalc.payrollTaxMonthly,
-    totalTaxAnnual: netCalc.totalTaxAnnual,
-    totalTaxMonthly: netCalc.totalTaxAnnual / 12,
-    effectiveTaxRate: netCalc.effectiveTaxRate,
-  };
+  // Calculate partner's retirement contributions when dual-income is active
+  const partnerRetCalc = isDualIncome
+    ? calculateRetirementContribution(
+        partnerAnnualSalary,
+        partnerRetirementContributionPercent,
+        partnerMaxOut401k,
+        partnerEmployerMatchPercent,
+        partnerEmployerMatchCapPercent,
+        partnerAge
+      )
+    : null;
+
+  // Partner 401k pre-tax vs Roth
+  const partnerAnnual401kPreTax = isDualIncome && partnerRetCalc && !partnerIs401kRoth
+    ? partnerRetCalc.annual401k
+    : 0;
+  const partnerAnnualRoth401k = isDualIncome && partnerRetCalc && partnerIs401kRoth
+    ? partnerRetCalc.annual401k
+    : 0;
+
+  const partnerRetirementBreakdown: RetirementBreakdown | null = isDualIncome && partnerRetCalc
+    ? {
+        monthly401k: partnerRetCalc.monthly401k,
+        annual401k: partnerRetCalc.annual401k,
+        is401kRoth: partnerIs401kRoth,
+        isMaxing401k: partnerRetCalc.isMaxing401k,
+        monthly401kCatchUp: partnerRetCalc.monthly401kCatchUp,
+        annual401kCatchUp: partnerRetCalc.annual401kCatchUp,
+        monthlyEmployerMatch: partnerRetCalc.monthlyEmployerMatch,
+        annualEmployerMatch: partnerRetCalc.annualEmployerMatch,
+        monthlyEmployerMatchCapped: partnerRetCalc.monthlyEmployerMatchCapped,
+        annualEmployerMatchCapped: partnerRetCalc.annualEmployerMatchCapped,
+        monthlyIRA: 0,
+        annualIRA: 0,
+        iraType: 'traditional',
+        isMaxingIRA: false,
+        monthlyIRACatchUp: 0,
+        annualIRACatchUp: 0,
+        monthlyHSA: 0,
+        annualHSA: 0,
+        isMaxingHSA: false,
+        totalMonthlyEmployee: partnerRetCalc.monthly401k + partnerRetCalc.monthly401kCatchUp,
+        totalAnnualEmployee: partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp,
+        retirementSavingsRate: partnerAnnualSalary > 0
+          ? (partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp) / partnerAnnualSalary
+          : 0,
+        isSaving15Percent: partnerAnnualSalary > 0
+          ? (partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp) / partnerAnnualSalary >= 0.15
+          : false,
+      }
+    : null;
+
+  // ── Net Monthly Income ────────────────────────────────────────────────────
+  // Primary person pre-tax 401k (Traditional only)
+  const primaryAnnual401kPreTax = is401kRoth ? 0 : retCalc.annual401k;
+  const primaryAnnualRoth401k = is401kRoth ? retCalc.annual401k : 0;
+  const annualTraditionalIRA = iraType === 'traditional' ? annualIRA : 0;
+  const annualRothIRA = iraType === 'roth' ? annualIRA : 0;
+
+  let netCalc: ReturnType<typeof calculateNetMonthlyIncome>;
+  let combinedCalc: ReturnType<typeof calculateCombinedNetMonthlyIncome> | null = null;
+
+  if (isDualIncome) {
+    combinedCalc = calculateCombinedNetMonthlyIncome(
+      annualSalary,
+      bonusIncome,
+      primaryAnnual401kPreTax,
+      annualTraditionalIRA,
+      annualHSA,
+      annualRothIRA,
+      primaryAnnualRoth401k,
+      partnerAnnualSalary,
+      partnerBonusIncome,
+      partnerAnnual401kPreTax,
+      partnerAnnualRoth401k,
+      state,
+      otherMonthlyIncome
+    );
+    // Wrap into same shape as netCalc so the rest of the function remains unchanged
+    netCalc = calculateNetMonthlyIncome(
+      annualSalary,
+      filingStatus,
+      state,
+      retCalc.annual401k,
+      annualIRA,
+      bonusIncome,
+      otherMonthlyIncome,
+      iraType,
+      annualHSA,
+      is401kRoth
+    );
+  } else {
+    netCalc = calculateNetMonthlyIncome(
+      annualSalary,
+      filingStatus,
+      state,
+      retCalc.annual401k,
+      annualIRA,
+      bonusIncome,
+      otherMonthlyIncome,
+      iraType,
+      annualHSA,
+      is401kRoth
+    );
+  }
+
+  const taxBreakdown: TaxBreakdown = isDualIncome && combinedCalc
+    ? {
+        grossAnnual: annualSalary + bonusIncome + partnerAnnualSalary + partnerBonusIncome,
+        grossMonthly: combinedCalc.combinedGrossMonthly,
+        federalAnnual: combinedCalc.federalTaxAnnual,
+        federalMonthly: combinedCalc.federalTaxAnnual / 12,
+        stateAnnual: combinedCalc.stateTaxAnnual,
+        stateMonthly: combinedCalc.stateTaxAnnual / 12,
+        payrollAnnual: combinedCalc.payrollTaxAnnual,
+        payrollMonthly: combinedCalc.payrollTaxAnnual / 12,
+        totalTaxAnnual: combinedCalc.totalTaxAnnual,
+        totalTaxMonthly: combinedCalc.totalTaxAnnual / 12,
+        effectiveTaxRate: combinedCalc.effectiveTaxRate,
+      }
+    : {
+        grossAnnual: annualSalary + bonusIncome,
+        grossMonthly: netCalc.grossMonthly,
+        federalAnnual: netCalc.federalTaxAnnual,
+        federalMonthly: netCalc.federalTaxMonthly,
+        stateAnnual: netCalc.stateTaxAnnual,
+        stateMonthly: netCalc.stateTaxMonthly,
+        payrollAnnual: netCalc.payrollTaxAnnual,
+        payrollMonthly: netCalc.payrollTaxMonthly,
+        totalTaxAnnual: netCalc.totalTaxAnnual,
+        totalTaxMonthly: netCalc.totalTaxAnnual / 12,
+        effectiveTaxRate: netCalc.effectiveTaxRate,
+      };
 
   // ── Expense Totals ────────────────────────────────────────────────────────
   const isHomeowner = inputs.housingMode === 'homeowner';
@@ -209,7 +329,10 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   // ── Savings & Investing ───────────────────────────────────────────────────
   // If percentage-based savings is enabled, calculate based on net income
   // Otherwise, use fixed dollar amounts from inputs
-  const netMonthly = netCalc.netMonthly;
+  // When dual-income is active, net monthly reflects the combined household take-home.
+  const netMonthly = isDualIncome && combinedCalc
+    ? combinedCalc.combinedNetMonthly
+    : netCalc.netMonthly;
   const savingsPercentage = isSavingsByPercentage
     ? clamp(
         Number.isFinite(savingsPercentOfNetIncome)
@@ -254,7 +377,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalInvestments +
     totalDebtPayoff;
 
-  const remainingMonthlyBuffer = netCalc.netMonthly - totalAllocated;
+  const remainingMonthlyBuffer = netMonthly - totalAllocated;
 
   // ── Essential Expenses (for emergency fund target) ───────────────────────
   // Essential = housing + utilities + transportation + groceries + health
@@ -280,7 +403,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     (totalSavings + totalInvestments) * 12 + retCalc.annual401k + annualIRA + annualHSA;
 
   // ── Rates ─────────────────────────────────────────────────────────────────
-  const grossMonthly = netCalc.grossMonthly;
+  const grossMonthly = isDualIncome && combinedCalc
+    ? combinedCalc.combinedGrossMonthly
+    : netCalc.grossMonthly;
 
   const savingsRateGross =
     grossMonthly > 0
@@ -339,6 +464,14 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     isOverBudget,
     surplus,
     deficit,
+    // Partner / dual-income fields
+    partnerGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.partnerGrossMonthly : 0,
+    partnerNetMonthly: isDualIncome && combinedCalc
+      ? Math.max(0, combinedCalc.partnerGrossMonthly - combinedCalc.payrollTaxAnnual / 12 / 2)
+      : 0,
+    partnerRetirement: partnerRetirementBreakdown,
+    householdGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedGrossMonthly : grossMonthly,
+    householdNetMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedNetMonthly : netMonthly,
   };
 }
 

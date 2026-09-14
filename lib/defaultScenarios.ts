@@ -19,6 +19,17 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   otherMonthlyIncome: 0,
   incomeVariabilityPercent: 0,
 
+  // Partner / dual-income (E5-T7)
+  partnerEnabled: false,
+  partnerAnnualSalary: 0,
+  partnerBonusIncome: 0,
+  partnerRetirementContributionPercent: 0,
+  partnerIs401kRoth: false,
+  partnerMaxOut401k: false,
+  partnerEmployerMatchPercent: 0,
+  partnerEmployerMatchCapPercent: 100,
+  partnerAge: 0,
+
   // Housing
   housingMode: 'renter',
   rent: 3000,

@@ -850,6 +850,106 @@ export function calculateNetMonthlyIncome(
   };
 }
 
+// ─── Combined (Dual-Income MFJ) Net Monthly Income ──────────────────────────
+
+/**
+ * Calculate estimated monthly take-home for a married-filing-jointly household
+ * where both partners earn income.
+ *
+ * Federal and state taxes are computed on combined income using MFJ brackets.
+ * Social Security payroll tax is computed per earner (SS wage base applies
+ * individually); Medicare and Additional Medicare are on combined income.
+ */
+export function calculateCombinedNetMonthlyIncome(
+  primaryGrossAnnual: number,
+  primaryBonusIncome: number,
+  primaryAnnual401k: number,         // primary pre-tax 401k (0 if Roth)
+  primaryAnnualTraditionalIRA: number,
+  primaryAnnualHSA: number,
+  primaryAnnualRothIRA: number,
+  primaryAnnualRoth401k: number,     // primary after-tax 401k (0 if Traditional)
+  partnerGrossAnnual: number,
+  partnerBonusIncome: number,
+  partnerAnnual401k: number,         // partner pre-tax 401k (0 if Roth)
+  partnerAnnualRoth401k: number,
+  state: StateOfResidence,
+  otherMonthlyIncome: number = 0
+): {
+  combinedGrossMonthly: number;
+  combinedNetMonthly: number;
+  federalTaxAnnual: number;
+  stateTaxAnnual: number;
+  payrollTaxAnnual: number;
+  totalTaxAnnual: number;
+  effectiveTaxRate: number;
+  primaryGrossMonthly: number;
+  partnerGrossMonthly: number;
+} {
+  const primaryTotalGross = primaryGrossAnnual + primaryBonusIncome;
+  const partnerTotalGross = partnerGrossAnnual + partnerBonusIncome;
+  const combinedTotalGross = primaryTotalGross + partnerTotalGross;
+
+  const combinedGrossMonthly = combinedTotalGross / 12 + otherMonthlyIncome;
+  const primaryGrossMonthly = primaryTotalGross / 12;
+  const partnerGrossMonthly = partnerTotalGross / 12;
+
+  // Combined pre-tax deductions reduce taxable income for federal/state
+  const combinedPreTaxDeductions =
+    primaryAnnual401k + primaryAnnualTraditionalIRA + primaryAnnualHSA +
+    partnerAnnual401k;
+
+  // Federal + state tax on combined household income (MFJ)
+  const federalTaxAnnual = federalIncomeTaxEstimate(
+    combinedTotalGross,
+    'married_jointly',
+    primaryAnnual401k + partnerAnnual401k,
+    primaryAnnualTraditionalIRA,
+    primaryAnnualHSA
+  );
+  const stateTaxAnnual = stateIncomeTaxEstimate(
+    combinedTotalGross,
+    state,
+    'married_jointly',
+    primaryAnnual401k + partnerAnnual401k,
+    primaryAnnualTraditionalIRA,
+    primaryAnnualHSA
+  );
+
+  // SS payroll tax per earner (wage base cap applies individually)
+  const primarySSTax = Math.min(primaryTotalGross, SS_WAGE_BASE) * SS_RATE;
+  const partnerSSTax = Math.min(partnerTotalGross, SS_WAGE_BASE) * SS_RATE;
+  const combinedMedicareTax = combinedTotalGross * MEDICARE_RATE;
+  const additionalMedicare =
+    combinedTotalGross > 250000
+      ? (combinedTotalGross - 250000) * ADDITIONAL_MEDICARE_RATE
+      : 0;
+  const payrollTaxAnnual = primarySSTax + partnerSSTax + combinedMedicareTax + additionalMedicare;
+
+  const totalTaxAnnual = federalTaxAnnual + stateTaxAnnual + payrollTaxAnnual;
+  const effectiveTaxRate = combinedTotalGross > 0 ? totalTaxAnnual / combinedTotalGross : 0;
+
+  // Net = combined gross - taxes - all pre-tax deductions - all after-tax retirement
+  const netMonthly =
+    combinedGrossMonthly -
+    totalTaxAnnual / 12 -
+    combinedPreTaxDeductions / 12 -
+    primaryAnnualRothIRA / 12 -
+    primaryAnnualRoth401k / 12 -
+    partnerAnnualRoth401k / 12;
+
+  return {
+    combinedGrossMonthly,
+    combinedNetMonthly: Math.max(0, netMonthly),
+    federalTaxAnnual,
+    stateTaxAnnual,
+    payrollTaxAnnual,
+    totalTaxAnnual,
+    effectiveTaxRate,
+    primaryGrossMonthly,
+    partnerGrossMonthly,
+  };
+}
+
 export const STATE_LABELS: Record<string, string> = {
   AL: 'Alabama',
   AK: 'Alaska',

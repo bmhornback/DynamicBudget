@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import type { BudgetBreakdown } from '@/types/budget';
+import type { BudgetBreakdown, BudgetInputs } from '@/types/budget';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import BudgetCard from './BudgetCard';
 
 interface IncomeSummaryProps {
   breakdown: BudgetBreakdown;
+  inputs: BudgetInputs;
 }
 
 function Row({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
@@ -25,21 +26,47 @@ function Divider() {
   return <div className="h-px bg-gray-100 my-1" />;
 }
 
-export default function IncomeSummary({ breakdown }: IncomeSummaryProps) {
+export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps) {
   const { taxes, retirement, grossMonthly, netMonthlyIncome } = breakdown;
+  const isDualIncome = inputs.partnerEnabled && inputs.filingStatus === 'married_jointly' &&
+    (inputs.partnerAnnualSalary > 0 || inputs.partnerBonusIncome > 0);
 
   return (
-    <BudgetCard title="Income Summary" accent="blue">
+    <BudgetCard title={isDualIncome ? 'Household Income Summary' : 'Income Summary'} accent="blue">
       <div className="space-y-0">
-        <Row
-          label="Gross Annual Salary"
-          value={formatCurrency(taxes.grossAnnual)}
-          highlight
-        />
-        <Row
-          label="Gross Monthly Income"
-          value={formatCurrency(grossMonthly)}
-        />
+        {isDualIncome ? (
+          <>
+            <Row
+              label="Your Gross Annual Salary"
+              value={formatCurrency(inputs.annualSalary + inputs.bonusIncome)}
+            />
+            <Row
+              label="Partner Gross Annual Salary"
+              value={formatCurrency(inputs.partnerAnnualSalary + inputs.partnerBonusIncome)}
+            />
+            <Row
+              label="Combined Household Gross"
+              value={formatCurrency(taxes.grossAnnual)}
+              highlight
+            />
+            <Row
+              label="Combined Gross Monthly"
+              value={formatCurrency(grossMonthly)}
+            />
+          </>
+        ) : (
+          <>
+            <Row
+              label="Gross Annual Salary"
+              value={formatCurrency(taxes.grossAnnual)}
+              highlight
+            />
+            <Row
+              label="Gross Monthly Income"
+              value={formatCurrency(grossMonthly)}
+            />
+          </>
+        )}
         <Divider />
         <Row
           label="Federal Income Tax (est.)"
@@ -66,6 +93,13 @@ export default function IncomeSummary({ breakdown }: IncomeSummaryProps) {
           value={`− ${formatCurrency(retirement.monthly401k)}/mo`}
           sub={`${formatCurrency(retirement.annual401k)}/yr${retirement.isMaxing401k ? ' ✓ MAX' : ''}`}
         />
+        {isDualIncome && breakdown.partnerRetirement && breakdown.partnerRetirement.monthly401k > 0 && (
+          <Row
+            label="Partner 401(k) Contribution"
+            value={`− ${formatCurrency(breakdown.partnerRetirement.monthly401k)}/mo`}
+            sub={`${formatCurrency(breakdown.partnerRetirement.annual401k)}/yr${breakdown.partnerRetirement.isMaxing401k ? ' ✓ MAX' : ''}`}
+          />
+        )}
         {retirement.monthlyIRA > 0 && (
           <Row
             label="IRA Contribution"
@@ -80,9 +114,16 @@ export default function IncomeSummary({ breakdown }: IncomeSummaryProps) {
             sub="(not in take-home)"
           />
         )}
+        {isDualIncome && breakdown.partnerRetirement && breakdown.partnerRetirement.monthlyEmployerMatch > 0 && (
+          <Row
+            label="Partner Employer Match"
+            value={`+ ${formatCurrency(breakdown.partnerRetirement.monthlyEmployerMatch)}/mo`}
+            sub="(not in take-home)"
+          />
+        )}
         <Divider />
         <Row
-          label="Est. Monthly Take-Home"
+          label={isDualIncome ? 'Est. Combined Take-Home' : 'Est. Monthly Take-Home'}
           value={formatCurrency(netMonthlyIncome)}
           highlight
         />

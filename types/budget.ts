@@ -49,6 +49,7 @@ export type SurplusAllocation =
 export type BudgetMode = 'manual' | 'auto';
 export type HousingMode = 'renter' | 'homeowner';
 export type PayFrequency = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+export type DualIncomeMode = 'disabled' | 'combined';
 
 export type IRAType = 'traditional' | 'roth';
 export type LongTermGoalCategory =
@@ -298,6 +299,18 @@ export interface BudgetInputs {
   surplusAllocation: SurplusAllocation;
   payFrequency: PayFrequency;
 
+  // Partner / dual-income mode (E5-T7)
+  // Enabled when filingStatus === 'married_jointly' and the user opts in.
+  partnerEnabled: boolean;
+  partnerAnnualSalary: number;
+  partnerBonusIncome: number;
+  partnerRetirementContributionPercent: number;
+  partnerIs401kRoth: boolean;
+  partnerMaxOut401k: boolean;
+  partnerEmployerMatchPercent: number;
+  partnerEmployerMatchCapPercent: number;
+  partnerAge: number;
+
   // Spending history for trend tracking
   spendingHistory?: SpendingHistory;
 }
@@ -361,6 +374,13 @@ export interface BudgetBreakdown {
   isOverBudget: boolean;
   surplus: number;
   deficit: number;
+
+  // Partner / dual-income breakdown (only populated when partnerEnabled === true)
+  partnerGrossMonthly: number;
+  partnerNetMonthly: number;
+  partnerRetirement: RetirementBreakdown | null;
+  householdGrossMonthly: number;
+  householdNetMonthly: number;
 }
 
 export type RecommendationSeverity = 'warning' | 'info' | 'success';
