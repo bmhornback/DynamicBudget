@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import type { BudgetBreakdown, BudgetInputs } from '@/types/budget';
 import { formatPercent } from '@/lib/formatters';
+import { BUDGET_THRESHOLDS } from '@/lib/budgetCalculations';
 import BudgetCard from './BudgetCard';
 
 interface ExpenseThresholdChartProps {
@@ -67,21 +68,21 @@ export default function ExpenseThresholdChart({ breakdown, inputs }: ExpenseThre
   const pct = (v: number) => v / net;
 
   const data: CategoryEntry[] = [
-    { name: 'Housing', value: pct(breakdown.totalHousing), threshold: 0.35 },
-    { name: 'Transportation', value: pct(breakdown.totalTransportation), threshold: 0.15 },
+    { name: 'Housing', value: pct(breakdown.totalHousing), threshold: BUDGET_THRESHOLDS.rentPercentTakeHome },
+    { name: 'Transportation', value: pct(breakdown.totalTransportation), threshold: BUDGET_THRESHOLDS.carPercentTakeHome },
     { name: 'Food & Groceries', value: pct(breakdown.totalGroceriesFood), threshold: 0.15 },
-    { name: 'Utilities', value: pct(breakdown.totalUtilities), threshold: 0.10 },
-    { name: 'Health', value: pct(breakdown.totalHealth), threshold: 0.10 },
-    { name: 'Lifestyle', value: pct(breakdown.totalLifestyle), threshold: 0.10 },
+    { name: 'Utilities & Phone', value: pct(breakdown.totalUtilities), threshold: 0.10 },
+    { name: 'Health & Medical', value: pct(breakdown.totalHealth), threshold: 0.10 },
+    { name: 'Lifestyle', value: pct(breakdown.totalLifestyle), threshold: BUDGET_THRESHOLDS.maxLifestylePercentTakeHome },
     ...(inputs.petsEnabled
-      ? [{ name: 'Pets', value: pct(breakdown.totalPets), threshold: 0.05 }]
+      ? [{ name: 'Pets', value: pct(breakdown.totalPets), threshold: BUDGET_THRESHOLDS.petPercentTakeHome }]
       : []),
   ];
 
   const maxValue = Math.max(...data.map((d) => Math.max(d.value, d.threshold))) * 1.15;
 
   return (
-    <BudgetCard title="Expenses vs Recommended Limits" accent="amber">
+    <BudgetCard title="Expenses vs Recommended Limits" accent="yellow">
       <div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
           Each bar shows % of take-home. Dashed line is recommended maximum.

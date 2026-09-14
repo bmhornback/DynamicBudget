@@ -109,11 +109,11 @@ export default function SavingsProgressCard({ breakdown, inputs }: SavingsProgre
 
   const monthlyHSA = breakdown.monthlyHSA;
 
-  // 401(k) annual contributions vs limit
-  const annual401k = retirement.annual401k + retirement.annual401kCatchUp;
+  // 401(k) annual contributions vs limit — annual401k already includes catch-up (age-adjusted cap)
+  const annual401k = retirement.annual401k;
   const limit401k = ANNUAL_401K_LIMIT + (inputs.userAge >= 50 ? 7500 : 0); // 2026 catch-up is $7,500
 
-  // IRA annual contributions vs limit
+  // IRA annual contributions vs limit — annualIRACatchUp is tracked separately from annualIRA
   const annualIRA = retirement.annualIRA + retirement.annualIRACatchUp;
   const limitIRA = ANNUAL_IRA_LIMIT + (inputs.userAge >= 50 ? 1000 : 0); // $1,000 catch-up
 
@@ -182,7 +182,7 @@ export default function SavingsProgressCard({ breakdown, inputs }: SavingsProgre
             monthly={effectiveEmergencyFundContribution}
             target={efTarget}
             monthsToGoal={efMonthsToGoal}
-            targetLabel="6 months of essentials"
+            targetLabel={inputs.emergencyFundTarget > 0 ? 'custom target' : '6 months of essentials'}
             colorClass="bg-emerald-500"
           />
         ) : (

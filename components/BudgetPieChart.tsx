@@ -31,6 +31,7 @@ const SLICE_COLORS: Record<string, string> = {
   'Savings & Investing': '#4ade80', // green-400
   'Debt Payoff': '#c084fc', // purple-400
   Buffer: '#e2e8f0',       // slate-200
+  Deficit: '#ef4444',      // red-500
 };
 
 interface TooltipPayloadEntry {
@@ -57,7 +58,7 @@ export default function BudgetPieChart({ breakdown, inputs }: BudgetPieChartProp
   const gross = breakdown.grossMonthly;
   if (gross <= 0) return null;
 
-  const taxTotal = breakdown.taxes.totalMonthlyTax;
+  const taxTotal = breakdown.taxes.totalTaxMonthly;
   const retirementTotal =
     breakdown.retirement.monthly401k +
     breakdown.retirement.monthly401kCatchUp +
@@ -79,7 +80,11 @@ export default function BudgetPieChart({ breakdown, inputs }: BudgetPieChartProp
     { name: 'Lifestyle', value: breakdown.totalLifestyle },
     { name: 'Savings & Investing', value: savingsTotal },
     ...(breakdown.totalDebtPayoff > 0 ? [{ name: 'Debt Payoff', value: breakdown.totalDebtPayoff }] : []),
-    ...(bufferRaw > 0 ? [{ name: 'Buffer', value: bufferRaw }] : []),
+    ...(bufferRaw > 0
+      ? [{ name: 'Buffer', value: bufferRaw }]
+      : bufferRaw < 0
+      ? [{ name: 'Deficit', value: Math.abs(bufferRaw) }]
+      : []),
   ]
     .filter((s) => s.value > 0)
     .map((s) => ({ ...s, shareOfGross: s.value / gross }));
