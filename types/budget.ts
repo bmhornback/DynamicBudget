@@ -49,7 +49,6 @@ export type SurplusAllocation =
 export type BudgetMode = 'manual' | 'auto';
 export type HousingMode = 'renter' | 'homeowner';
 export type PayFrequency = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
-export type DualIncomeMode = 'disabled' | 'combined';
 
 export type IRAType = 'traditional' | 'roth';
 export type LongTermGoalCategory =

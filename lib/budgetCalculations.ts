@@ -191,7 +191,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   const annualTraditionalIRA = iraType === 'traditional' ? annualIRA : 0;
   const annualRothIRA = iraType === 'roth' ? annualIRA : 0;
 
-  let netCalc: ReturnType<typeof calculateNetMonthlyIncome>;
+  let netCalc: ReturnType<typeof calculateNetMonthlyIncome> | null = null;
   let combinedCalc: ReturnType<typeof calculateCombinedNetMonthlyIncome> | null = null;
 
   if (isDualIncome) {
@@ -210,21 +210,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       state,
       otherMonthlyIncome
     );
-    // netCalc is only used in the solo path; initialize to a placeholder for type safety.
-    // The dual-income path uses combinedCalc exclusively for all figures.
-    netCalc = {
-      grossMonthly: 0,
-      federalTaxMonthly: 0,
-      stateTaxMonthly: 0,
-      payrollTaxMonthly: 0,
-      total401kMonthly: 0,
-      netMonthly: 0,
-      federalTaxAnnual: 0,
-      stateTaxAnnual: 0,
-      payrollTaxAnnual: 0,
-      totalTaxAnnual: 0,
-      effectiveTaxRate: 0,
-    };
+    // In dual-income mode, combinedCalc provides all tax/income figures.
+    // netCalc is only populated in the solo path (below).
   } else {
     netCalc = calculateNetMonthlyIncome(
       annualSalary,
@@ -256,16 +243,16 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       }
     : {
         grossAnnual: annualSalary + bonusIncome,
-        grossMonthly: netCalc.grossMonthly,
-        federalAnnual: netCalc.federalTaxAnnual,
-        federalMonthly: netCalc.federalTaxMonthly,
-        stateAnnual: netCalc.stateTaxAnnual,
-        stateMonthly: netCalc.stateTaxMonthly,
-        payrollAnnual: netCalc.payrollTaxAnnual,
-        payrollMonthly: netCalc.payrollTaxMonthly,
-        totalTaxAnnual: netCalc.totalTaxAnnual,
-        totalTaxMonthly: netCalc.totalTaxAnnual / 12,
-        effectiveTaxRate: netCalc.effectiveTaxRate,
+        grossMonthly: netCalc!.grossMonthly,
+        federalAnnual: netCalc!.federalTaxAnnual,
+        federalMonthly: netCalc!.federalTaxMonthly,
+        stateAnnual: netCalc!.stateTaxAnnual,
+        stateMonthly: netCalc!.stateTaxMonthly,
+        payrollAnnual: netCalc!.payrollTaxAnnual,
+        payrollMonthly: netCalc!.payrollTaxMonthly,
+        totalTaxAnnual: netCalc!.totalTaxAnnual,
+        totalTaxMonthly: netCalc!.totalTaxAnnual / 12,
+        effectiveTaxRate: netCalc!.effectiveTaxRate,
       };
 
   // ── Expense Totals ────────────────────────────────────────────────────────
@@ -334,7 +321,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   // When dual-income is active, net monthly reflects the combined household take-home.
   const netMonthly = isDualIncome && combinedCalc
     ? combinedCalc.combinedNetMonthly
-    : netCalc.netMonthly;
+    : netCalc!.netMonthly;
   const savingsPercentage = isSavingsByPercentage
     ? clamp(
         Number.isFinite(savingsPercentOfNetIncome)
@@ -407,7 +394,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   // ── Rates ─────────────────────────────────────────────────────────────────
   const grossMonthly = isDualIncome && combinedCalc
     ? combinedCalc.combinedGrossMonthly
-    : netCalc.grossMonthly;
+    : netCalc!.grossMonthly;
 
   const savingsRateGross =
     grossMonthly > 0

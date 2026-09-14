@@ -893,12 +893,17 @@ export function calculateCombinedNetMonthlyIncome(
   const primaryGrossMonthly = primaryTotalGross / 12;
   const partnerGrossMonthly = partnerTotalGross / 12;
 
-  // Combined pre-tax deductions reduce taxable income for federal/state
+  // Combined pre-tax deductions reduce taxable income for federal/state.
+  // Only primary earner's Traditional IRA and HSA are included here — the partner's
+  // IRA/HSA contributions are not currently modeled (the partner income inputs do not
+  // include IRA or HSA fields). If partner IRA/HSA support is added in the future,
+  // pass those amounts as additional parameters and include them here.
   const combinedPreTaxDeductions =
     primaryAnnual401k + primaryAnnualTraditionalIRA + primaryAnnualHSA +
     partnerAnnual401k;
 
-  // Federal + state tax on combined household income (MFJ)
+  // Federal + state tax on combined household income (MFJ).
+  // Partner IRA/HSA deductions are excluded (see comment above).
   const federalTaxAnnual = federalIncomeTaxEstimate(
     combinedTotalGross,
     'married_jointly',
