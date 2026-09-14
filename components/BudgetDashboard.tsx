@@ -13,6 +13,7 @@ import {
 import type {
   BudgetBreakdown,
   BudgetInputs,
+  DebtPayoffStrategy,
   BudgetHealthScore as BudgetHealthScoreType,
   FinancialLiteracyInsight,
   LongTermGoalProjection,
@@ -328,7 +329,7 @@ function DebtPayoffDetail({
 }: {
   projection: DebtPayoffProjection;
   debtCount: number;
-  strategy: import('@/types/budget').DebtPayoffStrategy;
+  strategy: DebtPayoffStrategy;
 }) {
   const latestMonth = projection.schedule[projection.schedule.length - 1];
   const latestBalance = latestMonth?.remainingBalance ?? 0;

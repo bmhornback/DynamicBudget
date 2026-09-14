@@ -390,7 +390,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - `debtPayoffStrategy: 'avalanche' | 'snowball'` field on `BudgetInputs` with UI selector in the Debt Accounts form section ✅
 - `lib/debtPayoff.ts` — `calculateDebtPayoffProjection` returns full month-by-month amortization schedule plus `perDebt` breakdown (paid-off month, interest cost per debt) ✅
 - Dashboard "Debt Payoff Timeline" card shows strategy label, totals, balance-over-time area chart, and per-debt breakdown table ✅
-- 12 unit tests in `lib/__tests__/debtPayoff.test.ts` covering per-debt schedule, strategy ordering, and edge cases ✅
+- 12 unit tests in `lib/__tests__/debtPayoff.test.ts` (7 new) covering per-debt schedule, strategy ordering, and edge cases ✅
 
 ### E5-T3 · Homeownership mode
 - Toggle: "Renter" vs "Homeowner"
