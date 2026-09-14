@@ -11,6 +11,7 @@ const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
 const CUSTOM_PRESETS_KEY = 'dynamicbudget_custom_presets';
 export const SHARE_PARAM_KEY = 'b';
 const STORAGE_VERSION = 1;
+export const SHARE_PAYLOAD_VERSION = 2;
 
 const VALID_PAY_FREQUENCIES = new Set<PayFrequency>(['weekly', 'biweekly', 'semimonthly', 'monthly']);
 
@@ -412,18 +413,82 @@ function decodeBase64Url(value: string): string {
 }
 
 export function encodeBudgetInputsForShare(inputs: BudgetInputs): string {
-  return encodeBase64Url(JSON.stringify(inputs));
+  const compactInputs = createCompactShareInputs(inputs);
+  return encodeBase64Url(
+    JSON.stringify({
+      v: SHARE_PAYLOAD_VERSION,
+      i: compactInputs,
+    })
+  );
 }
 
 export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | null {
   try {
     if (!encoded || encoded.trim() === '') return null;
     const decoded = decodeBase64Url(encoded.trim());
-    return normalizeBudgetInputs(JSON.parse(decoded));
+    const parsed = JSON.parse(decoded) as unknown;
+    if (parsed && typeof parsed === 'object' && 'v' in parsed) {
+      const version = (parsed as { v?: unknown }).v;
+      if (typeof version !== 'number') {
+        console.warn('Invalid shared budget payload version (not a number):', version);
+        return null;
+      }
+      if (version !== SHARE_PAYLOAD_VERSION) {
+        // Outdated or future payload version.
+        console.warn('Unsupported shared budget payload version:', version);
+        return null;
+      }
+      if (
+        'i' in parsed &&
+        (parsed as { i?: unknown }).i !== null &&
+        typeof (parsed as { i?: unknown }).i === 'object' &&
+        !Array.isArray((parsed as { i?: unknown }).i)
+      ) {
+        return normalizeBudgetInputs((parsed as { i: unknown }).i);
+      }
+      return null;
+    }
+
+    // Backward compatibility for legacy full-input payloads.
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
+    return normalizeBudgetInputs(parsed);
   } catch (error) {
     console.warn('Failed to decode shared budget:', error);
     return null;
   }
+}
+
+function valuesMatch(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function createCompactShareInputs(inputs: BudgetInputs): Partial<BudgetInputs> {
+  const compact: Partial<BudgetInputs> = {};
+
+  for (const key of Object.keys(DEFAULT_INPUTS) as Array<keyof BudgetInputs>) {
+    if (key === 'spendingHistory') continue;
+
+    const currentValue = inputs[key];
+    const defaultValue = DEFAULT_INPUTS[key];
+
+    if (key === 'lockedFields') {
+      const currentLockedFields = currentValue as Record<string, boolean>;
+      const filteredLockedFields = Object.fromEntries(
+        Object.entries(currentLockedFields ?? {}).filter(([, isLocked]) => isLocked)
+      );
+
+      if (!valuesMatch(filteredLockedFields, defaultValue)) {
+        compact.lockedFields = filteredLockedFields;
+      }
+      continue;
+    }
+
+    if (!valuesMatch(currentValue, defaultValue)) {
+      (compact as Record<keyof BudgetInputs, BudgetInputs[keyof BudgetInputs] | undefined>)[key] = currentValue;
+    }
+  }
+
+  return compact;
 }
 
 export function createShareableBudgetUrl(inputs: BudgetInputs, currentUrl: string): string {

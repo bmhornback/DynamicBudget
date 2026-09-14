@@ -504,12 +504,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - Filename: `dynamicbudget-budget-YYYY-MM-DD.csv`
 - **Implemented:** `exportBudgetAsCSV` in `storage.ts`; wired into `components/ExportImport.tsx` dropdown
 
-### E7-T3 · Shareable URL / link
+### E7-T3 · Shareable URL / link ✅ Done
 - Encode budget inputs as a compressed Base64 URL parameter (e.g., `?b=<encoded>`)
 - "Copy Share Link" button in the header
 - On load, parse the URL parameter and pre-populate inputs
 - Max URL length: ~2,000 chars (compress with `pako` / `lz-string`)
-- **Kickoff progress:** Added URL-safe Base64 budget encoding/decoding helpers, wired URL preload (`?b=`) into app initialization, and added a "Copy Share Link" action in Export/Import.
+- **Implemented:** Added URL-safe Base64 budget encoding/decoding helpers, wired URL preload (`?b=`) into app initialization, added a "Copy Share Link" action in Export/Import, and optimized payload size by sharing only fields that differ from defaults with backward-compatible decode support for earlier full-input links.
 
 ### E7-T4 · Clipboard copy — quick summary ✅ Done
 - "Copy Summary" button that puts a formatted plain-text budget summary in the clipboard
@@ -747,4 +747,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-13 — Completed E7-T4 by adding a clipboard-ready markdown-style budget summary export action and tests, and refreshed README/roadmap notes.*
+*Last updated: 2026-09-13 — Completed E7-T3 by finalizing shareable budget links with compact default-diff payload encoding and backward-compatible legacy link decoding; refreshed README/roadmap notes.*
