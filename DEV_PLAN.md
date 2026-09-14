@@ -433,11 +433,16 @@ States to add (in priority order based on population and no-income-tax interest)
 - Combined household budget with individual tax calculations
 - "Married Filing Jointly" triggers combined calculations
 
-### E5-T8 · Savings goal timeline calculator
+### E5-T8 · Savings goal timeline calculator ✅ Done
 - For each savings goal (emergency fund, house fund), show:
-  - Months to reach target at current rate
-  - What monthly contribution would be needed to reach it in N months
-  - An input for "I want to reach this in X months" that back-calculates required contribution
+  - Months to reach target at current rate ✅
+  - What monthly contribution would be needed to reach it in N months ✅
+  - An input for "I want to reach this in X months" that back-calculates required contribution ✅
+- `calculateMonthsToGoal` and `calculateRequiredContribution` helpers in `lib/longTermGoals.ts` ✅
+- `monthsAtCurrentRate` field on `LongTermGoalProjection` ✅
+- Interactive "Reach in X months" input per goal card in `LongTermGoalsDetail` dashboard card ✅
+- Timeline sub-labels on emergency fund and house fund rows in `SavingsDetail` ✅
+- 16 new tests (236 total passing) ✅
 
 ---
 
@@ -756,4 +761,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-14 — Completed E5-T7 (Partner / Dual-Income Mode): added `partnerEnabled` + 8 partner income fields to `BudgetInputs`; `calculateCombinedNetMonthlyIncome` in `taxCalculations.ts` combines household income for MFJ federal/state taxes while keeping SS payroll tax per earner; `budgetCalculations.ts` computes household combined take-home + partner retirement breakdown; Partner Income section in `BudgetForm` (shown when filing status = Married Filing Jointly); `IncomeSummary` updated for household view; 9 new tests (220 total passing).*
+*Last updated: 2026-09-14 — Completed E5-T8 (Savings Goal Timeline Calculator): added `calculateMonthsToGoal` and `calculateRequiredContribution` helpers to `lib/longTermGoals.ts`; `monthsAtCurrentRate` field on `LongTermGoalProjection`; `LongTermGoalsDetail` dashboard card now shows "At Current Rate" timeline and an interactive "Reach in X months" input per goal that back-calculates the required monthly contribution; `SavingsDetail` shows months-to-goal sub-labels for emergency fund and house fund; 16 new tests (236 total passing).*

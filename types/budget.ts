@@ -87,6 +87,8 @@ export interface LongTermGoalProjection {
   remainingAmount: number;
   targetDate: string;
   monthsRemaining: number | null;
+  /** Months to reach target at the current monthly funding rate (null if already funded or no funding) */
+  monthsAtCurrentRate: number | null;
   requiredMonthlySavings: number;
   currentMonthlyFunding: number;
   progress: number;

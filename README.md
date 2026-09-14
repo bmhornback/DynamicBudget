@@ -43,6 +43,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🏦 **Paycheck calculator** — Select your pay frequency (weekly, bi-weekly, semi-monthly, or monthly) and see every budget line translated into per-paycheck amounts; includes a deduction waterfall (gross → pre-tax → taxes → take-home) and a per-paycheck allocation view with spend-ratio bars
 - 📊 **Irregular income scenarios** — Set a monthly income variability % (ideal for freelancers and commission earners) to instantly see your budget at the P25 (bad month), P50 (typical), and P75 (good month) income levels; at-risk variable expenses are surfaced automatically when a bad month would push you into deficit
 - 👥 **Partner / dual-income mode** — Switch to Married Filing Jointly and enable a second earner's salary and 401(k); federal and state taxes are calculated on the combined household income using MFJ brackets (Social Security wage-base cap applied individually), and the dashboard's Income Summary switches to a household view showing each partner's gross income and the combined take-home
+- 📅 **Savings goal timeline calculator** — Each long-term goal card shows how many months it will take to reach the target at your current funding rate, plus an interactive "Reach in X months" input that instantly back-calculates the required monthly contribution; emergency fund and house fund rows in Savings Detail also display projected months to fully funded
 
 ### Upcoming Features
 - 📋 Deeper multi-scenario workflows

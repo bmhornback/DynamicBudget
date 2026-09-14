@@ -3,6 +3,8 @@ import { DEFAULT_INPUTS } from '../defaultScenarios';
 import {
   calculateLongTermGoalProjections,
   generateFinancialLiteracyInsights,
+  calculateMonthsToGoal,
+  calculateRequiredContribution,
 } from '../longTermGoals';
 
 describe('longTermGoals', () => {
@@ -164,5 +166,111 @@ describe('longTermGoals', () => {
     );
 
     expect(insights.map((insight) => insight.id)).toContain('debt_vs_savings');
+  });
+});
+
+describe('calculateMonthsToGoal', () => {
+  it('returns months to reach target at current contribution rate', () => {
+    expect(calculateMonthsToGoal(0, 6000, 500)).toBe(12);
+  });
+
+  it('rounds up to the next whole month', () => {
+    expect(calculateMonthsToGoal(0, 6001, 500)).toBe(13);
+  });
+
+  it('returns null when already funded', () => {
+    expect(calculateMonthsToGoal(6000, 6000, 500)).toBeNull();
+  });
+
+  it('returns null when target is exceeded', () => {
+    expect(calculateMonthsToGoal(7000, 6000, 500)).toBeNull();
+  });
+
+  it('returns null when monthly contribution is zero', () => {
+    expect(calculateMonthsToGoal(0, 6000, 0)).toBeNull();
+  });
+
+  it('returns null when monthly contribution is negative', () => {
+    expect(calculateMonthsToGoal(0, 6000, -100)).toBeNull();
+  });
+
+  it('returns 1 when remaining equals exactly one contribution', () => {
+    expect(calculateMonthsToGoal(5500, 6000, 500)).toBe(1);
+  });
+
+  it('accounts for partial progress correctly', () => {
+    expect(calculateMonthsToGoal(2000, 8000, 1000)).toBe(6);
+  });
+});
+
+describe('calculateRequiredContribution', () => {
+  it('computes required monthly contribution to reach goal in target months', () => {
+    expect(calculateRequiredContribution(0, 12000, 12)).toBeCloseTo(1000, 5);
+  });
+
+  it('accounts for current amount already saved', () => {
+    expect(calculateRequiredContribution(2000, 12000, 10)).toBeCloseTo(1000, 5);
+  });
+
+  it('returns null when already funded', () => {
+    expect(calculateRequiredContribution(12000, 12000, 12)).toBeNull();
+  });
+
+  it('returns null when target months is zero', () => {
+    expect(calculateRequiredContribution(0, 12000, 0)).toBeNull();
+  });
+
+  it('returns null when target months is negative', () => {
+    expect(calculateRequiredContribution(0, 12000, -5)).toBeNull();
+  });
+
+  it('returns null when current exceeds target', () => {
+    expect(calculateRequiredContribution(15000, 12000, 12)).toBeNull();
+  });
+});
+
+describe('monthsAtCurrentRate in LongTermGoalProjection', () => {
+  it('populates monthsAtCurrentRate for a behind goal', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      generalCashSavings: 600,
+      longTermGoals: [
+        {
+          id: 'vacation',
+          name: 'Vacation',
+          category: 'vacation' as const,
+          targetAmount: 6000,
+          currentAmount: 0,
+          targetDate: '',
+        },
+      ],
+    };
+    const breakdown = calculateBudgetBreakdown(inputs);
+    const projections = calculateLongTermGoalProjections(inputs, breakdown);
+    const vacation = projections.find((p) => p.id === 'vacation');
+    expect(vacation).toBeDefined();
+    expect(vacation!.monthsAtCurrentRate).not.toBeNull();
+    expect(vacation!.monthsAtCurrentRate).toBe(Math.ceil(6000 / 600));
+  });
+
+  it('returns null monthsAtCurrentRate for a funded goal', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      generalCashSavings: 600,
+      longTermGoals: [
+        {
+          id: 'funded',
+          name: 'Funded Goal',
+          category: 'vacation' as const,
+          targetAmount: 6000,
+          currentAmount: 6000,
+          targetDate: '',
+        },
+      ],
+    };
+    const breakdown = calculateBudgetBreakdown(inputs);
+    const projections = calculateLongTermGoalProjections(inputs, breakdown);
+    const goal = projections.find((p) => p.id === 'funded');
+    expect(goal!.monthsAtCurrentRate).toBeNull();
   });
 });
