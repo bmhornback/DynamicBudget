@@ -70,6 +70,7 @@ const COMPLETED_TASKS = {
   'E5-T5': 'payFrequency on BudgetInputs; lib/paycheckCalculations.ts; PaycheckCard.tsx',
   'E5-T6': 'incomeVariabilityPercent; lib/irregularIncome.ts P25/P50/P75; IrregularIncomeCard.tsx',
   'E5-T7': 'partnerEnabled + 8 partner fields; calculateCombinedNetMonthlyIncome; MFJ combined taxes; Partner Income section in BudgetForm; IncomeSummary household view',
+  'E5-T8': 'calculateMonthsToGoal + calculateRequiredContribution helpers; monthsAtCurrentRate on LongTermGoalProjection; goal timeline UI in BudgetDashboard',
 
   // Epic 6 — UX Polish & Accessibility
   'E6-T4': 'inputMode="decimal" on number inputs; section collapse/expand animation',
