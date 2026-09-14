@@ -191,11 +191,11 @@ export default function SavingsProgressCard({ breakdown, inputs }: SavingsProgre
           </p>
         )}
 
-        {!isHomeowner && (houseTarget > 0 || houseMonthly > 0) && (
+        {!isHomeowner && houseTarget > 0 && (
           <TimelineRow
             label="House Down Payment"
             monthly={houseMonthly}
-            target={houseTarget > 0 ? houseTarget : houseMonthly * 24}
+            target={houseTarget}
             monthsToGoal={houseMonthsToGoal}
             colorClass="bg-violet-500"
           />

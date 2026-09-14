@@ -36,7 +36,7 @@ const SLICE_COLORS: Record<string, string> = {
 interface TooltipPayloadEntry {
   name: string;
   value: number;
-  payload: { percent: number };
+  payload: { shareOfGross: number };
 }
 
 function CustomTooltip({ active, payload }: { active?: boolean; payload?: TooltipPayloadEntry[] }) {
@@ -46,7 +46,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-3 py-2 text-sm">
       <p className="font-semibold text-gray-900 dark:text-gray-100">{entry.name}</p>
       <p className="text-gray-700 dark:text-gray-300">{formatCurrency(entry.value)}/mo</p>
-      <p className="text-gray-500 dark:text-gray-400">{formatPercent(entry.payload.percent)}</p>
+      <p className="text-gray-500 dark:text-gray-400">{formatPercent(entry.payload.shareOfGross)}</p>
     </div>
   );
 }
@@ -82,7 +82,7 @@ export default function BudgetPieChart({ breakdown, inputs }: BudgetPieChartProp
     ...(bufferRaw > 0 ? [{ name: 'Buffer', value: bufferRaw }] : []),
   ]
     .filter((s) => s.value > 0)
-    .map((s) => ({ ...s, percent: s.value / gross }));
+    .map((s) => ({ ...s, shareOfGross: s.value / gross }));
 
   return (
     <BudgetCard title="Monthly Budget Breakdown" accent="blue">
@@ -125,7 +125,7 @@ export default function BudgetPieChart({ breakdown, inputs }: BudgetPieChartProp
                   <span className="text-xs text-gray-700 dark:text-gray-300">
                     {value}{' '}
                     <span className="text-gray-400">
-                      ({item ? formatPercent(item.percent) : ''})
+                      ({item ? formatPercent(item.shareOfGross) : ''})
                     </span>
                   </span>
                 );

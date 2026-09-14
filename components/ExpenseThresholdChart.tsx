@@ -64,7 +64,7 @@ export default function ExpenseThresholdChart({ breakdown, inputs }: ExpenseThre
   const net = breakdown.netMonthlyIncome;
   if (net <= 0) return null;
 
-  const pct = (v: number) => net > 0 ? v / net : 0;
+  const pct = (v: number) => v / net;
 
   const data: CategoryEntry[] = [
     { name: 'Housing', value: pct(breakdown.totalHousing), threshold: 0.35 },
