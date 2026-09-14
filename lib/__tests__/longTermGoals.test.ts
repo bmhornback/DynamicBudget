@@ -3,6 +3,8 @@ import { DEFAULT_INPUTS } from '../defaultScenarios';
 import {
   calculateLongTermGoalProjections,
   generateFinancialLiteracyInsights,
+  calculateMonthsToGoal,
+  calculateRequiredContribution,
 } from '../longTermGoals';
 
 describe('longTermGoals', () => {
@@ -166,11 +168,6 @@ describe('longTermGoals', () => {
     expect(insights.map((insight) => insight.id)).toContain('debt_vs_savings');
   });
 });
-
-import {
-  calculateMonthsToGoal,
-  calculateRequiredContribution,
-} from '../longTermGoals';
 
 describe('calculateMonthsToGoal', () => {
   it('returns months to reach target at current contribution rate', () => {

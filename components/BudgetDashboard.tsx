@@ -23,7 +23,7 @@ import type {
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { MAX_DEBT_PAYOFF_YEARS } from '@/lib/debtPayoff';
 import type { DebtPayoffProjection } from '@/lib/debtPayoff';
-import { calculateLongTermGoalProjections, generateFinancialLiteracyInsights, calculateRequiredContribution } from '@/lib/longTermGoals';
+import { calculateLongTermGoalProjections, generateFinancialLiteracyInsights, calculateRequiredContribution, calculateMonthsToGoal } from '@/lib/longTermGoals';
 import IncomeSummary from './IncomeSummary';
 import ExpenseSummary from './ExpenseSummary';
 import SavingsSummary from './SavingsSummary';
@@ -296,16 +296,10 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
       : breakdown.emergencyFundTargetCalculated;
 
   // Emergency fund: assume currentAmount = 0 for timeline (contribution is monthly toward target)
-  const efMonthsToGoal =
-    inputs.emergencyFundContribution > 0 && efTarget > 0
-      ? Math.ceil(efTarget / inputs.emergencyFundContribution)
-      : null;
+  const efMonthsToGoal = calculateMonthsToGoal(0, efTarget, inputs.emergencyFundContribution);
 
   // House fund: use houseDownPaymentTarget as target and houseDownPaymentContribution as monthly rate
-  const houseMonthsToGoal =
-    inputs.houseDownPaymentContribution > 0 && inputs.houseDownPaymentTarget > 0
-      ? Math.ceil(inputs.houseDownPaymentTarget / inputs.houseDownPaymentContribution)
-      : null;
+  const houseMonthsToGoal = calculateMonthsToGoal(0, inputs.houseDownPaymentTarget, inputs.houseDownPaymentContribution);
 
   return (
     <BudgetCard title="Savings Detail">
@@ -577,7 +571,7 @@ function LongTermGoalsDetail({ goals }: { goals: LongTermGoalProjection[] }) {
                         </span>
                       )}
                       {rawInput !== '' && (Number.isNaN(parsedMonths) || parsedMonths <= 0) && (
-                        <span className="text-xs text-red-500">Enter a positive number</span>
+                        <span role="alert" className="text-xs text-red-500">Enter a positive number</span>
                       )}
                     </div>
                   </div>
