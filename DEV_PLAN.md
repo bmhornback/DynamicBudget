@@ -341,24 +341,27 @@ States to add (in priority order based on population and no-income-tax interest)
 - Install and verify no conflicts with Next.js 16 / React 19
 - **Implemented:** `recharts` installed and used for area charts (debt payoff timeline) and trend charts
 
-### E4-T2 · Pie/donut chart — monthly budget breakdown
+### E4-T2 · Pie/donut chart — monthly budget breakdown ✅ Done
 - Show gross monthly income divided into: Taxes, Retirement, Housing, Utilities, Transport, Pets, Food, Health, Lifestyle, Savings/Investing, Buffer
 - Interactive (hover tooltip shows dollar amount + percentage)
 - Responsive (collapses gracefully on mobile)
 - Replace or augment the `ExpenseSummary` card
+- **Implemented:** `components/BudgetPieChart.tsx` — recharts donut chart with per-slice colors, hover tooltips, and responsive legend; rendered in the main dashboard grid
 
-### E4-T3 · Bar chart — expense categories vs recommended thresholds
+### E4-T3 · Bar chart — expense categories vs recommended thresholds ✅ Done
 - Horizontal bar chart showing each category as % of take-home
 - Threshold lines (e.g., 30% rent line, 15% car line)
 - Color coding: green = under threshold, amber = approaching, red = over
+- **Implemented:** `components/ExpenseThresholdChart.tsx` — recharts horizontal BarChart with per-category ReferenceLine thresholds and color-coded Cell fills; full-width row below the main grid
 
-### E4-T4 · Savings progress visual
+### E4-T4 · Savings progress visual ✅ Done
 - Progress bars for:
   - Emergency fund: current contribution rate vs 6-month target timeline
   - House down payment: months-to-goal countdown
   - 401(k): annual contribution vs limit
   - IRA: annual contribution vs limit
 - Replace text in `SavingsSummary` / `SavingsDetail`
+- **Implemented:** `components/SavingsProgressCard.tsx` — animated progress bars for 401(k)/IRA/HSA vs annual limits, plus emergency-fund and house-fund timelines; rendered in the main dashboard grid alongside `SavingsSummary`
 
 ### E4-T5 · Health score radial/gauge chart ✅ Done
 - Replace the plain number display in `BudgetHealthScore` with a visual gauge (0–100 arc)
@@ -710,7 +713,7 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ### v1.5 — "Grow It"
 - Epic 3 complete
-- Epic 4 complete (including projection chart, rebalance diff)
+- Epic 4 complete (including projection chart, rebalance diff) ✅ T2–T5 done; T6–T7 remaining
 - Epic 5-T1 through T4 (multi-scenario expansion, debt payoff, homeowner mode, COLI) ✅ T1–T4 complete
 - Epic 7 complete
 

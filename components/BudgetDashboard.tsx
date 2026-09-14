@@ -33,6 +33,9 @@ import BudgetCard from './BudgetCard';
 import ColiCard from './ColiCard';
 import PaycheckCard from './PaycheckCard';
 import IrregularIncomeCard from './IrregularIncomeCard';
+import BudgetPieChart from './BudgetPieChart';
+import ExpenseThresholdChart from './ExpenseThresholdChart';
+import SavingsProgressCard from './SavingsProgressCard';
 import { calculatePaycheckBreakdown } from '@/lib/paycheckCalculations';
 import { calculateIrregularIncomeAnalysis } from '@/lib/irregularIncome';
 
@@ -128,7 +131,12 @@ export default function BudgetDashboard({
         <SavingsSummary breakdown={breakdown} inputs={inputs} />
         <ExpenseSummary breakdown={breakdown} inputs={inputs} />
         <BudgetHealthScore healthScore={healthScore} />
+        <BudgetPieChart breakdown={breakdown} inputs={inputs} />
+        <SavingsProgressCard breakdown={breakdown} inputs={inputs} />
       </div>
+
+      {/* Expense threshold chart — full width */}
+      <ExpenseThresholdChart breakdown={breakdown} inputs={inputs} />
 
       {/* Detailed sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

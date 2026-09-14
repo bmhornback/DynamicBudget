@@ -57,6 +57,9 @@ const COMPLETED_TASKS = {
 
   // Epic 4 — Data Visualization
   'E4-T1': 'recharts installed; AreaChart used in debt payoff timeline + TrendChart',
+  'E4-T2': 'components/BudgetPieChart.tsx — recharts donut chart with per-slice colors, hover tooltips, responsive legend',
+  'E4-T3': 'components/ExpenseThresholdChart.tsx — recharts horizontal BarChart with ReferenceLine thresholds and color-coded Cell fills',
+  'E4-T4': 'components/SavingsProgressCard.tsx — animated progress bars for 401k/IRA/HSA limits plus emergency-fund and house-fund timelines',
   'E4-T5': 'SVG arc gauge with strokeDasharray in components/BudgetHealthScore.tsx',
 
   // Epic 5 — Advanced Budget Features
