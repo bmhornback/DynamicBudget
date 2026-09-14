@@ -36,6 +36,7 @@ const COMPLETED_TASKS = {
   'E1-T1':  'jest + ts-jest setup, jest.config.ts, npm test script',
   'E1-T2':  'taxCalculations.test.ts — all bracket/rate tests',
   'E1-T3':  'budgetCalculations.test.ts — breakdown + edge cases',
+  'E1-T4':  'rebalanceBudget.test.ts — strategies, surplus allocations, locks, no-mutate flow',
   'E1-T5':  'recommendations.test.ts — all recommendation IDs tested',
   'E1-T7':  '.github/workflows/ci.yml — install/lint/build/test',
   'E1-T8':  'ESLint flat config (eslint.config.mjs), strict TS in tsconfig.json',

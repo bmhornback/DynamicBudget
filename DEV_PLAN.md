@@ -199,7 +199,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Test edge cases: zero salary, zero rent, pets disabled, no car
 - **Target:** 100% branch coverage
 
-### E1-T4 · Unit tests — `rebalanceBudget.ts`
+### E1-T4 · Unit tests — `rebalanceBudget.ts` ✅ Done
 - Test each rebalance strategy (6 strategies × over-budget scenario)
 - Test surplus allocation (all `SurplusAllocation` values)
 - Test locked-field behavior (locked fields must not change)
@@ -761,4 +761,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-14 — Completed E5-T8 (Savings Goal Timeline Calculator): added `calculateMonthsToGoal` and `calculateRequiredContribution` helpers to `lib/longTermGoals.ts`; `monthsAtCurrentRate` field on `LongTermGoalProjection`; `LongTermGoalsDetail` dashboard card now shows "At Current Rate" timeline and an interactive "Reach in X months" input per goal that back-calculates the required monthly contribution; `SavingsDetail` shows months-to-goal sub-labels for emergency fund and house fund; 16 new tests (236 total passing).*
+*Last updated: 2026-09-14 — Completed E1-T4 (rebalanceBudget tests): added `lib/__tests__/rebalanceBudget.test.ts` covering all 6 over-budget strategies, all `SurplusAllocation` values, locked-field behavior, balanced/no-op flow, and `recommendations_only` immutability; 22 new tests (258 total passing).*
