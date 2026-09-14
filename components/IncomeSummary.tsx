@@ -27,9 +27,7 @@ function Divider() {
 }
 
 export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps) {
-  const { taxes, retirement, grossMonthly, netMonthlyIncome } = breakdown;
-  const isDualIncome = inputs.partnerEnabled && inputs.filingStatus === 'married_jointly' &&
-    (inputs.partnerAnnualSalary > 0 || inputs.partnerBonusIncome > 0);
+  const { taxes, retirement, grossMonthly, netMonthlyIncome, isDualIncome } = breakdown;
 
   return (
     <BudgetCard title={isDualIncome ? 'Household Income Summary' : 'Income Summary'} accent="blue">

@@ -390,7 +390,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   
   const totalAnnualSavingsIncludingRetirement =
     (totalSavings + totalInvestments) * 12 +
-    retCalc.annual401k + annualIRA + annualHSA +
+    retCalc.annual401k + retCalc.annual401kCatchUp + annualIRA + annualHSA +
     (isDualIncome && partnerRetCalc ? partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp : 0);
 
   // ── Rates ─────────────────────────────────────────────────────────────────
@@ -473,6 +473,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     partnerRetirement: partnerRetirementBreakdown,
     householdGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedGrossMonthly : grossMonthly,
     householdNetMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedNetMonthly : netMonthly,
+    isDualIncome,
   };
 }
 

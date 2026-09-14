@@ -380,6 +380,8 @@ export interface BudgetBreakdown {
   partnerRetirement: RetirementBreakdown | null;
   householdGrossMonthly: number;
   householdNetMonthly: number;
+  /** True when partner income is active and influencing the household tax/income calculation. */
+  isDualIncome: boolean;
 }
 
 export type RecommendationSeverity = 'warning' | 'info' | 'success';
