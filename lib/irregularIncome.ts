@@ -163,7 +163,7 @@ function buildAtRiskExpenses(inputs: BudgetInputs): AtRiskExpense[] {
     },
   ];
 
-  // Exclude pet costs if pets disabled
+  // Include pet-related discretionary costs when pets are enabled
   if (inputs.petsEnabled) {
     candidates.push(
       { label: 'Pet Grooming / Supplies', monthlyAmount: inputs.groomingSupplies, isEssential: false },

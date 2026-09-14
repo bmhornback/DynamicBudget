@@ -154,6 +154,7 @@ describe('calculateIrregularIncomeAnalysis', () => {
     });
 
     it('is positive when P25 is over budget', () => {
+      // Very high expenses, modest salary → P25 over budget
       const inputs = makeInputs({
         annualSalary: 60000,
         incomeVariabilityPercent: 60,
@@ -162,9 +163,8 @@ describe('calculateIrregularIncomeAnalysis', () => {
       });
       const bd = calculateBudgetBreakdown(inputs);
       const { p25Deficit, isP25OverBudget } = calculateIrregularIncomeAnalysis(inputs, bd);
-      if (isP25OverBudget) {
-        expect(p25Deficit).toBeGreaterThan(0);
-      }
+      expect(isP25OverBudget).toBe(true);
+      expect(p25Deficit).toBeGreaterThan(0);
     });
   });
 
