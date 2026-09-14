@@ -210,19 +210,21 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       state,
       otherMonthlyIncome
     );
-    // Wrap into same shape as netCalc so the rest of the function remains unchanged
-    netCalc = calculateNetMonthlyIncome(
-      annualSalary,
-      filingStatus,
-      state,
-      retCalc.annual401k,
-      annualIRA,
-      bonusIncome,
-      otherMonthlyIncome,
-      iraType,
-      annualHSA,
-      is401kRoth
-    );
+    // netCalc is only used in the solo path; initialize to a placeholder for type safety.
+    // The dual-income path uses combinedCalc exclusively for all figures.
+    netCalc = {
+      grossMonthly: 0,
+      federalTaxMonthly: 0,
+      stateTaxMonthly: 0,
+      payrollTaxMonthly: 0,
+      total401kMonthly: 0,
+      netMonthly: 0,
+      federalTaxAnnual: 0,
+      stateTaxAnnual: 0,
+      payrollTaxAnnual: 0,
+      totalTaxAnnual: 0,
+      effectiveTaxRate: 0,
+    };
   } else {
     netCalc = calculateNetMonthlyIncome(
       annualSalary,
@@ -466,8 +468,15 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     deficit,
     // Partner / dual-income fields
     partnerGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.partnerGrossMonthly : 0,
-    partnerNetMonthly: isDualIncome && combinedCalc
-      ? Math.max(0, combinedCalc.partnerGrossMonthly - combinedCalc.payrollTaxAnnual / 12 / 2)
+    // Attribute taxes proportionally to each earner's gross share, then subtract partner retirement.
+    partnerNetMonthly: isDualIncome && combinedCalc && combinedCalc.combinedGrossMonthly > 0
+      ? Math.max(
+          0,
+          combinedCalc.partnerGrossMonthly -
+            (combinedCalc.totalTaxAnnual / 12) *
+              (combinedCalc.partnerGrossMonthly / combinedCalc.combinedGrossMonthly) -
+            (partnerRetCalc ? (partnerAnnual401kPreTax + partnerAnnualRoth401k) / 12 : 0)
+        )
       : 0,
     partnerRetirement: partnerRetirementBreakdown,
     householdGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedGrossMonthly : grossMonthly,

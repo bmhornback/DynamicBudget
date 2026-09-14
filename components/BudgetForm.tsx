@@ -14,7 +14,7 @@ import type {
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
-import { STATE_LABELS } from '@/lib/taxCalculations';
+import { STATE_LABELS, ANNUAL_401K_LIMIT } from '@/lib/taxCalculations';
 import { adjustExpensesForColi, getColiIndex, getColiTierLabel } from '@/lib/coliData';
 import { PAY_FREQUENCY_LABELS } from '@/lib/paycheckCalculations';
 
@@ -381,7 +381,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           label="Max Out 401(k)"
           value={inputs.maxOut401k}
           onChange={(v) => onChange({ maxOut401k: v })}
-          description="Cap at $24,500/year employee contribution"
+          description={`Cap at $${ANNUAL_401K_LIMIT.toLocaleString()}/year employee contribution`}
         />
 
         {!inputs.maxOut401k && (
@@ -487,7 +487,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 label="Partner Max Out 401(k)"
                 value={inputs.partnerMaxOut401k}
                 onChange={(v) => onChange({ partnerMaxOut401k: v })}
-                description="Cap at $24,500/year"
+                description={`Cap at $${ANNUAL_401K_LIMIT.toLocaleString()}/year`}
               />
 
               {!inputs.partnerMaxOut401k && (
