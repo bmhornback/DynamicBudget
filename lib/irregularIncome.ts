@@ -52,7 +52,13 @@ export interface IrregularIncomeAnalysis {
 
 /**
  * Build a scaled copy of BudgetInputs with a different annual salary.
- * Bonus income is scaled proportionally; all other fields are unchanged.
+ * Bonus income is scaled proportionally to the salary ratio so that the
+ * bonus-to-salary relationship is preserved across scenarios.
+ *
+ * Note: variability is applied to `annualSalary` only, not to total gross
+ * (salary + bonus). This is intentional — variability represents fluctuation
+ * in the base salary (e.g. hourly/commission variance), while the bonus is
+ * treated as a dependent fraction of that salary.
  */
 function scaleInputsToSalary(inputs: BudgetInputs, newAnnualSalary: number): BudgetInputs {
   const salaryRatio = inputs.annualSalary > 0 ? newAnnualSalary / inputs.annualSalary : 1;
