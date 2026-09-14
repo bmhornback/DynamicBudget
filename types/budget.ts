@@ -374,7 +374,9 @@ export interface BudgetBreakdown {
   surplus: number;
   deficit: number;
 
-  // Partner / dual-income breakdown (only populated when partnerEnabled === true)
+  // Partner / dual-income breakdown (only populated when partnerEnabled === true, filing status
+  // is married_jointly, and partnerAnnualSalary > 0 or partnerBonusIncome > 0 — i.e., when
+  // dual-income is fully active)
   partnerGrossMonthly: number;
   partnerNetMonthly: number;
   partnerRetirement: RetirementBreakdown | null;

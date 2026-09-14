@@ -98,9 +98,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   }
 
   // For retirement savings rate calculation:
-  // Include 401(k) + catch-up, IRA + catch-up (both types), and HSA
-  const totalEmployeeRetirementAnnual = retCalc.annual401k + retCalc.annual401kCatchUp + annualIRA + annualIRACatchUp + annualHSA;
-  const totalEmployeeRetirementMonthly = retCalc.monthly401k + retCalc.monthly401kCatchUp + monthlyIRA + monthlyIRACatchUp + monthlyHSA;
+  // Include 401(k) (already includes the age-adjusted catch-up amount), IRA + catch-up, and HSA
+  const totalEmployeeRetirementAnnual = retCalc.annual401k + annualIRA + annualIRACatchUp + annualHSA;
+  const totalEmployeeRetirementMonthly = retCalc.monthly401k + monthlyIRA + monthlyIRACatchUp + monthlyHSA;
 
   const retirementBreakdown: RetirementBreakdown = {
     monthly401k: retCalc.monthly401k,
@@ -173,13 +173,16 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
         monthlyHSA: 0,
         annualHSA: 0,
         isMaxingHSA: false,
-        totalMonthlyEmployee: partnerRetCalc.monthly401k + partnerRetCalc.monthly401kCatchUp,
-        totalAnnualEmployee: partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp,
+        // Partner IRA/HSA are not modeled (no partner IRA/HSA input fields), so
+        // totalMonthlyEmployee/totalAnnualEmployee and the savings rate reflect 401(k) only.
+        // If partner IRA/HSA support is added in the future, include those amounts here.
+        totalMonthlyEmployee: partnerRetCalc.monthly401k,
+        totalAnnualEmployee: partnerRetCalc.annual401k,
         retirementSavingsRate: partnerAnnualSalary > 0
-          ? (partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp) / partnerAnnualSalary
+          ? partnerRetCalc.annual401k / partnerAnnualSalary
           : 0,
         isSaving15Percent: partnerAnnualSalary > 0
-          ? (partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp) / partnerAnnualSalary >= 0.15
+          ? partnerRetCalc.annual401k / partnerAnnualSalary >= 0.15
           : false,
       }
     : null;
@@ -388,10 +391,12 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   // Calculate Roth IRA contribution (for tracking in breakdown)
   const monthlyRothIRA = iraType === 'roth' ? monthlyIRA : 0;
   
+  // retCalc.annual401k already includes the catch-up amount (the age-adjusted limit is
+  // used as the cap), so annual401kCatchUp must not be added again here.
   const totalAnnualSavingsIncludingRetirement =
     (totalSavings + totalInvestments) * 12 +
-    retCalc.annual401k + retCalc.annual401kCatchUp + annualIRA + annualHSA +
-    (isDualIncome && partnerRetCalc ? partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp : 0);
+    retCalc.annual401k + annualIRA + annualHSA +
+    (isDualIncome && partnerRetCalc ? partnerRetCalc.annual401k : 0);
 
   // ── Rates ─────────────────────────────────────────────────────────────────
   const grossMonthly = isDualIncome && combinedCalc
@@ -458,18 +463,26 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     // Partner / dual-income fields
     partnerGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.partnerGrossMonthly : 0,
     // partnerNetMonthly uses a proportional approximation: each earner's share of the combined
-    // tax bill is weighted by their gross income share. This is for display-only attribution
-    // and is not expected to sum precisely to combinedNetMonthly (which uses the exact combined
-    // net formula). Use householdNetMonthly for the authoritative combined take-home figure.
-    partnerNetMonthly: isDualIncome && combinedCalc && combinedCalc.combinedGrossMonthly > 0
-      ? Math.max(
-          0,
-          combinedCalc.partnerGrossMonthly -
-            (combinedCalc.totalTaxAnnual / 12) *
-              (combinedCalc.partnerGrossMonthly / combinedCalc.combinedGrossMonthly) -
-            (partnerRetCalc ? (partnerAnnual401kPreTax + partnerAnnualRoth401k) / 12 : 0)
-        )
-      : 0,
+    // tax bill is weighted by their gross income share (excluding otherMonthlyIncome, which is
+    // not subject to taxes). This is for display-only attribution and is not expected to sum
+    // precisely to combinedNetMonthly (which uses the exact combined net formula).
+    // Use householdNetMonthly for the authoritative combined take-home figure.
+    partnerNetMonthly: (() => {
+      // Guard against negative taxableGrossMonthly in the unlikely case that otherMonthlyIncome
+      // exceeds the combined earned gross (e.g., all income is non-taxable other income).
+      const taxableGrossMonthly = isDualIncome && combinedCalc
+        ? Math.max(0, combinedCalc.combinedGrossMonthly - otherMonthlyIncome)
+        : 0;
+      return isDualIncome && combinedCalc && taxableGrossMonthly > 0
+        ? Math.max(
+            0,
+            combinedCalc.partnerGrossMonthly -
+              (combinedCalc.totalTaxAnnual / 12) *
+                (combinedCalc.partnerGrossMonthly / taxableGrossMonthly) -
+              (partnerRetCalc ? (partnerAnnual401kPreTax + partnerAnnualRoth401k) / 12 : 0)
+          )
+        : 0;
+    })(),
     partnerRetirement: partnerRetirementBreakdown,
     householdGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedGrossMonthly : grossMonthly,
     householdNetMonthly: isDualIncome && combinedCalc ? combinedCalc.combinedNetMonthly : netMonthly,

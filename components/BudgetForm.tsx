@@ -14,7 +14,7 @@ import type {
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
-import { STATE_LABELS, ANNUAL_401K_LIMIT } from '@/lib/taxCalculations';
+import { STATE_LABELS, get401kLimit, ANNUAL_401K_CATCHUP_LIMIT } from '@/lib/taxCalculations';
 import { adjustExpensesForColi, getColiIndex, getColiTierLabel } from '@/lib/coliData';
 import { PAY_FREQUENCY_LABELS } from '@/lib/paycheckCalculations';
 
@@ -381,7 +381,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           label="Max Out 401(k)"
           value={inputs.maxOut401k}
           onChange={(v) => onChange({ maxOut401k: v })}
-          description={`Cap at $${ANNUAL_401K_LIMIT.toLocaleString()}/year employee contribution`}
+          description={`Cap at $${get401kLimit(inputs.userAge).toLocaleString()}/year employee contribution`}
         />
 
         {!inputs.maxOut401k && (
@@ -467,10 +467,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           {inputs.partnerEnabled && (
             <>
               <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-                <label className="text-sm text-gray-700 block mb-1">Partner Annual Gross Salary</label>
+                <label htmlFor="partnerAnnualSalaryInput" className="text-sm text-gray-700 block mb-1">Partner Annual Gross Salary</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
                   <input
+                    id="partnerAnnualSalaryInput"
                     type="number"
                     value={inputs.partnerAnnualSalary}
                     onChange={(e) => onChange({ partnerAnnualSalary: Math.max(0, Number(e.target.value)) })}
@@ -487,7 +488,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 label="Partner Max Out 401(k)"
                 value={inputs.partnerMaxOut401k}
                 onChange={(v) => onChange({ partnerMaxOut401k: v })}
-                description={`Cap at $${ANNUAL_401K_LIMIT.toLocaleString()}/year`}
+                description={`Cap at $${get401kLimit(inputs.partnerAge).toLocaleString()}/year`}
               />
 
               {!inputs.partnerMaxOut401k && (
@@ -522,7 +523,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
               />
 
               <NumberSlider
-                label={`Partner Age${inputs.partnerAge >= 50 ? ' ✓ Eligible for $7,500 catch-up' : ''}`}
+                label={`Partner Age${inputs.partnerAge >= 50 ? ` ✓ Eligible for $${ANNUAL_401K_CATCHUP_LIMIT.toLocaleString()} catch-up` : ''}`}
                 value={inputs.partnerAge}
                 min={0}
                 max={100}
