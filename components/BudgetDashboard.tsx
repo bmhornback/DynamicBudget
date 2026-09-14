@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -23,7 +23,7 @@ import type {
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { MAX_DEBT_PAYOFF_YEARS } from '@/lib/debtPayoff';
 import type { DebtPayoffProjection } from '@/lib/debtPayoff';
-import { calculateLongTermGoalProjections, generateFinancialLiteracyInsights } from '@/lib/longTermGoals';
+import { calculateLongTermGoalProjections, generateFinancialLiteracyInsights, calculateRequiredContribution } from '@/lib/longTermGoals';
 import IncomeSummary from './IncomeSummary';
 import ExpenseSummary from './ExpenseSummary';
 import SavingsSummary from './SavingsSummary';
@@ -295,6 +295,18 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
       ? inputs.emergencyFundTarget
       : breakdown.emergencyFundTargetCalculated;
 
+  // Emergency fund: assume currentAmount = 0 for timeline (contribution is monthly toward target)
+  const efMonthsToGoal =
+    inputs.emergencyFundContribution > 0 && efTarget > 0
+      ? Math.ceil(efTarget / inputs.emergencyFundContribution)
+      : null;
+
+  // House fund: use houseDownPaymentTarget as target and houseDownPaymentContribution as monthly rate
+  const houseMonthsToGoal =
+    inputs.houseDownPaymentContribution > 0 && inputs.houseDownPaymentTarget > 0
+      ? Math.ceil(inputs.houseDownPaymentTarget / inputs.houseDownPaymentContribution)
+      : null;
+
   return (
     <BudgetCard title="Savings Detail">
       <DetailRow
@@ -304,6 +316,7 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
       <DetailRow
         label="Emergency Fund Target (6 mo)"
         value={formatCurrency(efTarget)}
+        sub={efMonthsToGoal !== null ? `~${efMonthsToGoal} month${efMonthsToGoal === 1 ? '' : 's'} to fully funded` : undefined}
       />
       <DividerLine />
       <DetailRow
@@ -315,8 +328,8 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
         label={inputs.housingMode === 'homeowner' ? 'Home Equity Target' : 'Down Payment Target'}
         value={formatCurrency(inputs.houseDownPaymentTarget)}
         sub={
-          inputs.houseDownPaymentContribution > 0
-            ? `~${Math.ceil(inputs.houseDownPaymentTarget / inputs.houseDownPaymentContribution)} months to goal`
+          houseMonthsToGoal !== null
+            ? `~${houseMonthsToGoal} month${houseMonthsToGoal === 1 ? '' : 's'} to goal`
             : undefined
         }
       />
@@ -475,59 +488,103 @@ function DebtPayoffDetail({
 }
 
 function LongTermGoalsDetail({ goals }: { goals: LongTermGoalProjection[] }) {
+  const [targetMonthsMap, setTargetMonthsMap] = useState<Record<string, string>>({});
+
   return (
     <BudgetCard title="Long-Term Goals">
       {goals.length === 0 ? (
-        <p className="text-sm text-gray-600">Add goals in the form to track timelines for retirement, travel, kids, and major purchases.</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Add goals in the form to track timelines for retirement, travel, kids, and major purchases.</p>
       ) : (
         <div className="space-y-3">
-          {goals.map((goal) => (
-            <div key={goal.id} className="rounded-lg border border-gray-100 p-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{goal.name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{goal.category.replace('_', ' ')}</p>
+          {goals.map((goal) => {
+            const rawInput = targetMonthsMap[goal.id] ?? '';
+            const parsedMonths = rawInput !== '' ? parseInt(rawInput, 10) : NaN;
+            const backcalcContrib =
+              !Number.isNaN(parsedMonths) && parsedMonths > 0
+                ? calculateRequiredContribution(goal.currentAmount, goal.targetAmount, parsedMonths)
+                : null;
+
+            return (
+              <div key={goal.id} className="rounded-lg border border-gray-100 dark:border-gray-700 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{goal.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{goal.category.replace('_', ' ')}</p>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${goal.status === 'funded' || goal.status === 'on_track' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : goal.status === 'no_deadline' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                    {goal.status === 'funded'
+                      ? 'Funded'
+                      : goal.status === 'on_track'
+                        ? 'On track'
+                        : goal.status === 'no_deadline'
+                          ? 'Needs date'
+                          : goal.status === 'past_due'
+                            ? 'Past due'
+                            : 'Behind'}
+                  </span>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${goal.status === 'funded' || goal.status === 'on_track' ? 'bg-green-50 text-green-700' : goal.status === 'no_deadline' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
-                  {goal.status === 'funded'
-                    ? 'Funded'
-                    : goal.status === 'on_track'
-                      ? 'On track'
-                      : goal.status === 'no_deadline'
-                        ? 'Needs date'
-                        : goal.status === 'past_due'
-                          ? 'Past due'
-                          : 'Behind'}
-                </span>
+                <div className="mt-2 h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                  <div
+                    className={`h-full ${goal.isOnTrack ? 'bg-green-500' : 'bg-amber-500'}`}
+                    style={{ width: `${Math.max(4, goal.progress * 100)}%` }}
+                  />
+                </div>
+                <div className="mt-2 space-y-1">
+                  <DetailRow label="Saved So Far" value={formatCurrency(goal.currentAmount)} />
+                  <DetailRow label="Remaining" value={formatCurrency(goal.remainingAmount)} />
+                  <DetailRow
+                    label="Needed Per Month"
+                    value={goal.monthsRemaining === null ? 'Set target month' : formatCurrency(goal.requiredMonthlySavings)}
+                    sub={goal.targetDate ? `Target ${goal.targetDate}` : undefined}
+                  />
+                  <DetailRow
+                    label={`Current ${goal.fundingSourceLabel}`}
+                    value={formatCurrency(goal.currentMonthlyFunding)}
+                    sub={
+                      goal.monthsRemaining && goal.monthsRemaining > 0
+                        ? `${goal.monthsRemaining} month${goal.monthsRemaining === 1 ? '' : 's'} remaining`
+                        : goal.targetDate
+                          ? 'Target date reached'
+                          : undefined
+                    }
+                  />
+                  {goal.status !== 'funded' && goal.monthsAtCurrentRate !== null && (
+                    <DetailRow
+                      label="At Current Rate"
+                      value={`${goal.monthsAtCurrentRate} month${goal.monthsAtCurrentRate === 1 ? '' : 's'}`}
+                      sub={goal.currentMonthlyFunding > 0 ? `(${formatCurrency(goal.currentMonthlyFunding)}/mo)` : undefined}
+                    />
+                  )}
+                </div>
+                {goal.status !== 'funded' && goal.remainingAmount > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Reach this goal in…</p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={rawInput}
+                        onChange={(e) => setTargetMonthsMap((prev) => ({ ...prev, [goal.id]: e.target.value }))}
+                        placeholder="months"
+                        aria-label={`Target months to reach ${goal.name}`}
+                        className="w-24 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-2 py-1 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-500 dark:text-gray-400">months</span>
+                      {backcalcContrib !== null && (
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 ml-1">
+                          → {formatCurrency(backcalcContrib)}/mo required
+                        </span>
+                      )}
+                      {rawInput !== '' && (Number.isNaN(parsedMonths) || parsedMonths <= 0) && (
+                        <span className="text-xs text-red-500">Enter a positive number</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="mt-2 h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div
-                  className={`h-full ${goal.isOnTrack ? 'bg-green-500' : 'bg-amber-500'}`}
-                  style={{ width: `${Math.max(4, goal.progress * 100)}%` }}
-                />
-              </div>
-              <div className="mt-2 space-y-1">
-                <DetailRow label="Saved So Far" value={formatCurrency(goal.currentAmount)} />
-                <DetailRow label="Remaining" value={formatCurrency(goal.remainingAmount)} />
-                <DetailRow
-                  label="Needed Per Month"
-                  value={goal.monthsRemaining === null ? 'Set target month' : formatCurrency(goal.requiredMonthlySavings)}
-                  sub={goal.targetDate ? `Target ${goal.targetDate}` : undefined}
-                />
-                <DetailRow
-                  label={`Current ${goal.fundingSourceLabel}`}
-                  value={formatCurrency(goal.currentMonthlyFunding)}
-                  sub={
-                    goal.monthsRemaining && goal.monthsRemaining > 0
-                      ? `${goal.monthsRemaining} month${goal.monthsRemaining === 1 ? '' : 's'} remaining`
-                      : goal.targetDate
-                        ? 'Target date reached'
-                        : undefined
-                  }
-                />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </BudgetCard>

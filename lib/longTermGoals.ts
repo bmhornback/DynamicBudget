@@ -9,6 +9,36 @@ import type {
 const GENERAL_GOAL_CATEGORIES = new Set(['vacation', 'kids', 'major_purchase', 'custom']);
 export const MONTHLY_COMPARISON_EPSILON = 0.005;
 
+/**
+ * Returns the number of months it will take to reach `targetAmount` from `currentAmount`
+ * at a fixed `monthlyContribution`. Returns null if already funded or no contribution.
+ */
+export function calculateMonthsToGoal(
+  currentAmount: number,
+  targetAmount: number,
+  monthlyContribution: number
+): number | null {
+  const remaining = Math.max(0, targetAmount - currentAmount);
+  if (remaining <= 0) return null;
+  if (monthlyContribution <= 0) return null;
+  return Math.ceil(remaining / monthlyContribution);
+}
+
+/**
+ * Returns the required monthly contribution to reach `targetAmount` from `currentAmount`
+ * within `targetMonths` months. Returns null if targetMonths <= 0 or already funded.
+ */
+export function calculateRequiredContribution(
+  currentAmount: number,
+  targetAmount: number,
+  targetMonths: number
+): number | null {
+  const remaining = Math.max(0, targetAmount - currentAmount);
+  if (remaining <= 0) return null;
+  if (targetMonths <= 0) return null;
+  return remaining / targetMonths;
+}
+
 function parseGoalMonth(targetDate: string): { year: number; month: number } | null {
   const match = /^(\d{4})-(\d{2})$/.exec(targetDate);
   if (!match) return null;
@@ -136,6 +166,7 @@ export function calculateLongTermGoalProjections(
       remainingAmount: item.remainingAmount,
       targetDate: item.goal.targetDate,
       monthsRemaining: item.monthsRemaining,
+      monthsAtCurrentRate: calculateMonthsToGoal(item.currentAmount, item.targetAmount, currentMonthlyFunding),
       requiredMonthlySavings: item.requiredMonthlySavings,
       currentMonthlyFunding,
       progress: item.progress,
