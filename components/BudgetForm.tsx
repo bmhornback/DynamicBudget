@@ -800,6 +800,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   key={strat}
                   type="button"
                   onClick={() => onChange({ debtPayoffStrategy: strat })}
+                  aria-pressed={inputs.debtPayoffStrategy === strat}
                   className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-colors ${
                     inputs.debtPayoffStrategy === strat
                       ? 'bg-blue-600 border-blue-600 text-white'

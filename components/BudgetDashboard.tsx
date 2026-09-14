@@ -339,7 +339,7 @@ function DebtPayoffDetail({
   const chartData = useMemo(() => {
     const sched = projection.schedule;
     if (sched.length === 0) return [];
-    const step = Math.max(1, Math.floor(sched.length / 24));
+    const step = Math.max(1, Math.ceil(sched.length / 24));
     const sampled = sched.filter((_, i) => i % step === 0 || i === sched.length - 1);
     return sampled.map((s) => ({ month: s.month, balance: s.remainingBalance }));
   }, [projection.schedule]);

@@ -378,7 +378,7 @@ function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
     mergedInputs.payFrequency = DEFAULT_INPUTS.payFrequency;
   }
   if (mergedInputs.debtPayoffStrategy !== 'avalanche' && mergedInputs.debtPayoffStrategy !== 'snowball') {
-    mergedInputs.debtPayoffStrategy = 'avalanche';
+    mergedInputs.debtPayoffStrategy = DEFAULT_INPUTS.debtPayoffStrategy;
   }
 
   return mergedInputs;
