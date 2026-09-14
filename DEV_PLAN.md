@@ -414,10 +414,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - `components/PaycheckCard.tsx` — dashboard card with "Paycheck Detail" (deduction waterfall) and "Budget Allocation" (bar-chart allocation view) tabs
 - Backward-compatible migration in `lib/storage.ts`; 35+ unit tests in `lib/__tests__/paycheckCalculations.test.ts`
 
-### E5-T6 · Irregular income support
-- For freelancers / variable-income users, add a "Monthly income variability" field
-- Show budget at P25 / P50 / P75 income scenarios
-- Flag which expenses would cause over-budget at P25
+### E5-T6 · Irregular income support ✅ Done
+- `incomeVariabilityPercent` field on `BudgetInputs`; slider (0–60%) in Income & Taxes form section ✅
+- `lib/irregularIncome.ts` — `calculateIrregularIncomeAnalysis` returns P25/P50/P75 scenarios (each a full `BudgetBreakdown`) using symmetric income range: P25 = base × (1 − pct/100), P75 = base × (1 + pct/100) ✅
+- `components/IrregularIncomeCard.tsx` — dashboard card shows three scenario columns (gross, net, buffer); flags at-risk variable expenses sorted by amount when P25 is over budget ✅
+- Card rendered conditionally (only when variabilityPercent > 0) in `BudgetDashboard.tsx` ✅
+- 18 unit tests in `lib/__tests__/irregularIncome.test.ts` (211 total passing) ✅
 
 ### E5-T7 · Partner / dual-income mode
 - Add income fields for a second earner
@@ -747,4 +749,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-14 — Completed E5-T2 (Debt Payoff Amortization): added `debtPayoffStrategy` field + form selector (avalanche/snowball), per-debt schedule (`PerDebtPayoffResult`) with paid-off month and interest cost, balance-over-time area chart in the dashboard Debt Payoff Timeline card, and 7 new tests (193 total passing).*
+*Last updated: 2026-09-14 — Completed E5-T6 (Irregular Income Support): added `incomeVariabilityPercent` field + slider, `lib/irregularIncome.ts` with P25/P50/P75 scenario engine, `IrregularIncomeCard` dashboard card (scenario columns + at-risk expense list), and 18 new tests (211 total passing).*

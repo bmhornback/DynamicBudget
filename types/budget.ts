@@ -203,6 +203,8 @@ export interface BudgetInputs {
   userAge: number; // User's current age (0 = not specified; 50+ eligible for catch-up)
   bonusIncome: number;
   otherMonthlyIncome: number;
+  /** Monthly income variability as a percentage (0 = stable salary, 20 = ±20% swings). Used for P25/P50/P75 scenario analysis. */
+  incomeVariabilityPercent: number;
 
   // Housing
   housingMode: HousingMode;

@@ -41,6 +41,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 - 🏦 **Paycheck calculator** — Select your pay frequency (weekly, bi-weekly, semi-monthly, or monthly) and see every budget line translated into per-paycheck amounts; includes a deduction waterfall (gross → pre-tax → taxes → take-home) and a per-paycheck allocation view with spend-ratio bars
+- 📊 **Irregular income scenarios** — Set a monthly income variability % (ideal for freelancers and commission earners) to instantly see your budget at the P25 (bad month), P50 (typical), and P75 (good month) income levels; at-risk variable expenses are surfaced automatically when a bad month would push you into deficit
 
 ### Upcoming Features
 - 📋 Deeper multi-scenario workflows
