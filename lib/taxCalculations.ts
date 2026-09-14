@@ -889,6 +889,10 @@ export function calculateCombinedNetMonthlyIncome(
   const partnerTotalGross = partnerGrossAnnual + partnerBonusIncome;
   const combinedTotalGross = primaryTotalGross + partnerTotalGross;
 
+  // `otherMonthlyIncome` is added to gross monthly but excluded from taxes — this matches the
+  // behavior in calculateNetMonthlyIncome where other monthly income is treated as already
+  // post-tax or otherwise not subject to estimated income tax (e.g., rental income already
+  // reported separately, gifts, etc.). The caller is responsible for correct categorization.
   const combinedGrossMonthly = combinedTotalGross / 12 + otherMonthlyIncome;
   const primaryGrossMonthly = primaryTotalGross / 12;
   const partnerGrossMonthly = partnerTotalGross / 12;

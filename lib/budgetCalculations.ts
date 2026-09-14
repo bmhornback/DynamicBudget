@@ -389,7 +389,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
   const monthlyRothIRA = iraType === 'roth' ? monthlyIRA : 0;
   
   const totalAnnualSavingsIncludingRetirement =
-    (totalSavings + totalInvestments) * 12 + retCalc.annual401k + annualIRA + annualHSA;
+    (totalSavings + totalInvestments) * 12 +
+    retCalc.annual401k + annualIRA + annualHSA +
+    (isDualIncome && partnerRetCalc ? partnerRetCalc.annual401k + partnerRetCalc.annual401kCatchUp : 0);
 
   // ── Rates ─────────────────────────────────────────────────────────────────
   const grossMonthly = isDualIncome && combinedCalc
@@ -455,7 +457,10 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     deficit,
     // Partner / dual-income fields
     partnerGrossMonthly: isDualIncome && combinedCalc ? combinedCalc.partnerGrossMonthly : 0,
-    // Attribute taxes proportionally to each earner's gross share, then subtract partner retirement.
+    // partnerNetMonthly uses a proportional approximation: each earner's share of the combined
+    // tax bill is weighted by their gross income share. This is for display-only attribution
+    // and is not expected to sum precisely to combinedNetMonthly (which uses the exact combined
+    // net formula). Use householdNetMonthly for the authoritative combined take-home figure.
     partnerNetMonthly: isDualIncome && combinedCalc && combinedCalc.combinedGrossMonthly > 0
       ? Math.max(
           0,
