@@ -83,7 +83,7 @@ function TimelineRow({ label, monthly, target, monthsToGoal, targetLabel, colorC
         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${monthly > 0 ? colorClass : 'bg-gray-300'}`} />
         <span className="text-gray-600 dark:text-gray-400">
           Target: <span className="font-medium">{formatCurrency(target)}</span>
-          {targetLabel && <span className="text-gray-400"> ({targetLabel})</span>}
+          {targetLabel && <span className="text-gray-500"> ({targetLabel})</span>}
         </span>
         {monthsToGoal !== null && (
           <span className="ml-auto text-gray-500 dark:text-gray-400 tabular-nums">

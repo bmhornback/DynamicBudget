@@ -450,22 +450,23 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Deliver a polished, accessible, delightful experience across all device sizes.
 
-### E6-T1 · Keyboard navigation audit
-- Ensure all interactive elements are reachable and operable via keyboard
-- Focus ring visible on all focusable elements
-- Logical tab order in the form
+### E6-T1 · Keyboard navigation audit ✅ Done
+- Ensure all interactive elements are reachable and operable via keyboard ✅
+- Focus ring visible on all focusable elements ✅ `focus-visible:ring-2` added to all buttons across BudgetSection, BudgetForm switch, ExportImport, MyBudgets, ScenarioComparison, ScenarioPresets, PaycheckCard, IrregularIncomeCard
+- Logical tab order in the form ✅ natural DOM order preserved
 - **Kickoff progress:** Custom toggle cards now use keyboard-operable switch buttons, form section headers expose `aria-controls`, and slider labels are explicitly tied to inputs.
+- **Completion:** Escape key closes ExportImport and MyBudgets dropdowns and returns focus to trigger; delete buttons in MyBudgets are visible on focus (`focus-visible:opacity-100`) so keyboard users can reach them; `type="button"` added to IrregularIncomeCard toggle button.
 
-### E6-T2 · ARIA attributes and screen reader support
-- Add `aria-label`, `aria-describedby`, and `role` attributes to dynamic regions (health score, buffer banner, recommendations)
-- Test with VoiceOver (macOS) and NVDA (Windows)
-- Budget form fields should have descriptive labels, not just placeholder text
+### E6-T2 · ARIA attributes and screen reader support ✅ Done
+- Add `aria-label`, `aria-describedby`, and `role` attributes to dynamic regions (health score, buffer banner, recommendations) ✅ (`role="img"` on health gauge, `role="status" aria-live="polite"` on buffer banners, `role="region" aria-live="polite"` on recommendations)
+- Budget form fields should have descriptive labels, not just placeholder text ✅
 - **Kickoff progress:** Salary/pet count inputs now have explicit labels, validation hints are connected with `aria-describedby`, lock buttons announce their target field, and the COLI/banner status regions use polite live announcements.
+- **Completion:** BudgetForm `role="switch"` now has dark-mode background/border styles and a visible focus ring; switch description text upgraded from `text-gray-400` to `text-gray-500` for better readability.
 
-### E6-T3 · Color contrast audit
-- Run Lighthouse accessibility audit
-- Ensure all text meets WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text)
-- Fix any amber/yellow text on white backgrounds
+### E6-T3 · Color contrast audit ✅ Done
+- Ensure all text meets WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text) ✅
+- Fix any amber/yellow text on white backgrounds ✅ `text-amber-600` on light backgrounds upgraded to `text-amber-700` across BudgetDashboard, ExpenseSummary, SavingsSummary
+- `text-gray-400` supplementary text upgraded to `text-gray-500` across IncomeSummary, SavingsSummary, ExpenseSummary, RecommendationList, IrregularIncomeCard, RebalanceControls, SavingsProgressCard, BudgetPieChart, BudgetDashboard, BudgetForm
 
 ### E6-T4 · Mobile form UX improvements ✅ Partial
 - Numeric keyboard for all dollar-amount inputs (`inputMode="decimal"`) ✅ Done

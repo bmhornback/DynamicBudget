@@ -27,7 +27,7 @@ function SummaryRow({
       <div className="text-right">
         <span className="text-sm font-medium tabular-nums">{formatCurrency(value)}</span>
         {percent !== undefined && (
-          <span className="text-xs text-gray-400 ml-1">({formatPercent(percent)})</span>
+          <span className="text-xs text-gray-500 ml-1">({formatPercent(percent)})</span>
         )}
       </div>
     </div>
@@ -109,7 +109,7 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
         <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-1 text-xs text-gray-500">
           <div className="flex justify-between">
             <span>{primaryHousingPaymentLabel} as % of gross</span>
-            <span className={primaryHousingPaymentAsPercentGross > 0.30 ? 'text-amber-600 font-medium' : ''}>
+            <span className={primaryHousingPaymentAsPercentGross > 0.30 ? 'text-amber-700 font-medium' : ''}>
               {formatPercent(primaryHousingPaymentAsPercentGross)}
             </span>
           </div>

@@ -82,7 +82,7 @@ export default function PaycheckCard({ paycheckBreakdown }: PaycheckCardProps) {
           type="button"
           aria-pressed={viewMode === 'paycheck'}
           onClick={() => setViewMode('paycheck')}
-          className={`flex-1 py-1.5 font-medium transition-colors ${
+          className={`flex-1 py-1.5 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-500 ${
             viewMode === 'paycheck'
               ? 'bg-green-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -94,7 +94,7 @@ export default function PaycheckCard({ paycheckBreakdown }: PaycheckCardProps) {
           type="button"
           aria-pressed={viewMode === 'allocation'}
           onClick={() => setViewMode('allocation')}
-          className={`flex-1 py-1.5 font-medium transition-colors ${
+          className={`flex-1 py-1.5 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-500 ${
             viewMode === 'allocation'
               ? 'bg-green-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'

@@ -33,7 +33,7 @@ export default function RecommendationList({ recommendations }: RecommendationLi
   if (recommendations.length === 0) {
     return (
       <BudgetCard title="Recommendations">
-        <p className="text-sm text-gray-400 italic">No recommendations — budget looks great!</p>
+        <p className="text-sm text-gray-500 italic">No recommendations — budget looks great!</p>
       </BudgetCard>
     );
   }

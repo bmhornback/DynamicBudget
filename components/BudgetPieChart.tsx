@@ -129,7 +129,7 @@ export default function BudgetPieChart({ breakdown, inputs }: BudgetPieChartProp
                 return (
                   <span className="text-xs text-gray-700 dark:text-gray-300">
                     {value}{' '}
-                    <span className="text-gray-400">
+                    <span className="text-gray-500">
                       ({item ? formatPercent(item.shareOfGross) : ''})
                     </span>
                   </span>

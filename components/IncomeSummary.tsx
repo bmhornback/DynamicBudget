@@ -16,7 +16,7 @@ function Row({ label, value, sub, highlight }: { label: string; value: string; s
       <span className={`text-sm ${highlight ? 'text-gray-900' : 'text-gray-600'}`}>{label}</span>
       <span className={`text-sm tabular-nums ${highlight ? 'text-gray-900' : 'text-gray-700'}`}>
         {value}
-        {sub && <span className="text-xs text-gray-400 ml-1">{sub}</span>}
+        {sub && <span className="text-xs text-gray-500 ml-1">{sub}</span>}
       </span>
     </div>
   );

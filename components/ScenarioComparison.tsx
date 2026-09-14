@@ -84,7 +84,7 @@ export default function ScenarioComparison({
                   onClick={() => handleTogglePreset(preset.id)}
                   aria-pressed={isSelected}
                   disabled={isActive}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                     isActive
                       ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'
                       : isSelected
@@ -122,7 +122,7 @@ export default function ScenarioComparison({
                         <button
                           type="button"
                           onClick={() => onApplyPreset(item.id)}
-                          className="rounded-md border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-700 hover:border-blue-300 hover:text-blue-600"
+                          className="rounded-md border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-700 hover:border-blue-300 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         >
                           Use this scenario
                         </button>

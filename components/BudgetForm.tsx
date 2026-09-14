@@ -120,11 +120,11 @@ function ToggleField({
       tabIndex={0}
       onClick={toggleValue}
       onKeyDown={handleKeyDown}
-      className="w-full flex items-center justify-between gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-gray-200 text-left"
+      className="w-full flex items-center justify-between gap-2 py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg cursor-pointer hover:border-gray-200 dark:hover:border-gray-600 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
     >
       <div>
-        <p id={labelId} className="text-sm text-gray-700">{label}</p>
-        {description && <p id={descriptionId} className="text-xs text-gray-400">{description}</p>}
+        <p id={labelId} className="text-sm text-gray-700 dark:text-gray-200">{label}</p>
+        {description && <p id={descriptionId} className="text-xs text-gray-500 dark:text-gray-400">{description}</p>}
       </div>
       <div
         aria-hidden="true"
@@ -177,7 +177,7 @@ function NumberSlider({
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-blue-600"
       />
-      <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+      <div className="flex justify-between text-xs text-gray-500 mt-0.5">
         <span>{min}{suffix}</span>
         <span>{max}{suffix}</span>
       </div>
