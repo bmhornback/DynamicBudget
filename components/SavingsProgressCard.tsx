@@ -53,6 +53,48 @@ function ProgressBar({ label, sublabel, current, target, colorClass = 'bg-blue-5
   );
 }
 
+interface TimelineRowProps {
+  label: string;
+  monthly: number;
+  target: number;
+  monthsToGoal: number | null;
+  targetLabel?: string;
+  colorClass?: string;
+}
+
+function TimelineRow({ label, monthly, target, monthsToGoal, targetLabel, colorClass = 'bg-emerald-500' }: TimelineRowProps) {
+  const yearsToGoal = monthsToGoal !== null ? Math.floor(monthsToGoal / 12) : null;
+  const remainingMonths = monthsToGoal !== null ? monthsToGoal % 12 : null;
+  const timeStr = monthsToGoal === null
+    ? '—'
+    : monthsToGoal <= 12
+    ? `${monthsToGoal} mo`
+    : `${yearsToGoal}y ${remainingMonths}m`;
+
+  return (
+    <div className="py-2">
+      <div className="flex justify-between items-baseline mb-1">
+        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{label}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+          {formatCurrency(monthly)}/mo
+        </span>
+      </div>
+      <div className="flex items-center gap-3 text-xs">
+        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${monthly > 0 ? colorClass : 'bg-gray-300'}`} />
+        <span className="text-gray-600 dark:text-gray-400">
+          Target: <span className="font-medium">{formatCurrency(target)}</span>
+          {targetLabel && <span className="text-gray-400"> ({targetLabel})</span>}
+        </span>
+        {monthsToGoal !== null && (
+          <span className="ml-auto text-gray-500 dark:text-gray-400 tabular-nums">
+            ~{timeStr} to goal
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Divider() {
   return <div className="h-px bg-gray-100 dark:bg-gray-700 my-1" />;
 }
@@ -75,7 +117,7 @@ export default function SavingsProgressCard({ breakdown, inputs }: SavingsProgre
   const annualIRA = retirement.annualIRA + retirement.annualIRACatchUp;
   const limitIRA = ANNUAL_IRA_LIMIT + (inputs.userAge >= 50 ? 1000 : 0); // $1,000 catch-up
 
-  // Emergency fund: monthly contributions × months needed
+  // Emergency fund target and months-to-goal
   const efTarget = inputs.emergencyFundTarget > 0
     ? inputs.emergencyFundTarget
     : emergencyFundTargetCalculated;
@@ -83,7 +125,7 @@ export default function SavingsProgressCard({ breakdown, inputs }: SavingsProgre
     ? Math.ceil(efTarget / effectiveEmergencyFundContribution)
     : null;
 
-  // House fund: monthly contributions vs target
+  // House fund months-to-goal
   const houseTarget = inputs.houseDownPaymentTarget;
   const houseMonthly = effectiveHouseDownPaymentContribution;
   const houseMonthsToGoal = houseMonthly > 0 && houseTarget > 0
@@ -127,62 +169,37 @@ export default function SavingsProgressCard({ breakdown, inputs }: SavingsProgre
 
         <Divider />
 
-        {/* Emergency fund */}
+        {/* Savings goal timelines */}
         <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mb-1 mt-2">
-          Savings Goals
+          Savings Goal Timelines
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
+          Time-to-goal based on current monthly contributions (starting from $0).
         </p>
         {efTarget > 0 ? (
-          <div>
-            <ProgressBar
-              label="Emergency Fund"
-              sublabel={
-                efMonthsToGoal !== null
-                  ? `${formatCurrency(effectiveEmergencyFundContribution)}/mo · ${efMonthsToGoal} mo to goal`
-                  : undefined
-              }
-              current={effectiveEmergencyFundContribution}
-              target={efTarget / (efMonthsToGoal ?? 1) || effectiveEmergencyFundContribution}
-              colorClass="bg-emerald-500"
-            />
-            <p className="text-xs text-gray-400 dark:text-gray-500 -mt-1 mb-1">
-              Target: {formatCurrency(efTarget)} (6 months of essentials)
-              {efMonthsToGoal !== null && ` · ${efMonthsToGoal} months to reach goal`}
-            </p>
-          </div>
+          <TimelineRow
+            label="Emergency Fund"
+            monthly={effectiveEmergencyFundContribution}
+            target={efTarget}
+            monthsToGoal={efMonthsToGoal}
+            targetLabel="6 months of essentials"
+            colorClass="bg-emerald-500"
+          />
         ) : (
           <p className="text-xs text-gray-400 dark:text-gray-500 py-1">
             No emergency fund contribution set.
           </p>
         )}
 
-        {/* House fund / equity */}
-        {!isHomeowner && houseTarget > 0 ? (
-          <div>
-            <ProgressBar
-              label="House Down Payment"
-              sublabel={
-                houseMonthsToGoal !== null
-                  ? `${formatCurrency(houseMonthly)}/mo · ${houseMonthsToGoal} mo to goal`
-                  : undefined
-              }
-              current={houseMonthly}
-              target={houseTarget / (houseMonthsToGoal ?? 1) || houseMonthly}
-              colorClass="bg-violet-500"
-            />
-            <p className="text-xs text-gray-400 dark:text-gray-500 -mt-1 mb-1">
-              Target: {formatCurrency(houseTarget)}
-              {houseMonthsToGoal !== null && ` · ${houseMonthsToGoal} months to reach goal`}
-            </p>
-          </div>
-        ) : !isHomeowner && houseMonthly > 0 ? (
-          <ProgressBar
-            label="House Fund"
-            sublabel={`${formatCurrency(houseMonthly)}/mo`}
-            current={houseMonthly}
-            target={houseMonthly}
+        {!isHomeowner && (houseTarget > 0 || houseMonthly > 0) && (
+          <TimelineRow
+            label="House Down Payment"
+            monthly={houseMonthly}
+            target={houseTarget > 0 ? houseTarget : houseMonthly * 24}
+            monthsToGoal={houseMonthsToGoal}
             colorClass="bg-violet-500"
           />
-        ) : null}
+        )}
       </div>
     </BudgetCard>
   );

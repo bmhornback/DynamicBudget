@@ -111,10 +111,10 @@ export default function ExpenseThresholdChart({ breakdown, inputs }: ExpenseThre
               width={84}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-            {data.map((entry) => (
+            {Array.from(new Set(data.map((d) => d.threshold))).map((threshold) => (
               <ReferenceLine
-                key={`ref-${entry.name}`}
-                x={entry.threshold}
+                key={`ref-${threshold}`}
+                x={threshold}
                 stroke="#94a3b8"
                 strokeDasharray="4 3"
                 strokeWidth={1.5}
