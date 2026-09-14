@@ -83,6 +83,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   hsaEligible: false,
   maxOutHSA: false,
   extraDebtPayoff: 0,
+  debtPayoffStrategy: 'avalanche',
   debts: [],
   generalCashSavings: 0,
   isSavingsByPercentage: false,

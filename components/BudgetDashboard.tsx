@@ -1,6 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import type {
   BudgetBreakdown,
   BudgetInputs,
@@ -121,7 +130,7 @@ export default function BudgetDashboard({
         <TransportationDetail breakdown={breakdown} inputs={inputs} />
         {inputs.petsEnabled && <PetsDetail inputs={inputs} breakdown={breakdown} />}
         <SavingsDetail breakdown={breakdown} inputs={inputs} />
-        <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} />
+        <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} strategy={inputs.debtPayoffStrategy} />
         <LongTermGoalsDetail goals={goalProjections} />
         <FinancialLiteracyDetail insights={literacyInsights} />
         <PaycheckCard paycheckBreakdown={paycheckBreakdown} />
@@ -315,13 +324,26 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
 function DebtPayoffDetail({
   projection,
   debtCount,
+  strategy,
 }: {
   projection: DebtPayoffProjection;
   debtCount: number;
+  strategy: import('@/types/budget').DebtPayoffStrategy;
 }) {
   const latestMonth = projection.schedule[projection.schedule.length - 1];
   const latestBalance = latestMonth?.remainingBalance ?? 0;
   const oneYearBalance = projection.schedule.find((entry) => entry.month === 12)?.remainingBalance;
+
+  // Sample chart data at most ~24 points for readability
+  const chartData = useMemo(() => {
+    const sched = projection.schedule;
+    if (sched.length === 0) return [];
+    const step = Math.max(1, Math.floor(sched.length / 24));
+    const sampled = sched.filter((_, i) => i % step === 0 || i === sched.length - 1);
+    return sampled.map((s) => ({ month: s.month, balance: s.remainingBalance }));
+  }, [projection.schedule]);
+
+  const strategyLabel = strategy === 'avalanche' ? '📉 Avalanche' : '❄️ Snowball';
 
   return (
     <BudgetCard title="Debt Payoff Timeline">
@@ -333,6 +355,7 @@ function DebtPayoffDetail({
         </p>
       ) : (
         <>
+          <DetailRow label="Strategy" value={strategyLabel} />
           <DetailRow label="Tracked Debts" value={`${debtCount}`} />
           <DetailRow label="Monthly Debt Budget" value={formatCurrency(projection.monthlyBudget)} />
           <DetailRow
@@ -352,6 +375,81 @@ function DebtPayoffDetail({
           />
           {projection.monthsToDebtFree === null && (
             <DetailRow label="Projected Ending Balance" value={formatCurrency(latestBalance)} />
+          )}
+
+          {/* Amortization chart */}
+          {chartData.length > 1 && (
+            <>
+              <DividerLine />
+              <p className="text-xs font-medium text-gray-700 mb-2">Balance Over Time</p>
+              <div className="w-full h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 11 }}
+                      tickFormatter={(v: number) => `mo ${v}`}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11 }}
+                      tickFormatter={(v: number) =>
+                        v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`
+                      }
+                      width={46}
+                    />
+                    <Tooltip
+                      formatter={(v) => [formatCurrency(typeof v === 'number' ? v : 0), 'Balance']}
+                      labelFormatter={(l) => `Month ${l}`}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '6px 10px',
+                        fontSize: '12px',
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="balance"
+                      stroke="#3b82f6"
+                      fill="#eff6ff"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+
+          {/* Per-debt breakdown */}
+          {projection.perDebt.length > 0 && (
+            <>
+              <DividerLine />
+              <p className="text-xs font-medium text-gray-700 mb-2">Per-Debt Breakdown</p>
+              <div className="space-y-2">
+                {projection.perDebt.map((d) => (
+                  <div key={d.id} className="rounded-md border border-gray-100 p-2 text-xs">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-medium text-gray-800 truncate">{d.name}</span>
+                      <span className="text-gray-500 shrink-0">{d.interestRate}% APR</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-gray-600">
+                      <span>Balance: {formatCurrency(d.originalBalance)}</span>
+                      <span>
+                        {d.paidOffMonth === null
+                          ? `Not paid off in ${MAX_DEBT_PAYOFF_YEARS} yrs`
+                          : `Paid off: month ${d.paidOffMonth}`}
+                      </span>
+                    </div>
+                    <div className="text-gray-500 mt-0.5">
+                      Interest cost: {formatCurrency(d.totalInterestPaid)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </>
       )}

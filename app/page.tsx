@@ -156,8 +156,8 @@ export default function DynamicBudgetPage() {
     [inputs, comparisonPresetIds, activePreset]
   );
   const debtProjection = useMemo(
-    () => calculateDebtPayoffProjection(inputs.debts, inputs.extraDebtPayoff),
-    [inputs.debts, inputs.extraDebtPayoff]
+    () => calculateDebtPayoffProjection(inputs.debts, inputs.extraDebtPayoff, inputs.debtPayoffStrategy),
+    [inputs.debts, inputs.extraDebtPayoff, inputs.debtPayoffStrategy]
   );
 
   // ── Handlers ───────────────────────────────────────────────────────────────

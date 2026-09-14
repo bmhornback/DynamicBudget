@@ -377,6 +377,9 @@ function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
   if (!mergedInputs.payFrequency || !VALID_PAY_FREQUENCIES.has(mergedInputs.payFrequency)) {
     mergedInputs.payFrequency = DEFAULT_INPUTS.payFrequency;
   }
+  if (mergedInputs.debtPayoffStrategy !== 'avalanche' && mergedInputs.debtPayoffStrategy !== 'snowball') {
+    mergedInputs.debtPayoffStrategy = 'avalanche';
+  }
 
   return mergedInputs;
 }

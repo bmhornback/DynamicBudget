@@ -19,7 +19,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
 - 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset scenarios
 - 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
-- 💳 **Debt payoff timeline** — Track debt accounts with projected payoff timeline and interest totals
+- 💳 **Debt payoff timeline** — Track debt accounts with avalanche/snowball strategy selector, per-debt amortization breakdown, balance-over-time chart, and interest cost per debt
 - 💾 **Data persistence** — Auto-save your budget to your browser (no account needed)
 - 🖨️ **PDF export** — Save a print-friendly dashboard summary to PDF from the Export / Import menu
 - 📦 **JSON import/export** — Backup and restore budgets locally
@@ -182,7 +182,7 @@ npm run lint             # ESLint check
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
 - **v1.0 closeout** (current): Stability, accessibility, typing cleanup, and roadmap rebaseline
-- **v1.5 — Grow It**: Multi-scenario comparison, debt payoff, homeowner mode, export/share
+- **v1.5 — Grow It**: Multi-scenario comparison, debt payoff ✅, homeowner mode, export/share
 - **v2.0 — Platform**: Optional cloud sync, landing page/SEO, analytics, and MCP integrations after core budgeting work is complete
 
 ## Contributing

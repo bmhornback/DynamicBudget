@@ -90,4 +90,65 @@ describe('calculateDebtPayoffProjection', () => {
     expect(avalanche.schedule[0].extraPaymentTargetDebtId).toBe('high_rate_big_balance');
     expect(snowball.schedule[0].extraPaymentTargetDebtId).toBe('low_rate_small_balance');
   });
+
+  it('returns perDebt array with correct ids', () => {
+    const projection = calculateDebtPayoffProjection(sampleDebts, 200, 'avalanche');
+
+    expect(projection.perDebt).toHaveLength(2);
+    expect(projection.perDebt.map((d) => d.id)).toEqual(
+      expect.arrayContaining(['credit_card', 'car_loan'])
+    );
+  });
+
+  it('perDebt records paidOffMonth for each debt', () => {
+    const projection = calculateDebtPayoffProjection(sampleDebts, 200, 'avalanche');
+
+    for (const d of projection.perDebt) {
+      expect(d.paidOffMonth).not.toBeNull();
+      expect(d.paidOffMonth).toBeGreaterThan(0);
+    }
+  });
+
+  it('avalanche pays off highest-rate debt first', () => {
+    const projection = calculateDebtPayoffProjection(sampleDebts, 200, 'avalanche');
+    const creditCard = projection.perDebt.find((d) => d.id === 'credit_card');
+    const carLoan = projection.perDebt.find((d) => d.id === 'car_loan');
+
+    // Credit card (24% APR) should be targeted first with avalanche
+    expect(creditCard?.paidOffMonth).toBeLessThan(carLoan?.paidOffMonth ?? Infinity);
+  });
+
+  it('snowball pays off smallest-balance debt first', () => {
+    const projection = calculateDebtPayoffProjection(sampleDebts, 200, 'snowball');
+    const creditCard = projection.perDebt.find((d) => d.id === 'credit_card');
+    const carLoan = projection.perDebt.find((d) => d.id === 'car_loan');
+
+    // Credit card ($5k) is smaller than car loan ($12k) so snowball targets it first
+    expect(creditCard?.paidOffMonth).toBeLessThan(carLoan?.paidOffMonth ?? Infinity);
+  });
+
+  it('perDebt totalInterestPaid is non-negative and less than total interest', () => {
+    const projection = calculateDebtPayoffProjection(sampleDebts, 200, 'avalanche');
+
+    let sumPerDebtInterest = 0;
+    for (const d of projection.perDebt) {
+      expect(d.totalInterestPaid).toBeGreaterThanOrEqual(0);
+      sumPerDebtInterest += d.totalInterestPaid;
+    }
+    // Sum of per-debt interest should approximately equal total (within rounding)
+    expect(Math.abs(sumPerDebtInterest - projection.totalInterestPaid)).toBeLessThan(1);
+  });
+
+  it('perDebt is empty for empty debt list', () => {
+    const projection = calculateDebtPayoffProjection([], 200);
+    expect(projection.perDebt).toHaveLength(0);
+  });
+
+  it('perDebt has null paidOffMonth when no budget', () => {
+    const projection = calculateDebtPayoffProjection(
+      [{ id: 'a', name: 'A', balance: 1000, interestRate: 10, minimumPayment: 0 }],
+      0
+    );
+    expect(projection.perDebt[0].paidOffMonth).toBeNull();
+  });
 });
