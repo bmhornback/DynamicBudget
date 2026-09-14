@@ -42,16 +42,19 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
     const json = exportBudgetAsJSON(currentInputs);
     triggerDownload(json, `dynamicbudget-budget-${todayDateStr()}.json`, 'application/json');
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const handleExportCSV = () => {
     const csv = exportBudgetAsCSV(currentInputs);
     triggerDownload(csv, `dynamicbudget-budget-${todayDateStr()}.csv`, 'text/csv');
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const handleExportPDF = () => {
     setOpen(false);
+    triggerRef.current?.focus();
     onExportPDF();
   };
 
@@ -107,6 +110,7 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
         onImport(imported);
         setOpen(false);
         setImportError(null);
+        triggerRef.current?.focus();
       } else {
         setImportError('The file is incompatible or from a different version. Please export a fresh copy.');
       }

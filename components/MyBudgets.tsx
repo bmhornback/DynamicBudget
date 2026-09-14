@@ -48,18 +48,23 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  // Close panel on Escape key
+  // Close panel on Escape key; if save-name flow is active, cancel it first
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setOpen(false);
-        triggerRef.current?.focus();
+        if (saving) {
+          setSaving(false);
+          setNewName('');
+        } else {
+          setOpen(false);
+          triggerRef.current?.focus();
+        }
       }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [open]);
+  }, [open, saving]);
 
   const handleSave = () => {
     const trimmed = newName.trim();
