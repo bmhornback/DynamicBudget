@@ -40,7 +40,7 @@ jobs:
         run: npm run test -- --coverage
 
       - name: Audit DEV_PLAN.md completeness
-        run: node scripts/audit-devplan.mjs
+        run: npm run audit:devplan
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

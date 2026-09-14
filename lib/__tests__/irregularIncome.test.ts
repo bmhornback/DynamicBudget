@@ -200,8 +200,10 @@ describe('calculateIrregularIncomeAnalysis', () => {
       });
       const bd = calculateBudgetBreakdown(inputs);
       const result = calculateIrregularIncomeAnalysis(inputs, bd);
-      // P25 salary = 90000, ratio = 0.75 → bonus = 9000
-      expect(result.scenarios[0].grossAnnual).toBeCloseTo(90000, 0);
+      // P25 salary = 90000, ratio = 0.75 → bonus = 9000, total annual gross = 99000
+      expect(result.scenarios[0].grossAnnual).toBeCloseTo(99000, 0);
+      // grossMonthly includes bonus/12 + otherMonthlyIncome (no otherMonthlyIncome here)
+      expect(result.scenarios[0].grossMonthly).toBeCloseTo(99000 / 12, 0);
     });
   });
 });
