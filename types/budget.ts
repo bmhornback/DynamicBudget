@@ -59,6 +59,8 @@ export type LongTermGoalCategory =
   | 'major_purchase'
   | 'custom';
 
+export type DebtPayoffStrategy = 'avalanche' | 'snowball';
+
 export interface DebtAccount {
   id: string;
   name: string;
@@ -267,6 +269,7 @@ export interface BudgetInputs {
   hsaEligible: boolean; // Is user eligible for HSA?
   maxOutHSA: boolean; // Checkbox to maximize HSA contribution
   extraDebtPayoff: number;
+  debtPayoffStrategy: DebtPayoffStrategy;
   debts: DebtAccount[];
   generalCashSavings: number;
   

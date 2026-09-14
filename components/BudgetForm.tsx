@@ -790,6 +790,29 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
             </div>
           ))
         )}
+
+        {inputs.debts.length > 0 && (
+          <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+            <p className="text-xs font-medium text-gray-700">Payoff Strategy</p>
+            <div className="flex gap-2">
+              {(['avalanche', 'snowball'] as const).map((strat) => (
+                <button
+                  key={strat}
+                  type="button"
+                  onClick={() => onChange({ debtPayoffStrategy: strat })}
+                  aria-pressed={inputs.debtPayoffStrategy === strat}
+                  className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+                    inputs.debtPayoffStrategy === strat
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {strat === 'avalanche' ? '📉 Avalanche (highest APR first)' : '❄️ Snowball (smallest balance first)'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </BudgetSection>
 
     </div>

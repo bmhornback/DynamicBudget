@@ -66,7 +66,7 @@
 | Mobile `inputMode="decimal"` on number inputs | ✅ Done |
 | Section collapse/expand animation | ✅ Done |
 | Inline field validation (rent warning) | ✅ Done |
-| Debt amortization | ❌ Only flat extra-payment field |
+| Debt amortization | ✅ Done |
 
 ### New in This Release (v1.0.0)
 
@@ -385,12 +385,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - A comparison table shows key metrics (take-home, savings rate, health score, buffer) across all scenarios
 - Use case: "San Diego $190k vs Atlanta $150k — which makes more sense?"
 
-### E5-T2 · Debt payoff amortization
-- Add a `debts` array to `BudgetInputs` (each entry: `name`, `balance`, `interestRate`, `minimumPayment`)
-- Calculate time-to-payoff for each debt given extra payment allocation
-- Show a debt payoff timeline in a dedicated card
-- Integrate with the rebalance engine: "debt snowball" and "debt avalanche" strategies
-- **Kickoff progress:** Debt payoff is now tracked separately from investments in budget calculations and dashboard summaries, debt accounts can be added in the form, and a first-pass debt payoff timeline card is live using avalanche/snowball-ready projection logic.
+### E5-T2 · Debt payoff amortization ✅ Done
+- `debts` array on `BudgetInputs`; each entry: `name`, `balance`, `interestRate`, `minimumPayment` ✅
+- `debtPayoffStrategy: 'avalanche' | 'snowball'` field on `BudgetInputs` with UI selector in the Debt Accounts form section ✅
+- `lib/debtPayoff.ts` — `calculateDebtPayoffProjection` returns full month-by-month amortization schedule plus `perDebt` breakdown (paid-off month, interest cost per debt) ✅
+- Dashboard "Debt Payoff Timeline" card shows strategy label, totals, balance-over-time area chart, and per-debt breakdown table ✅
+- 12 unit tests in `lib/__tests__/debtPayoff.test.ts` (7 new) covering per-debt schedule, strategy ordering, and edge cases ✅
 
 ### E5-T3 · Homeownership mode
 - Toggle: "Renter" vs "Homeowner"
@@ -747,4 +747,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-13 — Completed E7-T3 by finalizing shareable budget links with compact default-diff payload encoding and backward-compatible legacy link decoding; refreshed README/roadmap notes.*
+*Last updated: 2026-09-14 — Completed E5-T2 (Debt Payoff Amortization): added `debtPayoffStrategy` field + form selector (avalanche/snowball), per-debt schedule (`PerDebtPayoffResult`) with paid-off month and interest cost, balance-over-time area chart in the dashboard Debt Payoff Timeline card, and 7 new tests (193 total passing).*

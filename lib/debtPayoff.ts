@@ -1,6 +1,6 @@
-import type { DebtAccount } from '@/types/budget';
+import type { DebtAccount, DebtPayoffStrategy } from '@/types/budget';
 
-export type DebtPayoffStrategy = 'avalanche' | 'snowball';
+export type { DebtPayoffStrategy };
 
 export interface DebtPayoffMonth {
   month: number;
@@ -10,12 +10,23 @@ export interface DebtPayoffMonth {
   extraPaymentTargetDebtId?: string;
 }
 
+export interface PerDebtPayoffResult {
+  id: string;
+  name: string;
+  originalBalance: number;
+  interestRate: number;
+  minimumPayment: number;
+  paidOffMonth: number | null; // null if not paid off within MAX_DEBT_PAYOFF_MONTHS
+  totalInterestPaid: number;
+}
+
 export interface DebtPayoffProjection {
   monthsToDebtFree: number | null;
   totalPrincipalPaid: number;
   totalInterestPaid: number;
   monthlyBudget: number;
   schedule: DebtPayoffMonth[];
+  perDebt: PerDebtPayoffResult[];
 }
 
 interface WorkingDebt extends DebtAccount {
@@ -62,6 +73,7 @@ export function calculateDebtPayoffProjection(
       totalInterestPaid: 0,
       monthlyBudget: 0,
       schedule: [],
+      perDebt: [],
     };
   }
 
@@ -75,12 +87,28 @@ export function calculateDebtPayoffProjection(
       totalInterestPaid: 0,
       monthlyBudget: 0,
       schedule: [],
+      perDebt: normalizedDebts.map((d) => ({
+        id: d.id,
+        name: d.name,
+        originalBalance: d.balance,
+        interestRate: d.interestRate,
+        minimumPayment: d.minimumPayment,
+        paidOffMonth: null,
+        totalInterestPaid: 0,
+      })),
     };
   }
 
   let totalPrincipalPaid = 0;
   let totalInterestPaid = 0;
   const schedule: DebtPayoffMonth[] = [];
+
+  // Per-debt tracking
+  const perDebtInterest: Record<string, number> = {};
+  const perDebtPaidOffMonth: Record<string, number> = {};
+  for (const d of normalizedDebts) {
+    perDebtInterest[d.id] = 0;
+  }
 
   for (let month = 1; month <= MAX_DEBT_PAYOFF_MONTHS; month += 1) {
     let paymentPool = monthlyBudget;
@@ -93,6 +121,7 @@ export function calculateDebtPayoffProjection(
       const interest = roundCents(debt.remainingBalance * monthlyRate);
       debt.remainingBalance = roundCents(debt.remainingBalance + interest);
       monthInterest += interest;
+      perDebtInterest[debt.id] = roundCents((perDebtInterest[debt.id] ?? 0) + interest);
     }
 
     // orderedDebts shares object references with normalizedDebts by design
@@ -121,6 +150,13 @@ export function calculateDebtPayoffProjection(
       }
     }
 
+    // Record month each debt reaches zero
+    for (const debt of normalizedDebts) {
+      if (debt.remainingBalance <= 0 && !(debt.id in perDebtPaidOffMonth)) {
+        perDebtPaidOffMonth[debt.id] = month;
+      }
+    }
+
     // monthPrincipal tracks total payments made; subtract accrued interest to get
     // true principal reduction (i.e., payments that reduced the outstanding balance).
     const monthPrincipalReduction = roundCents(Math.max(0, monthPrincipal - monthInterest));
@@ -146,6 +182,15 @@ export function calculateDebtPayoffProjection(
         totalInterestPaid,
         monthlyBudget,
         schedule,
+        perDebt: normalizedDebts.map((d) => ({
+          id: d.id,
+          name: d.name,
+          originalBalance: d.balance,
+          interestRate: d.interestRate,
+          minimumPayment: d.minimumPayment,
+          paidOffMonth: perDebtPaidOffMonth[d.id] ?? null,
+          totalInterestPaid: perDebtInterest[d.id] ?? 0,
+        })),
       };
     }
   }
@@ -156,5 +201,14 @@ export function calculateDebtPayoffProjection(
     totalInterestPaid,
     monthlyBudget,
     schedule,
+    perDebt: normalizedDebts.map((d) => ({
+      id: d.id,
+      name: d.name,
+      originalBalance: d.balance,
+      interestRate: d.interestRate,
+      minimumPayment: d.minimumPayment,
+      paidOffMonth: perDebtPaidOffMonth[d.id] ?? null,
+      totalInterestPaid: perDebtInterest[d.id] ?? 0,
+    })),
   };
 }
