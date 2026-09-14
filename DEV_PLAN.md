@@ -179,13 +179,13 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 
 **Goal:** Establish a reliable foundation with automated testing, linting, and CI so every future change is safe and confident.
 
-### E1-T1 · Set up unit test framework (Jest + ts-jest)
+### E1-T1 · Set up unit test framework (Jest + ts-jest) ✅ Done
 - Install `jest`, `ts-jest`, `@types/jest`
 - Add `jest.config.ts` targeting `lib/**` and `types/**`
 - Add `npm run test` and `npm run test:watch` scripts
 - **Acceptance:** `npm test` runs with zero failures on an empty test suite
 
-### E1-T2 · Unit tests — `taxCalculations.ts`
+### E1-T2 · Unit tests — `taxCalculations.ts` ✅ Done
 - Test `federalIncomeTaxEstimate` against known 2024 bracket values for all three filing statuses
 - Test `stateIncomeTaxEstimate` for CA single, CA MFJ, GA, no-state-tax
 - Test `payrollTaxEstimate` including additional Medicare threshold
@@ -193,7 +193,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Test `calculateNetMonthlyIncome` for a full round-trip
 - **Target:** 100% branch coverage of `taxCalculations.ts`
 
-### E1-T3 · Unit tests — `budgetCalculations.ts`
+### E1-T3 · Unit tests — `budgetCalculations.ts` ✅ Done
 - Test `calculateBudgetBreakdown` with the `DEFAULT_INPUTS` scenario
 - Test each expense-total field individually
 - Test edge cases: zero salary, zero rent, pets disabled, no car
@@ -205,7 +205,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Test locked-field behavior (locked fields must not change)
 - Test `recommendations_only` strategy does not mutate inputs
 
-### E1-T5 · Unit tests — `budgetHealthScore.ts` and `recommendations.ts`
+### E1-T5 · Unit tests — `budgetHealthScore.ts` and `recommendations.ts` ✅ Done
 - Score boundary tests for each scoring dimension
 - Recommendation trigger tests for all `Recommendation` IDs
 - Test that all positive-reinforcement conditions produce the correct recommendation
@@ -215,7 +215,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Render `page.tsx` with all DEFAULT_INPUTS and assert no crash
 - Verify the "Surplus" banner renders when budget is balanced
 
-### E1-T7 · GitHub Actions CI workflow
+### E1-T7 · GitHub Actions CI workflow ✅ Done
 - Create `.github/workflows/ci.yml`
 - Steps: install, lint, build, test
 - Run on every push and pull request
@@ -227,18 +227,18 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Use the official `actions/deploy-pages` action
 - Enables zero-infrastructure hosting: the repo itself serves the app
 
-### E1-T8 · ESLint & strict TypeScript tightening
+### E1-T8 · ESLint & strict TypeScript tightening ✅ Done
 - Enable `"strict": true` in `tsconfig.json` (already `"strict": true` — verify no violations)
 - Fix the type-cast issue in `budgetHealthScore.ts` (accessing `houseDownPaymentContribution` off `BudgetBreakdown` via cast — move to accepting `inputs` as a second param or add field to breakdown)
 - Add `eslint-plugin-react-hooks` rules
 - Zero lint warnings in CI
 
-### E1-T9 · Error boundaries
+### E1-T9 · Error boundaries ✅ Done
 - Create a `components/ErrorBoundary.tsx` component
 - Wrap the main `<main>` content in `page.tsx`
 - Display a friendly "something went wrong" card with a reset button
 
-### E1-T10 · Annual tax constant update process
+### E1-T10 · Annual tax constant update process ✅ Done
 - Extract `TAX_YEAR` constant
 - Document in `taxCalculations.ts` which values need updating each January
 - Add a comment reminder for `SS_WAGE_BASE`, `ANNUAL_401K_LIMIT`, `ANNUAL_IRA_LIMIT`, and all bracket arrays
@@ -249,13 +249,13 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 
 **Goal:** Users should not lose their budget when they close the tab. Auto-save to `localStorage` is the MVP; user accounts are Phase 2.
 
-### E2-T1 · localStorage auto-save
+### E2-T1 · localStorage auto-save ✅ Done
 - Create `lib/storage.ts` with `saveBudgetInputs(inputs: BudgetInputs)` and `loadBudgetInputs(): BudgetInputs | null`
 - Serialize as JSON; add a version key so schema migrations can be handled
 - Debounce writes by 500 ms to avoid write storms
 - Load saved state on app mount (before first render)
 
-### E2-T2 · Storage schema versioning
+### E2-T2 · Storage schema versioning ✅ Done
 - Add a `STORAGE_VERSION` constant
 - On load, if the persisted version doesn't match, fall back to `DEFAULT_INPUTS` and log a warning
 - Lay groundwork for a migration function in future
@@ -285,7 +285,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 
 **Goal:** Support more states, model Roth vs Traditional IRA, add HSA, and keep tax tables current.
 
-### E3-T1 · Add 10+ major state tax calculations
+### E3-T1 · Add 10+ major state tax calculations ✅ Done
 States to add (in priority order based on population and no-income-tax interest):
 1. Texas (no state income tax — alias for `no_state_tax`)
 2. Florida (no state income tax)
@@ -300,13 +300,13 @@ States to add (in priority order based on population and no-income-tax interest)
 - Add state selector to the form with a full US state dropdown
 - Update `STATE_LABELS` and `stateIncomeTaxEstimate`
 
-### E3-T2 · Roth vs Traditional IRA distinction
+### E3-T2 · Roth vs Traditional IRA distinction ✅ Done
 - Add `iraType: 'traditional' | 'roth'` to `BudgetInputs`
 - Traditional IRA: reduce federal taxable income (up to income phase-out limits)
 - Roth IRA: after-tax contribution — subtract from take-home but don't reduce taxable income
 - Add phase-out income limit warnings in the recommendations engine
 
-### E3-T3 · HSA support
+### E3-T3 · HSA support ✅ Done
 - Add `hsaContribution: number` and `hsaEligible: boolean` to `BudgetInputs`
 - HSA contribution is triple-tax-advantaged: pre-tax, tax-free growth, tax-free withdrawal for medical
 - Model as pre-tax deduction similar to 401(k)
@@ -323,10 +323,11 @@ States to add (in priority order based on population and no-income-tax interest)
 - Taxed as ordinary income (simplified)
 - Display in the income summary as supplemental income
 
-### E3-T6 · 2025+ tax year support
+### E3-T6 · 2025+ tax year support ✅ Done
 - Update all federal and state brackets to 2025 values once published (IRS typically publishes in October/November)
 - Update `ANNUAL_401K_LIMIT` (2025: $23,500) and `ANNUAL_IRA_LIMIT` (2025: $7,000 under 50 / $8,000 50+)
 - Add age input and catch-up contribution support (401k: +$7,500 if 50+)
+- **Implemented:** All 2026 federal/state brackets, limits, and SS wage base updated in `lib/taxCalculations.ts`; age-based catch-up contributions for 401(k) and IRA; `userAge` field on `BudgetInputs`
 
 ---
 
@@ -334,10 +335,11 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Replace the text-heavy dashboard with charts and visual breakdowns that make budget proportions immediately legible.
 
-### E4-T1 · Choose and install charting library
+### E4-T1 · Choose and install charting library ✅ Done
 - Evaluate: `recharts` (lightweight, React-native), `chart.js` + `react-chartjs-2`, `visx` (D3-based)
 - Recommendation: **recharts** — small bundle, composable, TypeScript-first
 - Install and verify no conflicts with Next.js 16 / React 19
+- **Implemented:** `recharts` installed and used for area charts (debt payoff timeline) and trend charts
 
 ### E4-T2 · Pie/donut chart — monthly budget breakdown
 - Show gross monthly income divided into: Taxes, Retirement, Housing, Utilities, Transport, Pets, Food, Health, Lifestyle, Savings/Investing, Buffer
@@ -358,10 +360,11 @@ States to add (in priority order based on population and no-income-tax interest)
   - IRA: annual contribution vs limit
 - Replace text in `SavingsSummary` / `SavingsDetail`
 
-### E4-T5 · Health score radial/gauge chart
+### E4-T5 · Health score radial/gauge chart ✅ Done
 - Replace the plain number display in `BudgetHealthScore` with a visual gauge (0–100 arc)
 - Color shifts: red (0–39) → orange (40–59) → yellow (60–74) → green (75–100)
 - Animate on value change
+- **Implemented:** SVG arc gauge with `strokeDasharray` animation in `components/BudgetHealthScore.tsx`; per-dimension breakdown bars with color coding
 
 ### E4-T6 · Annual projection chart
 - Line chart showing projected savings balances over 1/3/5/10 years
@@ -379,11 +382,12 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Add depth to the budgeting engine for more complex real-world situations.
 
-### E5-T1 · Multi-scenario comparison view
+### E5-T1 · Multi-scenario comparison view ✅ Done
 - Allow the user to open 2–3 budget scenarios side by side
 - Each scenario is a full independent `BudgetInputs` state
 - A comparison table shows key metrics (take-home, savings rate, health score, buffer) across all scenarios
 - Use case: "San Diego $190k vs Atlanta $150k — which makes more sense?"
+- **Implemented:** `lib/scenarioComparison.ts` + `components/ScenarioComparison.tsx`; live budget plus up to 2 preset scenarios; "Load into Editor" button; 18 tests in `lib/__tests__/scenarioComparison.test.ts`
 
 ### E5-T2 · Debt payoff amortization ✅ Done
 - `debts` array on `BudgetInputs`; each entry: `name`, `balance`, `interestRate`, `minimumPayment` ✅
@@ -392,12 +396,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - Dashboard "Debt Payoff Timeline" card shows strategy label, totals, balance-over-time area chart, and per-debt breakdown table ✅
 - 12 unit tests in `lib/__tests__/debtPayoff.test.ts` (7 new) covering per-debt schedule, strategy ordering, and edge cases ✅
 
-### E5-T3 · Homeownership mode
+### E5-T3 · Homeownership mode ✅ Done
 - Toggle: "Renter" vs "Homeowner"
 - Homeowner adds: mortgage payment, property tax, HOA, home insurance, maintenance reserve
 - Replace "House Down Payment Fund" with "Home Equity" tracking once in homeowner mode
 - Mortgage calculator: loan amount, rate, term → monthly payment
-- **Progress:** Added renter/homeowner housing mode toggle, homeowner housing fields (mortgage/property tax/home insurance/maintenance reserve), and homeowner-aware labels for housing payment + home equity tracking in savings/dashboard/comparison surfaces.
+- **Implemented:** `housingMode: HousingMode` on `BudgetInputs` with renter/homeowner toggle, all homeowner housing fields, homeowner-aware labels in budget calculations, savings summary, dashboard, and scenario comparison surfaces
 
 ### E5-T4 · Cost-of-living index comparison ✅ Done
 - Integrated a static COLI dataset (MERIC 2023–2024 composite, all 50 states + DC, US avg = 100) in `lib/coliData.ts`
@@ -414,10 +418,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - `components/PaycheckCard.tsx` — dashboard card with "Paycheck Detail" (deduction waterfall) and "Budget Allocation" (bar-chart allocation view) tabs
 - Backward-compatible migration in `lib/storage.ts`; 35+ unit tests in `lib/__tests__/paycheckCalculations.test.ts`
 
-### E5-T6 · Irregular income support
-- For freelancers / variable-income users, add a "Monthly income variability" field
-- Show budget at P25 / P50 / P75 income scenarios
-- Flag which expenses would cause over-budget at P25
+### E5-T6 · Irregular income support ✅ Done
+- `incomeVariabilityPercent` field on `BudgetInputs`; slider (0–60%) in Income & Taxes form section ✅
+- `lib/irregularIncome.ts` — `calculateIrregularIncomeAnalysis` returns P25/P50/P75 scenarios (each a full `BudgetBreakdown`) using symmetric income range: P25 = base × (1 − pct/100), P75 = base × (1 + pct/100) ✅
+- `components/IrregularIncomeCard.tsx` — dashboard card shows three scenario columns (gross, net, buffer); flags at-risk variable expenses sorted by amount when P25 is over budget ✅
+- Card rendered conditionally (only when variabilityPercent > 0) in `BudgetDashboard.tsx` ✅
+- 18 unit tests in `lib/__tests__/irregularIncome.test.ts` (211 total passing) ✅
 
 ### E5-T7 · Partner / dual-income mode
 - Add income fields for a second earner
@@ -747,4 +753,4 @@ A task is **Done** when:
 
 ---
 
-*Last updated: 2026-09-14 — Completed E5-T2 (Debt Payoff Amortization): added `debtPayoffStrategy` field + form selector (avalanche/snowball), per-debt schedule (`PerDebtPayoffResult`) with paid-off month and interest cost, balance-over-time area chart in the dashboard Debt Payoff Timeline card, and 7 new tests (193 total passing).*
+*Last updated: 2026-09-14 — Completed E5-T6 (Irregular Income Support): added `incomeVariabilityPercent` field + slider, `lib/irregularIncome.ts` with P25/P50/P75 scenario engine, `IrregularIncomeCard` dashboard card (scenario columns + at-risk expense list), and 18 new tests (211 total passing).*

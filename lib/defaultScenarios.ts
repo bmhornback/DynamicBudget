@@ -17,6 +17,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   userAge: 0,
   bonusIncome: 0,
   otherMonthlyIncome: 0,
+  incomeVariabilityPercent: 0,
 
   // Housing
   housingMode: 'renter',

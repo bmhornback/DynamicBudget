@@ -32,7 +32,9 @@ import RecommendationList from './RecommendationList';
 import BudgetCard from './BudgetCard';
 import ColiCard from './ColiCard';
 import PaycheckCard from './PaycheckCard';
+import IrregularIncomeCard from './IrregularIncomeCard';
 import { calculatePaycheckBreakdown } from '@/lib/paycheckCalculations';
+import { calculateIrregularIncomeAnalysis } from '@/lib/irregularIncome';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -54,6 +56,9 @@ export default function BudgetDashboard({
   const goalProjections = calculateLongTermGoalProjections(inputs, breakdown);
   const literacyInsights = generateFinancialLiteracyInsights(inputs, breakdown, goalProjections);
   const paycheckBreakdown = calculatePaycheckBreakdown(inputs, breakdown);
+  const irregularIncomeAnalysis = inputs.incomeVariabilityPercent > 0
+    ? calculateIrregularIncomeAnalysis(inputs, breakdown)
+    : null;
 
   // Buffer status banner
   const bufferBanner = isOverBudget ? (
@@ -136,6 +141,9 @@ export default function BudgetDashboard({
         <FinancialLiteracyDetail insights={literacyInsights} />
         <PaycheckCard paycheckBreakdown={paycheckBreakdown} />
         <ColiCard currentState={inputs.state} annualSalary={inputs.annualSalary} />
+        {irregularIncomeAnalysis && (
+          <IrregularIncomeCard analysis={irregularIncomeAnalysis} />
+        )}
       </div>
 
       {/* Recommendations */}

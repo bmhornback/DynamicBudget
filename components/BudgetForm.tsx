@@ -426,6 +426,24 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
         {field('bonusIncome', 'Annual Bonus Income')}
         {field('otherMonthlyIncome', 'Other Monthly Income')}
+
+        <NumberSlider
+          label="Monthly Income Variability"
+          value={inputs.incomeVariabilityPercent}
+          min={0}
+          max={60}
+          step={5}
+          suffix="%"
+          onChange={(v) => onChange({ incomeVariabilityPercent: v })}
+        />
+        {inputs.incomeVariabilityPercent > 0 && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 px-1">
+            A bad month (P25) could be{' '}
+            <strong>{(100 - inputs.incomeVariabilityPercent).toFixed(0)}%</strong> of your typical
+            income. The dashboard will show P25 / P50 / P75 scenarios.
+          </p>
+        )}
+
         {field('iraContribution', 'Monthly IRA Contribution', inputs.userAge >= 50 ? 'Capped at $8,000/year' : 'Capped at $7,000/year')}
 
         <SelectField

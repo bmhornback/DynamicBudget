@@ -13,7 +13,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "audit:devplan": "node scripts/audit-devplan.mjs"
   },
   "dependencies": {
     "next": "16.2.9",

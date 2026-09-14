@@ -39,6 +39,9 @@ jobs:
       - name: Run tests
         run: npm run test -- --coverage
 
+      - name: Audit DEV_PLAN.md completeness
+        run: npm run audit:devplan
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         if: always()
