@@ -1,14 +1,7 @@
-import nextConfig from '@/next.config';
 import { buildMetadata, SITE_URL } from '@/lib/seo';
+import { buildStaticSitePathConfig } from '@/lib/siteConfig';
 
 describe('seo metadata helpers', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-
-  afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
-    jest.resetModules();
-  });
-
   it('preserves the project subpath in canonical and Open Graph URLs', () => {
     const homeMetadata = buildMetadata({
       title: 'Home',
@@ -33,18 +26,14 @@ describe('seo metadata helpers', () => {
     ).toBe(`${SITE_URL}/learn`);
   });
 
-  it('uses the GitHub Pages base path for production exports', async () => {
-    process.env.NODE_ENV = 'production';
-    jest.resetModules();
-
-    const { default: productionConfig } = await import('../../next.config');
-
-    expect(productionConfig.basePath).toBe('/DynamicBudget');
-    expect(productionConfig.assetPrefix).toBe('/DynamicBudget/');
+  it('uses the GitHub Pages base path for production exports', () => {
+    expect(buildStaticSitePathConfig('production')).toEqual({
+      basePath: '/DynamicBudget',
+      assetPrefix: '/DynamicBudget/',
+    });
   });
 
   it('omits the GitHub Pages base path outside production', () => {
-    expect(nextConfig.basePath).toBeUndefined();
-    expect(nextConfig.assetPrefix).toBeUndefined();
+    expect(buildStaticSitePathConfig('test')).toEqual({});
   });
 });

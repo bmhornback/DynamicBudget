@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
-
-const isProduction = process.env.NODE_ENV === 'production';
-const githubPagesBasePath = '/DynamicBudget';
+import { buildStaticSitePathConfig } from './lib/siteConfig';
 
 const nextConfig: NextConfig = {
   // Output as a fully static site (no Node server required).
@@ -9,8 +7,7 @@ const nextConfig: NextConfig = {
   // GitHub Pages, Netlify, S3, or opened directly in a browser — the same
   // self-hosted static pattern used by the FirstTimeFitness app.
   output: "export",
-  basePath: isProduction ? githubPagesBasePath : undefined,
-  assetPrefix: isProduction ? `${githubPagesBasePath}/` : undefined,
+  ...buildStaticSitePathConfig(),
 };
 
 export default nextConfig;

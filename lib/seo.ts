@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
+import { SITE_BASE_PATH } from '@/lib/siteConfig';
 
-export const SITE_URL = 'https://bmhornback.github.io/DynamicBudget';
+export const SITE_URL = `https://bmhornback.github.io${SITE_BASE_PATH}`;
 export const SITE_NAME = 'DynamicBudget';
-export const SITE_BASE_PATH = '/DynamicBudget';
 
 function buildCanonicalUrl(path?: string): string {
   const normalizedPath = !path || path === '/'
