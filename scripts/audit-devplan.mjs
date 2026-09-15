@@ -65,6 +65,8 @@ const COMPLETED_TASKS = {
   'E4-T3': 'components/ExpenseThresholdChart.tsx — recharts horizontal BarChart with ReferenceLine thresholds and color-coded Cell fills',
   'E4-T4': 'components/SavingsProgressCard.tsx — animated progress bars for 401k/IRA/HSA limits plus emergency-fund and house-fund timelines',
   'E4-T5': 'SVG arc gauge with strokeDasharray in components/BudgetHealthScore.tsx',
+  'E4-T6': 'lib/annualProjection.ts + components/AnnualProjectionChart.tsx for 1/3/5/10-year savings projections',
+  'E4-T7': 'components/RebalanceDiffChart.tsx integrated in RebalanceControls.tsx for before/after rebalance visualization',
 
   // Epic 5 — Advanced Budget Features
   'E5-T1': 'lib/scenarioComparison.ts + components/ScenarioComparison.tsx; side-by-side comparison',
