@@ -78,7 +78,7 @@ const COMPLETED_TASKS = {
   'E6-T1': 'focus-visible rings on all interactive elements; Escape closes dropdowns; focus restored to trigger',
   'E6-T2': 'role="switch" dark: variants; region/status/live ARIA coverage verified',
   'E6-T3': 'text-amber-600 → text-amber-700; text-gray-400 → text-gray-500 across 10 components',
-  'E6-T4': 'inputMode="decimal" on number inputs; section collapse/expand animation',
+  'E6-T4': 'inputMode="decimal" on number inputs; section collapse/expand animation; mobile swipe toggle between editor and dashboard',
   'E6-T5': 'Inline field validation (rent > 50% gross warning); accessible field labels',
   'E6-T7': 'ThemeProvider.tsx (class strategy), DarkModeToggle, dark: Tailwind classes, localStorage persist',
   'E6-T9': 'components/OnboardingCard.tsx; dismiss state in localStorage',

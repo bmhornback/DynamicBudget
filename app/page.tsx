@@ -45,6 +45,8 @@ const SAVINGS_FIELDS = [
   'extraDebtPayoff',
 ] as const;
 const DEFAULT_SAVINGS_PERCENT = DEFAULT_INPUTS.savingsPercentOfNetIncome;
+const MOBILE_SWIPE_THRESHOLD_PX = 60;
+const MOBILE_SWIPE_DIRECTION_RATIO = 1.25;
 type ActiveTab = 'budget' | 'trends' | 'business_expenses';
 
 export default function DynamicBudgetPage() {
@@ -79,6 +81,8 @@ export default function DynamicBudgetPage() {
   );
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
   const printTriggered = useRef(false);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeCurrent = useRef<{ x: number; y: number } | null>(null);
   const printRestoreState = useRef<{
     activeTab: ActiveTab;
     showForm: boolean;
@@ -288,6 +292,62 @@ export default function DynamicBudgetPage() {
     []
   );
 
+  const isMobileViewport = useCallback(() => {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  }, []);
+
+  const resetSwipeGesture = useCallback(() => {
+    swipeStart.current = null;
+    swipeCurrent.current = null;
+  }, []);
+
+  const handleWorkspaceTouchStart = useCallback((event: React.TouchEvent<HTMLElement>) => {
+    if (!isMobileViewport() || event.touches.length !== 1) {
+      resetSwipeGesture();
+      return;
+    }
+
+    const touch = event.touches[0];
+    const position = { x: touch.clientX, y: touch.clientY };
+    swipeStart.current = position;
+    swipeCurrent.current = position;
+  }, [isMobileViewport, resetSwipeGesture]);
+
+  const handleWorkspaceTouchMove = useCallback((event: React.TouchEvent<HTMLElement>) => {
+    if (!swipeStart.current) return;
+    if (event.touches.length !== 1) {
+      resetSwipeGesture();
+      return;
+    }
+
+    const touch = event.touches[0];
+    swipeCurrent.current = { x: touch.clientX, y: touch.clientY };
+  }, [resetSwipeGesture]);
+
+  const handleWorkspaceTouchEnd = useCallback(() => {
+    const start = swipeStart.current;
+    const end = swipeCurrent.current;
+    resetSwipeGesture();
+
+    if (!start || !end || !isMobileViewport()) return;
+
+    const deltaX = end.x - start.x;
+    const deltaY = end.y - start.y;
+
+    if (
+      Math.abs(deltaX) < MOBILE_SWIPE_THRESHOLD_PX ||
+      Math.abs(deltaX) < Math.abs(deltaY) * MOBILE_SWIPE_DIRECTION_RATIO
+    ) {
+      return;
+    }
+
+    if (deltaX < 0 && showForm) {
+      setShowForm(false);
+    } else if (deltaX > 0 && !showForm) {
+      setShowForm(true);
+    }
+  }, [isMobileViewport, resetSwipeGesture, showForm]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900" data-print-root="true">
       {/* Header */}
@@ -415,6 +475,11 @@ export default function DynamicBudgetPage() {
               aria-labelledby="budget-tab"
               className="space-y-6"
               data-print-budget="true"
+              onTouchStart={handleWorkspaceTouchStart}
+              onTouchMove={handleWorkspaceTouchMove}
+              onTouchEnd={handleWorkspaceTouchEnd}
+              onTouchCancel={resetSwipeGesture}
+              style={{ touchAction: 'pan-y' }}
             >
               <div data-print-hidden="true">
                 <OnboardingCard />
@@ -481,7 +546,17 @@ export default function DynamicBudgetPage() {
               </div>
             </div>
           ) : activeTab === 'trends' ? (
-            <div id="trends-panel" role="tabpanel" aria-labelledby="trends-tab" className="flex flex-col md:flex-row gap-6">
+            <div
+              id="trends-panel"
+              role="tabpanel"
+              aria-labelledby="trends-tab"
+              className="flex flex-col md:flex-row gap-6"
+              onTouchStart={handleWorkspaceTouchStart}
+              onTouchMove={handleWorkspaceTouchMove}
+              onTouchEnd={handleWorkspaceTouchEnd}
+              onTouchCancel={resetSwipeGesture}
+              style={{ touchAction: 'pan-y' }}
+            >
               <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
                 <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
                   <SpendingTracker

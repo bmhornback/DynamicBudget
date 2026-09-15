@@ -14,6 +14,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
 - ♿ **Accessibility-minded UI** — Keyboard-operable controls, labeled form fields, and live status messaging for key budget updates
+- 👆 **Mobile workspace gestures** — Swipe between the editor and dashboard panels on small screens without losing vertical scroll
 - 🎯 **Long-term goal planner** — Track house, vacation, retirement, kids, and custom major-purchase targets
 - 🧾 **Business expense guide** — Categorize, track, and estimate potential business tax write-offs with recordkeeping prompts
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
