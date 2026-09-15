@@ -468,11 +468,11 @@ States to add (in priority order based on population and no-income-tax interest)
 - Fix any amber/yellow text on white backgrounds ✅ `text-amber-600` on light backgrounds upgraded to `text-amber-700` across BudgetDashboard, ExpenseSummary, SavingsSummary
 - `text-gray-400` supplementary text upgraded to `text-gray-500` across IncomeSummary, SavingsSummary, ExpenseSummary, RecommendationList, IrregularIncomeCard, RebalanceControls, SavingsProgressCard, BudgetPieChart, BudgetDashboard, BudgetForm
 
-### E6-T4 · Mobile form UX improvements ✅ Partial
+### E6-T4 · Mobile form UX improvements ✅ Done
 - Numeric keyboard for all dollar-amount inputs (`inputMode="decimal"`) ✅ Done
 - Sticky "Dashboard" button when scrolled into the form on mobile (existing — top-0 header button)
 - Collapse/expand sections in the form with smooth animation ✅ Done (CSS transition in `BudgetSection.tsx`)
-- Swipe gesture to toggle between form and dashboard on mobile (deferred to v1.5)
+- Swipe gesture to toggle between form and dashboard on mobile ✅ Done (`app/page.tsx` touch gesture handlers with horizontal-swipe threshold + vertical-scroll guard)
 
 ### E6-T5 · Form input improvements ✅ Partial
 - Currency formatting in inputs (deferred)
