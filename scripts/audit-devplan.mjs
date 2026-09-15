@@ -86,6 +86,7 @@ const COMPLETED_TASKS = {
   'E6-T5': 'Inline field validation (rent > 50% gross warning); accessible field labels',
   'E6-T6': 'count-up transitions, card entrance animation, rebalance fade-in, and health score gauge sweep animation',
   'E6-T7': 'ThemeProvider.tsx (class strategy), DarkModeToggle, dark: Tailwind classes, localStorage persist',
+  'E6-T8': 'DashboardSkeleton.tsx pulse-animated placeholder; isMounted guard in page.tsx eliminates blank-page flash',
   'E6-T9': 'components/OnboardingCard.tsx; dismiss state in localStorage',
 
   // Epic 7 — Export & Sharing
