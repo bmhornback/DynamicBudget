@@ -1,5 +1,5 @@
 import { buildMetadata, SITE_URL } from '@/lib/seo';
-import { buildStaticSitePathConfig } from '@/lib/siteConfig';
+import { buildStaticSitePathConfig, SITE_BASE_PATH } from '@/lib/siteConfig';
 
 describe('seo metadata helpers', () => {
   it('preserves the project subpath in canonical and Open Graph URLs', () => {
@@ -28,8 +28,8 @@ describe('seo metadata helpers', () => {
 
   it('uses the GitHub Pages base path for production exports', () => {
     expect(buildStaticSitePathConfig('production')).toEqual({
-      basePath: '/DynamicBudget',
-      assetPrefix: '/DynamicBudget/',
+      basePath: SITE_BASE_PATH,
+      assetPrefix: `${SITE_BASE_PATH}/`,
     });
   });
 
