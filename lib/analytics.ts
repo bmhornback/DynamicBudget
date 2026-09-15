@@ -29,9 +29,11 @@ export function loadAnalyticsCounts(): Record<string, number> {
     const raw = window.localStorage.getItem(ANALYTICS_STORAGE_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return Object.fromEntries(
-      Object.entries(parsed).filter(([, value]) => typeof value === 'number' && Number.isFinite(value))
+    const filteredEntries = Object.entries(parsed).filter(
+      (entry): entry is [string, number] =>
+        typeof entry[1] === 'number' && Number.isFinite(entry[1])
     );
+    return Object.fromEntries(filteredEntries);
   } catch {
     return {};
   }

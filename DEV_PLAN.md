@@ -101,6 +101,7 @@
 
 - Accessibility polish is improved but not complete — keyboard and ARIA baselines are stronger now, but contrast audits and dedicated screen-reader validation are still desirable.
 - Multi-scenario comparison now supports saved budgets, but richer compare workflows (more than 2 alternates, grouping, notes filtering) are still future work.
+- Growth/discovery foundations are now in place, but a dedicated landing page and deeper educational content are still future work.
 - 2027 tax brackets not yet published by IRS (typically available late 2026).
 - County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
 

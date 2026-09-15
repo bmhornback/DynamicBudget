@@ -117,10 +117,12 @@ lib/
   budgetCalculations.ts   ← Core budget math
   budgetHealthScore.ts    ← 0–100 score + thresholds
   annualProjection.ts     ← 1/3/5/10-year savings projection (E4-T6)
+  analytics.ts            ← Local-only aggregate product event counters
   formatters.ts           ← Number/currency formatting
   longTermGoals.ts        ← Goal projections + literacy insights
   rebalanceBudget.ts      ← 6 rebalancing strategies
   recommendations.ts      ← Actionable suggestions
+  seo.ts                  ← Shared metadata + JSON-LD helpers
   taxCalculations.ts      ← Federal, state, payroll tax
   spendingTrends.ts       ← Trend analysis & forecasting
   storage.ts              ← localStorage persistence
@@ -135,7 +137,10 @@ components/
   [other UI components]
 app/
   page.tsx                ← Main app (Budget, Trends, and Business tabs, scenario comparison embedded in Budget view)
-  layout.tsx
+  learn/page.tsx          ← Educational content tied to app workflows
+  layout.tsx              ← Metadata + app shell
+  robots.ts               ← Search crawler rules
+  sitemap.ts              ← Static route discovery
   globals.css
 ```
 
