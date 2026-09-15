@@ -31,6 +31,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🏷️ **Scenario notes** — Add an optional note to saved budgets so comparisons preserve the scenario's intent
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
+- 🗓️ **Sinking funds & recurring annual expenses** — Plan ahead for non-monthly bills like registration, insurance, travel, home maintenance, and holidays with automatic monthly reserve guidance
 - 📱 **Responsive design** — Works great on desktop and mobile
 
 ### Spending Trends & Analytics
@@ -47,6 +48,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 📊 **Irregular income scenarios** — Set a monthly income variability % (ideal for freelancers and commission earners) to instantly see your budget at the P25 (bad month), P50 (typical), and P75 (good month) income levels; at-risk variable expenses are surfaced automatically when a bad month would push you into deficit
 - 👥 **Partner / dual-income mode** — Switch to Married Filing Jointly and enable a second earner's salary and 401(k); federal and state taxes are calculated on the combined household income using MFJ brackets (Social Security wage-base cap applied individually), and the dashboard's Income Summary switches to a household view showing each partner's gross income and the combined take-home
 - 📅 **Savings goal timeline calculator** — Each long-term goal card shows how many months it will take to reach the target at your current funding rate, plus an interactive "Reach in X months" input that instantly back-calculates the required monthly contribution; emergency fund and house fund rows in Savings Detail also display projected months to fully funded
+- 🧠 **Decision support summaries** — A dedicated dashboard card now highlights recurring-bill readiness, home-purchase timing, debt-vs-investing tradeoffs, and dual-income reliance
 - 📈 **Annual savings projection chart** — Full-width line chart on the dashboard showing projected 401(k), IRA, Taxable, House Fund, and Emergency Fund balances at 1, 3, 5, and 10 years; includes an interactive growth-rate slider (0–15%, default 7%) and a summary table of all account balances at each horizon
 - ⚖️ **Rebalance diff visualization** — After running Auto Balance, a before/after horizontal bar chart animates each field change; reductions are colored red and increases are green, with a delta summary table beneath
 

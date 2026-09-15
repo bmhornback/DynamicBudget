@@ -26,6 +26,7 @@ import {
   ANNUAL_HSA_LIMIT_FAMILY,
   getIRALimit,
 } from './taxCalculations';
+import { calculateAnnualExpensePlan } from './annualExpenses';
 
 /**
  * Calculate the complete budget breakdown from user inputs.
@@ -367,6 +368,15 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     ? 0
     : (inputs.debts ?? []).reduce((sum, d) => sum + (d.minimumPayment ?? 0), 0);
   const totalDebtPayoff = isSavingsByPercentage ? 0 : debtMinimumPayments + inputs.extraDebtPayoff;
+  const annualExpensePlan = calculateAnnualExpensePlan(inputs.annualExpenses ?? []);
+  const totalSinkingFunds = annualExpensePlan.reduce(
+    (sum, expense) => sum + expense.recommendedMonthlyContribution,
+    0
+  );
+  const totalAnnualRecurringExpenses = annualExpensePlan.reduce(
+    (sum, expense) => sum + expense.annualAmount,
+    0
+  );
 
   // ── Aggregates ────────────────────────────────────────────────────────────
   // Fixed = housing + utilities + transportation + health + groceries (baseline)
@@ -385,7 +395,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalLifestyle +
     totalSavings +
     totalInvestments +
-    totalDebtPayoff;
+    totalDebtPayoff +
+    totalSinkingFunds;
 
   const remainingMonthlyBuffer = netMonthly - totalAllocated;
 
@@ -398,7 +409,10 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     inputs.groceries +
     inputs.householdBasics +
     totalHealth +
-    (inputs.petsEnabled ? inputs.petFood + inputs.vetMedications : 0);
+    (inputs.petsEnabled ? inputs.petFood + inputs.vetMedications : 0) +
+    annualExpensePlan
+      .filter((expense) => expense.isEssential)
+      .reduce((sum, expense) => sum + expense.recommendedMonthlyContribution, 0);
 
   const emergencyFundTargetCalculated = essentialExpensesMonthly * 6;
 
@@ -455,6 +469,8 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     totalSavings,
     totalInvestments,
     totalDebtPayoff,
+    totalSinkingFunds,
+    totalAnnualRecurringExpenses,
     calculatedSavingsFromPercentage,
     effectiveEmergencyFundContribution: isSavingsByPercentage ? calculatedSavingsFromPercentage : inputs.emergencyFundContribution,
     effectiveHouseDownPaymentContribution: isSavingsByPercentage ? 0 : inputs.houseDownPaymentContribution,

@@ -42,6 +42,10 @@ import { useCountUp } from '@/lib/useCountUp';
 import AnnualProjectionChart from './AnnualProjectionChart';
 import DeferredRender from './DeferredRender';
 import PlanningAssumptionsCard from './PlanningAssumptionsCard';
+import { calculateAnnualExpensePlan } from '@/lib/annualExpenses';
+import { generateDecisionSupportSummaries } from '@/lib/decisionSupport';
+import SinkingFundsCard from './SinkingFundsCard';
+import DecisionSupportCard from './DecisionSupportCard';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -62,9 +66,14 @@ export default function BudgetDashboard({
 }: BudgetDashboardProps) {
   const { isOverBudget, deficit, surplus, remainingMonthlyBuffer, netMonthlyIncome } = breakdown;
   const goalProjections = useMemo(() => calculateLongTermGoalProjections(inputs, breakdown), [inputs, breakdown]);
+  const annualExpensePlan = useMemo(() => calculateAnnualExpensePlan(inputs.annualExpenses ?? []), [inputs.annualExpenses]);
   const literacyInsights = useMemo(
     () => generateFinancialLiteracyInsights(inputs, breakdown, goalProjections),
     [breakdown, goalProjections, inputs]
+  );
+  const decisionSupportSummaries = useMemo(
+    () => generateDecisionSupportSummaries(inputs, breakdown, annualExpensePlan, goalProjections),
+    [annualExpensePlan, breakdown, goalProjections, inputs]
   );
   const paycheckBreakdown = useMemo(() => calculatePaycheckBreakdown(inputs, breakdown), [inputs, breakdown]);
   const irregularIncomeAnalysis = useMemo(
@@ -173,6 +182,8 @@ export default function BudgetDashboard({
         <TransportationDetail breakdown={breakdown} inputs={inputs} />
         {inputs.petsEnabled && <PetsDetail inputs={inputs} breakdown={breakdown} />}
         <SavingsDetail breakdown={breakdown} inputs={inputs} />
+        <SinkingFundsCard annualExpensePlan={annualExpensePlan} totalMonthly={breakdown.totalSinkingFunds} />
+        <DecisionSupportCard summaries={decisionSupportSummaries} />
         <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} strategy={inputs.debtPayoffStrategy} />
         <LongTermGoalsDetail goals={goalProjections} />
         <FinancialLiteracyDetail insights={literacyInsights} />
@@ -376,6 +387,11 @@ function SavingsDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown; inpu
         sub={`${formatCurrency(breakdown.annualTaxableInvestments)}/year`}
       />
       <DetailRow label="Debt Payoff" value={formatCurrency(breakdown.totalDebtPayoff)} />
+      <DetailRow
+        label="Sinking Funds"
+        value={formatCurrency(breakdown.totalSinkingFunds)}
+        sub={`${formatCurrency(breakdown.totalAnnualRecurringExpenses)}/year of recurring bills`}
+      />
       <DetailRow label="General Cash Savings" value={formatCurrency(inputs.generalCashSavings)} />
       <DividerLine />
       <DetailRow

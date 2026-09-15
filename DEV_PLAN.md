@@ -52,7 +52,7 @@
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
 | Export as CSV | ✅ Done |
-| Test suite | ✅ Jest (275 tests passing) |
+| Test suite | ✅ Jest (284 tests passing) |
 | CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ✅ Done |
@@ -69,6 +69,8 @@
 | Debt amortization | ✅ Done |
 | Saved-budget scenario comparison | ✅ Done |
 | Planning assumptions / undo recovery | ✅ Done |
+| Sinking funds / annual expenses | ✅ Done |
+| Decision-support summaries | ✅ Done |
 
 ### New in This Release (v1.0.0)
 
@@ -89,7 +91,7 @@
 - Savings fields automatically locked when in percentage mode to prevent confusion
 - Integration with rebalancing engine for both modes
 - New scenario comparison table for side-by-side relocation and savings tradeoff analysis
-- 275 Jest tests passing
+- 284 Jest tests passing
 
 ### Known gaps / rough edges
 
@@ -449,6 +451,14 @@ States to add (in priority order based on population and no-income-tax interest)
 - Interactive "Reach in X months" input per goal card in `LongTermGoalsDetail` dashboard card ✅
 - Timeline sub-labels on emergency fund and house fund rows in `SavingsDetail` ✅
 - 16 new tests (236 total passing) ✅
+
+### E5-T9 · Sinking funds, recurring annual expenses, and decision support ✅ Done
+- `annualExpenses` array added to `BudgetInputs` so users can track known non-monthly costs like insurance, travel, home maintenance, and fees ✅
+- `lib/annualExpenses.ts` calculates due-month-aware monthly reserve targets, remaining unfunded amounts, and near-term due-soon status ✅
+- Budget calculations now include sinking-fund reserves in `totalAllocated` and emergency-fund planning, while keeping them separate from long-term savings-rate metrics ✅
+- `BudgetForm.tsx` exposes CRUD controls for annual expenses, including category, due month, saved-so-far, and essential/non-essential classification ✅
+- Dashboard adds `SinkingFundsCard` and `DecisionSupportCard` for recurring-bill readiness, home-purchase timing, debt-vs-investing tradeoffs, and dual-income reliance ✅
+- Recommendations, quick summary export, CSV export, storage normalization, and test coverage updated for the new workflow ✅
 
 ---
 

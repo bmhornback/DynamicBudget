@@ -103,6 +103,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   generalCashSavings: 0,
   isSavingsByPercentage: false,
   savingsPercentOfNetIncome: 30,
+  annualExpenses: [],
   longTermGoals: [
     {
       id: 'goal-house',

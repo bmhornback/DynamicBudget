@@ -55,6 +55,13 @@ export default function PlanningAssumptionsCard({
     });
   }
 
+  if (inputs.annualExpenses.length > 0) {
+    explanationRows.push({
+      label: 'Recurring annual bills',
+      detail: `${formatCurrency(breakdown.totalSinkingFunds)}/month is reserved for ${inputs.annualExpenses.length} known non-monthly expense${inputs.annualExpenses.length === 1 ? '' : 's'}. This protects your monthly buffer without counting those dollars as long-term wealth-building savings.`,
+    });
+  }
+
   return (
     <BudgetCard title="Planning Assumptions" accent="yellow">
       <div className="space-y-4">

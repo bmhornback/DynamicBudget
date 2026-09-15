@@ -113,4 +113,33 @@ describe('DynamicBudget page smoke test', () => {
 
     expect(screen.getByRole('button', { name: 'Show dashboard panel' })).toBeTruthy();
   });
+
+  it('renders sinking-fund planning when annual expenses exist', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      annualExpenses: [
+        {
+          id: 'registration',
+          name: 'Car Registration',
+          category: 'car' as const,
+          annualAmount: 600,
+          currentSaved: 100,
+          dueMonth: 12,
+          isEssential: true,
+        },
+      ],
+    };
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      version: 1,
+      inputs,
+      timestamp: new Date().toISOString(),
+    }));
+
+    render(<DynamicBudgetPage />);
+
+    expect(screen.getAllByText('Sinking Funds & Annual Expenses').length).toBeGreaterThan(0);
+    expect(screen.getByText('Car Registration')).toBeTruthy();
+    expect(screen.getByText('Decision Support')).toBeTruthy();
+  });
 });

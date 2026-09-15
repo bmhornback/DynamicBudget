@@ -61,6 +61,17 @@ export type LongTermGoalCategory =
   | 'custom';
 
 export type DebtPayoffStrategy = 'avalanche' | 'snowball';
+export type AnnualExpenseCategory =
+  | 'insurance'
+  | 'travel'
+  | 'home'
+  | 'car'
+  | 'medical'
+  | 'pets'
+  | 'holidays'
+  | 'subscriptions'
+  | 'taxes_fees'
+  | 'custom';
 
 export interface DebtAccount {
   id: string;
@@ -68,6 +79,16 @@ export interface DebtAccount {
   balance: number;
   interestRate: number; // annual percentage rate
   minimumPayment: number;
+}
+
+export interface AnnualExpense {
+  id: string;
+  name: string;
+  category: AnnualExpenseCategory;
+  annualAmount: number;
+  currentSaved: number;
+  dueMonth: number; // 1-12
+  isEssential: boolean;
 }
 
 export interface LongTermSavingsGoal {
@@ -102,6 +123,31 @@ export interface FinancialLiteracyInsight {
   id: string;
   priority: 'high' | 'medium' | 'low';
   title: string;
+  detail: string;
+}
+
+export interface AnnualExpensePlan {
+  id: string;
+  name: string;
+  category: AnnualExpenseCategory;
+  annualAmount: number;
+  currentSaved: number;
+  dueMonth: number;
+  monthsUntilDue: number;
+  remainingAmount: number;
+  recommendedMonthlyContribution: number;
+  annualizedMonthlyContribution: number;
+  fundedRatio: number;
+  isEssential: boolean;
+  isFullyFunded: boolean;
+  isDueSoon: boolean;
+}
+
+export interface DecisionSupportSummary {
+  id: string;
+  title: string;
+  priority: 'high' | 'medium' | 'low';
+  summary: string;
   detail: string;
 }
 
@@ -272,6 +318,7 @@ export interface BudgetInputs {
   // Savings mode: percentage vs. fixed amounts
   isSavingsByPercentage: boolean;
   savingsPercentOfNetIncome: number; // e.g., 30 for 30% of net income
+  annualExpenses: AnnualExpense[];
   longTermGoals: LongTermSavingsGoal[];
 
   // Lifestyle
@@ -332,6 +379,8 @@ export interface BudgetBreakdown {
   totalSavings: number;
   totalInvestments: number;
   totalDebtPayoff: number;
+  totalSinkingFunds: number;
+  totalAnnualRecurringExpenses: number;
   calculatedSavingsFromPercentage: number; // Monthly savings when isSavingsByPercentage is enabled
   effectiveEmergencyFundContribution: number;
   effectiveHouseDownPaymentContribution: number;

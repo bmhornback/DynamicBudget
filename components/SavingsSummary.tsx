@@ -46,6 +46,8 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
     totalSavings,
     totalInvestments,
     totalDebtPayoff,
+    totalSinkingFunds,
+    totalAnnualRecurringExpenses,
     annualHouseFund,
     annualTaxableInvestments,
     totalAnnualSavingsIncludingRetirement,
@@ -134,6 +136,11 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
               label="Debt Payoff"
               monthly={totalDebtPayoff}
               annual={totalDebtPayoff * 12}
+            />
+            <SavingsRow
+              label="Sinking Funds"
+              monthly={totalSinkingFunds}
+              annual={totalAnnualRecurringExpenses}
             />
           </>
         )}
