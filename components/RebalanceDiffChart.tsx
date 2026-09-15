@@ -21,6 +21,7 @@ interface RebalanceDiffChartProps {
 }
 
 interface DiffRow {
+  fieldId: string;
   label: string;
   before: number;
   after: number;
@@ -35,6 +36,7 @@ export default function RebalanceDiffChart({ result }: RebalanceDiffChartProps) 
   const rows: DiffRow[] = useMemo(
     () =>
       result.changes.map((c) => ({
+        fieldId: c.fieldId,
         label: c.label,
         before: c.oldValue,
         after: c.newValue,
