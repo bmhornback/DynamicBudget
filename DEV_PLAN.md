@@ -478,11 +478,11 @@ States to add (in priority order based on population and no-income-tax interest)
 - Collapse/expand sections in the form with smooth animation ✅ Done (CSS transition in `BudgetSection.tsx`)
 - Swipe gesture to toggle between form and dashboard on mobile ✅ Done (`app/page.tsx` touch gesture handlers with horizontal-swipe threshold + vertical-scroll guard)
 
-### E6-T5 · Form input improvements ✅ Partial
-- Currency formatting in inputs (deferred)
-- Slider support for high-frequency-adjusted fields (deferred)
+### E6-T5 · Form input improvements ✅ Done
+- Currency formatting in inputs ✅ Done — `BudgetFieldInput` shows `$1,234` format when not focused; switches to raw number type on focus for editing
+- Slider support for high-frequency-adjusted fields (deferred — low value vs complexity tradeoff)
 - Inline field validation (e.g., warn if rent > monthly income) ✅ Done — rent warns at >50% of gross monthly
-- `Tab` key increments numeric inputs (deferred)
+- `Tab` key increments numeric inputs (deferred — browser default arrow-key step is sufficient)
 
 ### E6-T6 · Animations and transitions ✅ Done
 - Smooth number transitions when values change (count-up animation) ✅ `lib/useCountUp.ts` — cubic ease-out rAF hook, respects `prefers-reduced-motion`
@@ -496,9 +496,9 @@ States to add (in priority order based on population and no-income-tax interest)
 - All Tailwind colors tested in dark mode ✅ `dark:` classes applied across header, presets bar, BudgetFieldInput, BudgetSection, OnboardingCard, MyBudgets, ScenarioPresets
 - Persist preference to localStorage ✅ `dynamicbudget_theme` key
 
-### E6-T8 · Loading state and skeleton screens
-- Add a loading skeleton for the dashboard on initial hydration
-- Prevent layout shift on first render
+### E6-T8 · Loading state and skeleton screens ✅ Done
+- Add a loading skeleton for the dashboard on initial hydration ✅ `components/DashboardSkeleton.tsx` — pulse-animated placeholder shown before React hydration completes
+- Prevent layout shift on first render ✅ `isMounted` state in `app/page.tsx` hides the real UI until after mount; `DashboardSkeleton` fills the viewport in its place
 
 ### E6-T9 · Onboarding / empty state ✅ Done
 - First-time user sees a brief (dismissible) tooltip or walkthrough card ✅ `components/OnboardingCard.tsx`
@@ -745,9 +745,9 @@ States to add (in priority order based on population and no-income-tax interest)
 | TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | ✅ Resolved | E1-T9 |
 | TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (259 tests) | E1 |
 | TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | ✅ Resolved | E5-T2 |
-| TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | Open | General |
-| TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | Open | E3-T2 |
-| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | Open | E10-T1 |
+| TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | ✅ Resolved — `BudgetField` interface removed from `types/budget.ts`; `BudgetFieldInput` and `BudgetSection` are actively used in `BudgetForm.tsx` | General |
+| TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | ✅ Resolved — Verified: Roth IRA already correctly excluded from taxable income deductions; only subtracts from take-home (after-tax), same as Roth 401k | E3-T2 |
+| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | 🔄 Partially addressed — `lib/taxCalculations.ts` and `lib/budgetCalculations.ts` are already pure/React-free; public API documented in file headers. Full extraction deferred to E10-T1 | E10-T1 |
 
 ---
 

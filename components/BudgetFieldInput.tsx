@@ -63,6 +63,13 @@ export default function BudgetFieldInput({
     onChange(finalValue);
   };
 
+  // Format the display value with locale-aware thousands separators when not focused
+  const displayValue = focused
+    ? raw
+    : value % 1 === 0
+      ? value.toLocaleString('en-US')
+      : value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   const validationMessage = validate ? validate(value) : null;
   const describedBy = [descriptionId, validationMessage ? validationId : undefined]
     .filter(Boolean)
@@ -115,16 +122,16 @@ export default function BudgetFieldInput({
           )}
           <input
             id={id}
-            type="number"
+            type={focused ? 'number' : 'text'}
             inputMode="decimal"
-            value={focused ? raw : value}
+            value={displayValue}
             onChange={handleChange}
             onFocus={() => { setFocused(true); setRaw(value.toString()); }}
             onBlur={handleBlur}
             disabled={disabled}
-            min={min}
-            max={max}
-            step="1"
+            min={focused ? min : undefined}
+            max={focused ? max : undefined}
+            step={focused ? '1' : undefined}
             aria-describedby={describedBy}
             className={`w-28 text-right text-sm rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
               prefix ? 'pl-6' : ''

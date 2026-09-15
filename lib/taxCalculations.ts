@@ -15,6 +15,17 @@
  * - ANNUAL_HSA_LIMIT_SELF (currently $4,150 for 2026)
  * - ANNUAL_HSA_LIMIT_FAMILY (currently $8,300 for 2026)
  * - All test expectations in lib/__tests__/taxCalculations.test.ts
+ *
+ * ── Public API (TD-9 / Epic 10) ──────────────────────────────────────────
+ * This module is intentionally dependency-free (no React, no browser APIs) so
+ * it can be extracted for external use (npm package, MCP server, etc.).
+ * Public exports: federalIncomeTaxEstimate, stateIncomeTaxEstimate,
+ *   payrollTaxEstimate, calculateRetirementContribution,
+ *   calculateNetMonthlyIncome, calculateCombinedNetMonthlyIncome,
+ *   get401kLimit, getIRALimit, all ANNUAL_* / TRADITIONAL_IRA_PHASEOUT_* consts,
+ *   STATE_LABELS.
+ * Internal helpers: bracket-math helpers above federalIncomeTaxEstimate are
+ *   module-private (no `export` keyword) and should remain so.
  */
 
 import type { BonusTaxMode, FilingStatus, StateOfResidence } from '@/types/budget';
