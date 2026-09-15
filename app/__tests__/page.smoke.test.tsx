@@ -65,6 +65,8 @@ describe('DynamicBudget page smoke test', () => {
 
     expect(screen.getByRole('heading', { name: 'DynamicBudget' })).toBeTruthy();
     expect(screen.getByText(/^Surplus:/)).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: 'Learn budgeting concepts' }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: '💬 Feedback' })).toBeTruthy();
   });
 
   it('toggles between the form and dashboard on mobile swipe gestures', () => {

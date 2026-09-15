@@ -32,6 +32,9 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 🗓️ **Sinking funds & recurring annual expenses** — Plan ahead for non-monthly bills like registration, insurance, travel, home maintenance, and holidays with automatic monthly reserve guidance
+- 💬 **In-app feedback widget** — Open a prefilled GitHub issue directly from the app, with optional plain-text budget context for faster triage
+- 📚 **Learn hub** — Browse short budgeting guides tied to housing, retirement, rule-of-thumb budgeting, and cost-of-living planning
+- 🔍 **Discovery metadata** — Rich Open Graph metadata, sitemap, robots rules, and app JSON-LD improve sharing and search discovery
 - 📱 **Responsive design** — Works great on desktop and mobile
 
 ### Spending Trends & Analytics
@@ -42,6 +45,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔮 **Forecasting** — Predict next month's spending using linear regression on historical patterns
 - 🧠 **Financial literacy tips** — Personalized education prompts around emergency funds, retirement, debt, and goal tradeoffs
 - 🧭 **Planning assumptions panel** — See why take-home, savings, and rebalancing changed plus the current tax-model limitations
+- 📈 **Local-only product analytics** — Track preset usage, rebalance runs, learn CTA clicks, and feedback submissions in browser storage only
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 - 🏦 **Paycheck calculator** — Select your pay frequency (weekly, bi-weekly, semi-monthly, or monthly) and see every budget line translated into per-paycheck amounts; includes a deduction waterfall (gross → pre-tax → taxes → take-home) and a per-paycheck allocation view with spend-ratio bars
@@ -54,6 +58,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 
 ### Upcoming Features
 - 📋 Deeper multi-scenario workflows
+- 🏠 Dedicated marketing/landing experience
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 
 ## Getting Started
@@ -164,6 +169,7 @@ All calculations and data are processed entirely in your browser. No data is sen
 - **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, features, tech debt register
 - **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
 - **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
+- **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Short educational guides tied to in-app planning decisions
 
 ## Development
 
@@ -190,13 +196,13 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** finish accessibility closeout work, continue saved-budget decision support, and keep frontend performance strong as planning workflows deepen.
+**Current focus:** deepen growth/discovery work with a future landing page, stronger educational content, and continued workflow polish.
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
 - **v1.0 closeout** (current): Stability, accessibility, typing cleanup, and roadmap rebaseline
 - **v1.5 — Grow It**: Multi-scenario comparison, debt payoff ✅, homeowner mode, export/share
-- **v2.0 — Platform**: Optional cloud sync, landing page/SEO, analytics, and MCP integrations after core budgeting work is complete
+- **v2.0 — Platform**: Optional cloud sync, landing page expansion, and MCP integrations after core budgeting work is complete
 
 ## Contributing
 

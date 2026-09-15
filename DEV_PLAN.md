@@ -52,7 +52,7 @@
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
 | Export as CSV | ✅ Done |
-| Test suite | ✅ Jest (284 tests passing) |
+| Test suite | ✅ Jest (289 tests passing) |
 | CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ✅ Done |
@@ -71,6 +71,10 @@
 | Planning assumptions / undo recovery | ✅ Done |
 | Sinking funds / annual expenses | ✅ Done |
 | Decision-support summaries | ✅ Done |
+| SEO / sitemap / structured metadata | ✅ Done |
+| In-app feedback widget | ✅ Done |
+| Learn hub | ✅ Done |
+| Privacy-preserving local analytics | ✅ Done |
 
 ### New in This Release (v1.0.0)
 
@@ -91,7 +95,7 @@
 - Savings fields automatically locked when in percentage mode to prevent confusion
 - Integration with rebalancing engine for both modes
 - New scenario comparison table for side-by-side relocation and savings tradeoff analysis
-- 284 Jest tests passing
+- 289 Jest tests passing
 
 ### Known gaps / rough edges
 
@@ -588,31 +592,31 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Make the app discoverable, trustworthy, and useful to a broader audience.
 
-### E9-T1 · SEO & metadata
-- Add `<title>`, `<meta description>`, and Open Graph tags in `layout.tsx`
-- Create a `robots.txt` and `sitemap.xml`
-- Add structured data (JSON-LD) for the app type
+### E9-T1 · SEO & metadata ✅ Done
+- Add `<title>`, `<meta description>`, and Open Graph tags in `layout.tsx` ✅
+- Create a `robots.txt` and `sitemap.xml` ✅ (`app/robots.ts`, `app/sitemap.ts`)
+- Add structured data (JSON-LD) for the app type ✅
 
 ### E9-T2 · Landing page
 - Create an `/` marketing route and move the app to `/app`
 - Landing page: hero, feature list, screenshot/demo, CTA
 - Optimized for "salary budget calculator" search terms
 
-### E9-T3 · Analytics
-- Add privacy-respecting analytics (Plausible or Fathom — no cookies, GDPR-friendly)
-- Track: page views, scenario preset usage, rebalance count, export usage
-- No PII collected
+### E9-T3 · Analytics ✅ Done
+- Add privacy-respecting analytics (Plausible or Fathom — no cookies, GDPR-friendly) ✅ Implemented as local-only aggregate counters in browser storage to preserve the static/no-backend model
+- Track: page views, scenario preset usage, rebalance count, export usage ✅ Partial for this tranche: scenario preset usage, saved-budget loads, rebalance count, learn CTA clicks, and feedback submissions
+- No PII collected ✅
 
-### E9-T4 · Feedback widget
-- Simple in-app "Send feedback" button (opens a small form)
-- Submissions go to a GitHub Issue or a simple webhook (e.g., Slack)
+### E9-T4 · Feedback widget ✅ Done
+- Simple in-app "Send feedback" button (opens a small form) ✅
+- Submissions go to a GitHub Issue or a simple webhook (e.g., Slack) ✅ Implemented with a prefilled GitHub issue flow and optional budget-summary context
 
-### E9-T5 · Blog / educational content
-- `/learn` section with articles:
-  - "How much should I spend on rent?"
-  - "The 50/30/20 rule explained"
-  - "How to pick a 401(k) contribution percentage"
-  - "Comparing cost of living: California vs Georgia"
+### E9-T5 · Blog / educational content ✅ Done
+- `/learn` section with articles: ✅ Initial learn hub shipped with short practical guides tied to core planner concepts
+  - "How much should I spend on rent?" ✅
+  - "The 50/30/20 rule explained" ✅
+  - "How to pick a 401(k) contribution percentage" ✅
+  - "Comparing cost of living: California vs Georgia" ✅
 
 ---
 

@@ -1,19 +1,30 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import './globals.css';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { buildMetadata, buildWebApplicationJsonLd, SITE_URL } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: "DynamicBudget — Dynamic Salary to Budget Planner",
-  description: "Interactive personal finance sandbox for budgeting, long-term savings goals, retirement planning, and practical financial literacy guidance.",
-};
+export const metadata = buildMetadata({
+  title: 'DynamicBudget — Dynamic Salary to Budget Planner',
+  description:
+    'Interactive personal finance sandbox for budgeting, scenario planning, long-term savings goals, retirement planning, and practical financial literacy guidance.',
+});
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = buildWebApplicationJsonLd();
+
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        <meta name="theme-color" content="#0f172a" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <link rel="alternate" hrefLang="en" href={SITE_URL} />
+      </head>
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         <ThemeProvider>{children}</ThemeProvider>
       </body>

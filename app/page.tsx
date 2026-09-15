@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import type { BudgetInputs, NamedBudget, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
@@ -37,6 +38,8 @@ import MyBudgets from '@/components/MyBudgets';
 import OnboardingCard from '@/components/OnboardingCard';
 import { DarkModeToggle } from '@/components/ThemeProvider';
 import ExportImport from '@/components/ExportImport';
+import FeedbackWidget from '@/components/FeedbackWidget';
+import { trackAnalyticsEvent } from '@/lib/analytics';
 
 // ─── Module-level constants ───────────────────────────────────────────────────
 // Savings fields that should be locked/unlocked when toggling percentage mode
@@ -271,6 +274,7 @@ export default function DynamicBudgetPage() {
     setInputs(newInputs);
     setRebalanceResult(null);
     setActivePreset(presetId);
+    trackAnalyticsEvent('preset_applied');
     setComparisonPresetIds((prev) => {
       const normalized = normalizeComparisonPresetIds(prev, presetId, savedBudgets);
       return normalized.length > 0 ? normalized : getDefaultComparisonPresetIds(presetId);
@@ -289,6 +293,7 @@ export default function DynamicBudgetPage() {
     const result = rebalanceBudget(inputs, inputs.rebalanceStrategy, inputs.surplusAllocation);
     setRebalanceResult(result);
     setInputs(result.updatedInputs);
+    trackAnalyticsEvent('rebalance_run');
   }, [inputs]);
 
   const handleReset = useCallback(() => {
@@ -312,6 +317,7 @@ export default function DynamicBudgetPage() {
     setInputs(budget.inputs);
     setRebalanceResult(null);
     setActivePreset(undefined);
+    trackAnalyticsEvent('saved_budget_loaded');
     setComparisonPresetIds((prev) => normalizeComparisonPresetIds(prev, undefined, savedBudgets));
   }, [rememberUndoState, savedBudgets]);
 
@@ -461,6 +467,16 @@ export default function DynamicBudgetPage() {
               onImport={handleImport}
               onExportPDF={handleExportPDF}
             />
+
+            <Link
+              href="/learn"
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all"
+              onClick={() => trackAnalyticsEvent('learn_cta_clicked')}
+            >
+              📚 Learn
+            </Link>
+
+            <FeedbackWidget currentInputs={inputs} />
 
             <DarkModeToggle />
 
@@ -704,6 +720,24 @@ export default function DynamicBudgetPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-gray-400 dark:text-gray-500">
           <p>DynamicBudget — Personal finance planning tool. All calculations are client-side estimates only.</p>
           <p className="mt-1">Tax figures are simplified estimates and should not be used for tax filing purposes.</p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-sm">
+            <Link
+              href="/learn"
+              className="text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
+              onClick={() => trackAnalyticsEvent('learn_cta_clicked')}
+            >
+              Learn budgeting concepts
+            </Link>
+            <span aria-hidden="true">•</span>
+            <a
+              href="https://github.com/bmhornback/DynamicBudget/issues/new/choose"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
+            >
+              Request a feature
+            </a>
+          </div>
         </div>
       </footer>
       </div>{/* end mounted wrapper */}
