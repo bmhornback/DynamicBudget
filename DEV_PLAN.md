@@ -2,7 +2,7 @@
 
 > **App:** DynamicBudget (repo: DynamicBudget)
 > **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind CSS 4
-> **Deployment target:** Static web app — fully self-hosted in the browser, no server required. `npm run build` outputs to `out/` and can be served via GitHub Pages, any static host, or opened directly as a local file. Follows the same pattern as [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
+> **Deployment target:** Static web app — fully self-hosted in the browser, no server required. `npm run build` outputs to `out/` and can be served via GitHub Pages, any static host, or opened directly as a local file. Production exports preserve the `/DynamicBudget` project-site path for GitHub Pages. Follows the same pattern as [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
 > **Purpose:** A client-side personal finance tool that takes an annual salary, estimates taxes, ensures savings, and lets the user dynamically budget every remaining dollar.
 
 ---

@@ -87,6 +87,7 @@ npm run dev
 npm run build
 
 # The app is ready in the `out/` directory
+# GitHub Pages project-site paths are prefixed for /DynamicBudget in production builds
 # Can be hosted on GitHub Pages, Netlify, or any static host
 ```
 
