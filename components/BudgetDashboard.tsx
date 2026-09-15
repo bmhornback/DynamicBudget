@@ -39,6 +39,7 @@ import SavingsProgressCard from './SavingsProgressCard';
 import { calculatePaycheckBreakdown } from '@/lib/paycheckCalculations';
 import { calculateIrregularIncomeAnalysis } from '@/lib/irregularIncome';
 import { useCountUp } from '@/lib/useCountUp';
+import AnnualProjectionChart from './AnnualProjectionChart';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -146,6 +147,9 @@ export default function BudgetDashboard({
 
       {/* Expense threshold chart — full width */}
       <ExpenseThresholdChart breakdown={breakdown} inputs={inputs} />
+
+      {/* Annual projection chart — full width */}
+      <AnnualProjectionChart breakdown={breakdown} inputs={inputs} />
 
       {/* Detailed sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
