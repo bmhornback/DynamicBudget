@@ -148,7 +148,10 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     section('INCOME'),
     row('Gross Income', inputs.annualSalary / 12, inputs.annualSalary),
     row('Bonus Income', inputs.bonusIncome / 12, inputs.bonusIncome),
+    row('ESPP Income', inputs.esppIncome / 12, inputs.esppIncome),
+    row('RSU Vesting Income', inputs.rsuVestingIncome / 12, inputs.rsuVestingIncome),
     row('Other Monthly Income', inputs.otherMonthlyIncome, inputs.otherMonthlyIncome * 12),
+    title(`  Bonus Tax Modeling: ${inputs.bonusTaxMode === 'lump_sum_withholding' ? 'Lump-sum withholding (federal 22%)' : 'Blended annual rate'}`),
     sep,
     section('HOUSING'),
   ];

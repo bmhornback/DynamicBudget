@@ -38,6 +38,17 @@ describe('budgetCalculations', () => {
       );
     });
 
+    it('should include ESPP and RSU income in gross and supplemental totals', () => {
+      const inputs = { ...DEFAULT_INPUTS, esppIncome: 12000, rsuVestingIncome: 18000 };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.taxes.grossAnnual).toBeCloseTo(
+        DEFAULT_INPUTS.annualSalary + 12000 + 18000,
+        0
+      );
+      expect(result.taxes.supplementalIncomeAnnual).toBeCloseTo(30000, 0);
+    });
+
     it('should calculate housing expense total correctly', () => {
       const inputs = {
         ...DEFAULT_INPUTS,

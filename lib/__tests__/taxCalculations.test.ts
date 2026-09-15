@@ -278,6 +278,81 @@ describe('taxCalculations', () => {
       );
     });
 
+    it('should apply 22% federal withholding model to bonus when enabled', () => {
+      const resultBlended = calculateNetMonthlyIncome(
+        100000,
+        'single',
+        'GA',
+        10000,
+        0,
+        20000,
+        0,
+        'traditional',
+        0,
+        false,
+        'blended_annual'
+      );
+
+      const resultLumpSum = calculateNetMonthlyIncome(
+        100000,
+        'single',
+        'GA',
+        10000,
+        0,
+        20000,
+        0,
+        'traditional',
+        0,
+        false,
+        'lump_sum_withholding'
+      );
+
+      const expectedFederalLumpSum = federalIncomeTaxEstimate(100000, 'single', 10000) + 20000 * 0.22;
+      expect(resultLumpSum.federalTaxAnnual).toBeCloseTo(expectedFederalLumpSum, 2);
+      expect(resultLumpSum.federalTaxAnnual).not.toBeCloseTo(resultBlended.federalTaxAnnual, 2);
+      expect(resultLumpSum.totalTaxAnnual).toBeGreaterThan(0);
+    });
+
+    it('should treat ESPP/RSU supplemental income as ordinary income', () => {
+      const resultWithoutSupplemental = calculateNetMonthlyIncome(
+        100000,
+        'single',
+        'GA',
+        10000,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        false,
+        'blended_annual',
+        0
+      );
+
+      const resultWithSupplemental = calculateNetMonthlyIncome(
+        100000,
+        'single',
+        'GA',
+        10000,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        false,
+        'blended_annual',
+        25000
+      );
+
+      expect(resultWithSupplemental.grossMonthly).toBeCloseTo(
+        resultWithoutSupplemental.grossMonthly + 25000 / 12,
+        2
+      );
+      expect(resultWithSupplemental.totalTaxAnnual).toBeGreaterThan(
+        resultWithoutSupplemental.totalTaxAnnual
+      );
+    });
+
     it('should include other monthly income', () => {
       const result = calculateNetMonthlyIncome(
         60000,
