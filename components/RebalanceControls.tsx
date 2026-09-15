@@ -3,6 +3,7 @@
 import React from 'react';
 import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult } from '@/types/budget';
 import BudgetCard from './BudgetCard';
+import RebalanceDiffChart from './RebalanceDiffChart';
 
 interface RebalanceControlsProps {
   inputs: BudgetInputs;
@@ -111,28 +112,33 @@ export default function RebalanceControls({
 
         {/* Rebalance result */}
         {rebalanceResult && (
-          <div key={rebalanceResult.message} className={`p-3 rounded-lg text-sm animate-fade-in ${
-            rebalanceResult.success
-              ? 'bg-green-50 border border-green-200 text-green-800'
-              : 'bg-amber-50 border border-amber-200 text-amber-800'
-          }`}>
-            <p className="font-medium mb-1">
-              {rebalanceResult.success ? '✅' : '⚠️'} {rebalanceResult.message}
-            </p>
+          <>
+            <div key={rebalanceResult.message} className={`p-3 rounded-lg text-sm animate-fade-in ${
+              rebalanceResult.success
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : 'bg-amber-50 border border-amber-200 text-amber-800'
+            }`}>
+              <p className="font-medium mb-1">
+                {rebalanceResult.success ? '✅' : '⚠️'} {rebalanceResult.message}
+              </p>
+              {rebalanceResult.changes.length > 0 && (
+                <ul className="text-xs space-y-0.5 mt-2 border-t border-current border-opacity-20 pt-2">
+                  {rebalanceResult.changes.map((change) => (
+                    <li key={change.fieldId} className="flex justify-between">
+                      <span>{change.label}</span>
+                      <span className={change.delta < 0 ? 'text-red-600' : 'text-green-600'}>
+                        ${change.oldValue.toFixed(0)} → ${change.newValue.toFixed(0)}
+                        {' '}({change.delta >= 0 ? '+' : ''}${change.delta.toFixed(0)})
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             {rebalanceResult.changes.length > 0 && (
-              <ul className="text-xs space-y-0.5 mt-2 border-t border-current border-opacity-20 pt-2">
-                {rebalanceResult.changes.map((change) => (
-                  <li key={change.fieldId} className="flex justify-between">
-                    <span>{change.label}</span>
-                    <span className={change.delta < 0 ? 'text-red-600' : 'text-green-600'}>
-                      ${change.oldValue.toFixed(0)} → ${change.newValue.toFixed(0)}
-                      {' '}({change.delta >= 0 ? '+' : ''}${change.delta.toFixed(0)})
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <RebalanceDiffChart result={rebalanceResult} />
             )}
-          </div>
+          </>
         )}
       </div>
     </BudgetCard>

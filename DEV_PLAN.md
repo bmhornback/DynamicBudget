@@ -371,15 +371,17 @@ States to add (in priority order based on population and no-income-tax interest)
 - Animate on value change
 - **Implemented:** SVG arc gauge with `strokeDasharray` animation in `components/BudgetHealthScore.tsx`; per-dimension breakdown bars with color coding
 
-### E4-T6 · Annual projection chart
+### E4-T6 · Annual projection chart ✅ Done
 - Line chart showing projected savings balances over 1/3/5/10 years
 - Assumes fixed monthly contributions and a configurable annual growth rate (default 7%)
-- Shows: 401(k), IRA, Taxable Investments, House Fund, Emergency Fund as stacked/grouped lines
+- Shows: 401(k) + match, IRA, Taxable Investments, House Fund, Emergency Fund as grouped lines
+- **Implemented:** `lib/annualProjection.ts` — `buildAnnualProjection` computes FV via compound interest formula; `components/AnnualProjectionChart.tsx` — recharts LineChart with interactive growth-rate slider (0–15%) and a summary table; card is rendered full-width in `BudgetDashboard` after the expense threshold chart
 
-### E4-T7 · Rebalance diff visualization
+### E4-T7 · Rebalance diff visualization ✅ Done
 - When a rebalance runs, show a before/after bar comparison for each changed field
 - Color-code reductions (red) vs allocations (green)
 - Animate the transition
+- **Implemented:** `components/RebalanceDiffChart.tsx` — horizontal recharts BarChart with blue "Before" bars and green/red "After" bars (Cell-based coloring), animated entry (500/700 ms stagger); summary delta table below the chart; rendered inside `RebalanceControls` whenever a rebalance result with changes is present
 
 ---
 

@@ -45,6 +45,8 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 📊 **Irregular income scenarios** — Set a monthly income variability % (ideal for freelancers and commission earners) to instantly see your budget at the P25 (bad month), P50 (typical), and P75 (good month) income levels; at-risk variable expenses are surfaced automatically when a bad month would push you into deficit
 - 👥 **Partner / dual-income mode** — Switch to Married Filing Jointly and enable a second earner's salary and 401(k); federal and state taxes are calculated on the combined household income using MFJ brackets (Social Security wage-base cap applied individually), and the dashboard's Income Summary switches to a household view showing each partner's gross income and the combined take-home
 - 📅 **Savings goal timeline calculator** — Each long-term goal card shows how many months it will take to reach the target at your current funding rate, plus an interactive "Reach in X months" input that instantly back-calculates the required monthly contribution; emergency fund and house fund rows in Savings Detail also display projected months to fully funded
+- 📈 **Annual savings projection chart** — Full-width line chart on the dashboard showing projected 401(k), IRA, Taxable, House Fund, and Emergency Fund balances at 1, 3, 5, and 10 years; includes an interactive growth-rate slider (0–15%, default 7%) and a summary table of all account balances at each horizon
+- ⚖️ **Rebalance diff visualization** — After running Auto Balance, a before/after horizontal bar chart animates each field change; reductions are colored red and increases are green, with a delta summary table beneath
 
 ### Upcoming Features
 - 📋 Deeper multi-scenario workflows
@@ -105,6 +107,7 @@ npm run build
 lib/
   budgetCalculations.ts   ← Core budget math
   budgetHealthScore.ts    ← 0–100 score + thresholds
+  annualProjection.ts     ← 1/3/5/10-year savings projection (E4-T6)
   formatters.ts           ← Number/currency formatting
   longTermGoals.ts        ← Goal projections + literacy insights
   rebalanceBudget.ts      ← 6 rebalancing strategies
@@ -115,6 +118,8 @@ lib/
 types/
   budget.ts               ← All TypeScript interfaces
 components/
+  AnnualProjectionChart.tsx  ← 1/3/5/10-year savings line chart (E4-T6)
+  RebalanceDiffChart.tsx     ← Before/after rebalance bar chart (E4-T7)
   SpendingTracker.tsx     ← Expense logging form
   TrendAnalysis.tsx       ← Analytics dashboard
   TrendChart.tsx          ← 6-month trend chart
