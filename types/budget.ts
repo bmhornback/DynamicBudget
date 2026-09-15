@@ -105,20 +105,6 @@ export interface FinancialLiteracyInsight {
   detail: string;
 }
 
-export interface BudgetField {
-  id: string;
-  value: number;
-  label: string;
-  category: BudgetCategory;
-  isLocked: boolean;
-  isRequired: boolean;
-  isFlexible: boolean;
-  minValue: number;
-  maxValue?: number;
-  recommendedValue?: number;
-  description?: string;
-}
-
 export interface TaxBreakdown {
   /** Annual gross salary */
   grossAnnual: number;

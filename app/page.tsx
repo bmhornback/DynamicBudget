@@ -23,6 +23,7 @@ import {
 } from '@/lib/storage';
 import BudgetForm from '@/components/BudgetForm';
 import BudgetDashboard from '@/components/BudgetDashboard';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ScenarioPresets from '@/components/ScenarioPresets';
 import RebalanceControls from '@/components/RebalanceControls';
@@ -79,6 +80,8 @@ export default function DynamicBudgetPage() {
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
+  // Track client-side hydration so we can show the skeleton during SSR/initial paint
+  const [isMounted, setIsMounted] = useState(false);
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
   const printTriggered = useRef(false);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
@@ -90,6 +93,10 @@ export default function DynamicBudgetPage() {
 
   // ── Load from localStorage on mount ──────────────────────────────────────
   // (handled in useState initializer above)
+
+  // ── Mark client-side mount (for skeleton → real UI transition) ───────────
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- mounting flag is the canonical SSR hydration guard
+  useEffect(() => { setIsMounted(true); }, []);
 
   // ── Auto-save to localStorage ────────────────────────────────────────
   const isFirstRender = useRef(true);
@@ -350,6 +357,10 @@ export default function DynamicBudgetPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900" data-print-root="true">
+      {/* Skeleton shown before client-side hydration completes (E6-T8) */}
+      {!isMounted && <DashboardSkeleton />}
+      {/* Full app — hidden from DOM until mounted to prevent layout shift */}
+      <div hidden={!isMounted}>
       {/* Header */}
       <header
         className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm"
@@ -591,6 +602,7 @@ export default function DynamicBudgetPage() {
           <p className="mt-1">Tax figures are simplified estimates and should not be used for tax filing purposes.</p>
         </div>
       </footer>
+      </div>{/* end mounted wrapper */}
     </div>
   );
 }

@@ -1,6 +1,15 @@
 /**
  * Core budget calculation utilities for DynamicBudget.
  * All logic is pure/deterministic — no React, no side effects.
+ *
+ * ── Public API (TD-9 / Epic 10) ──────────────────────────────────────────
+ * This module is dependency-free from browser/React and is a candidate for
+ * extraction into a standalone library or MCP server (see Epic 10).
+ * Public exports: calculateBudgetBreakdown, BUDGET_THRESHOLDS.
+ * The remaining work for full decoupling (Epic 10 / E10-T1) involves:
+ *   - Adding a barrel index.ts for the calc engine
+ *   - Writing JSDoc for all BudgetBreakdown return fields
+ *   - Separating input-validation helpers into their own module
  */
 
 import type { BudgetInputs, BudgetBreakdown, TaxBreakdown, RetirementBreakdown } from '@/types/budget';
