@@ -6,7 +6,7 @@ import DynamicBudgetPage from '../page';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 
 jest.mock('recharts', () => {
-  const passthrough = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>;
+  const passthrough = ({ children }: { children?: React.ReactNode }) => children as React.ReactElement ?? null;
 
   return {
     ResponsiveContainer: passthrough,
