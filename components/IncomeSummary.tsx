@@ -28,6 +28,11 @@ function Divider() {
 
 export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps) {
   const { taxes, retirement, grossMonthly, netMonthlyIncome, isDualIncome } = breakdown;
+  const supplementalIncomeAnnual = taxes.supplementalIncomeAnnual;
+  const supplementalIncomeMonthly = supplementalIncomeAnnual / 12;
+  const bonusTaxModeLabel = inputs.bonusTaxMode === 'lump_sum_withholding'
+    ? 'Lump-sum withholding (federal 22%)'
+    : 'Blended annual rate';
 
   return (
     <BudgetCard title={isDualIncome ? 'Household Income Summary' : 'Income Summary'} accent="blue">
@@ -65,6 +70,17 @@ export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps)
             />
           </>
         )}
+        {supplementalIncomeAnnual > 0 && (
+          <Row
+            label="Supplemental Income (included in gross)"
+            value={formatCurrency(supplementalIncomeMonthly)}
+            sub={`${formatCurrency(supplementalIncomeAnnual)}/yr`}
+          />
+        )}
+        <Row
+          label="Bonus Tax Modeling"
+          value={bonusTaxModeLabel}
+        />
         <Divider />
         <Row
           label="Federal Income Tax (est.)"

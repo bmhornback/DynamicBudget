@@ -17,7 +17,7 @@
  * - All test expectations in lib/__tests__/taxCalculations.test.ts
  */
 
-import type { FilingStatus, StateOfResidence } from '@/types/budget';
+import type { BonusTaxMode, FilingStatus, StateOfResidence } from '@/types/budget';
 
 // ─── Federal Income Tax (2026 brackets) ────────────────────────────────────
 // Updated per IRS 2026 inflation adjustments
@@ -774,7 +774,9 @@ export function calculateNetMonthlyIncome(
   otherMonthlyIncome: number = 0,
   iraType: 'traditional' | 'roth' = 'traditional',
   annualHSA: number = 0,
-  is401kRoth: boolean = false
+  is401kRoth: boolean = false,
+  bonusTaxMode: BonusTaxMode = 'blended_annual',
+  nonBonusSupplementalIncomeAnnual: number = 0
 ): {
   grossMonthly: number;
   federalTaxMonthly: number;
@@ -788,7 +790,8 @@ export function calculateNetMonthlyIncome(
   totalTaxAnnual: number;
   effectiveTaxRate: number;
 } {
-  const totalAnnualGross = grossAnnual + bonusIncome;
+  const totalAnnualSupplemental = bonusIncome + nonBonusSupplementalIncomeAnnual;
+  const totalAnnualGross = grossAnnual + totalAnnualSupplemental;
   const grossMonthly = totalAnnualGross / 12 + otherMonthlyIncome;
 
   // For tax purposes, only Traditional IRA and HSA reduce taxable income
@@ -798,13 +801,19 @@ export function calculateNetMonthlyIncome(
   // For tax purposes, only Traditional 401k reduces taxable income, not Roth 401k
   const annual401kPreTax = is401kRoth ? 0 : annual401k;
 
-  const federalTaxAnnual = federalIncomeTaxEstimate(
-    totalAnnualGross,
+  const baseFederalGrossForModel = bonusTaxMode === 'lump_sum_withholding'
+    ? grossAnnual + nonBonusSupplementalIncomeAnnual
+    : totalAnnualGross;
+  const federalBaseTaxAnnual = federalIncomeTaxEstimate(
+    baseFederalGrossForModel,
     filingStatus,
     annual401kPreTax,
     annualTraditionalIRA,
     annualHSA
   );
+  const federalTaxAnnual = bonusTaxMode === 'lump_sum_withholding'
+    ? federalBaseTaxAnnual + bonusIncome * 0.22
+    : federalBaseTaxAnnual;
   const stateTaxAnnual = stateIncomeTaxEstimate(
     totalAnnualGross,
     state,
@@ -873,7 +882,9 @@ export function calculateCombinedNetMonthlyIncome(
   partnerAnnual401k: number,         // partner pre-tax 401k (0 if Roth)
   partnerAnnualRoth401k: number,
   state: StateOfResidence,
-  otherMonthlyIncome: number = 0
+  otherMonthlyIncome: number = 0,
+  bonusTaxMode: BonusTaxMode = 'blended_annual',
+  primarySupplementalIncomeAnnual: number = 0
 ): {
   combinedGrossMonthly: number;
   combinedNetMonthly: number;
@@ -885,7 +896,7 @@ export function calculateCombinedNetMonthlyIncome(
   primaryGrossMonthly: number;
   partnerGrossMonthly: number;
 } {
-  const primaryTotalGross = primaryGrossAnnual + primaryBonusIncome;
+  const primaryTotalGross = primaryGrossAnnual + primaryBonusIncome + primarySupplementalIncomeAnnual;
   const partnerTotalGross = partnerGrossAnnual + partnerBonusIncome;
   const combinedTotalGross = primaryTotalGross + partnerTotalGross;
 
@@ -908,13 +919,19 @@ export function calculateCombinedNetMonthlyIncome(
 
   // Federal + state tax on combined household income (MFJ).
   // Partner IRA/HSA deductions are excluded (see comment above).
-  const federalTaxAnnual = federalIncomeTaxEstimate(
-    combinedTotalGross,
+  const combinedBaseFederalGross = bonusTaxMode === 'lump_sum_withholding'
+    ? primaryGrossAnnual + primarySupplementalIncomeAnnual + partnerGrossAnnual
+    : combinedTotalGross;
+  const federalBaseTaxAnnual = federalIncomeTaxEstimate(
+    combinedBaseFederalGross,
     'married_jointly',
     primaryAnnual401k + partnerAnnual401k,
     primaryAnnualTraditionalIRA,
     primaryAnnualHSA
   );
+  const federalTaxAnnual = bonusTaxMode === 'lump_sum_withholding'
+    ? federalBaseTaxAnnual + (primaryBonusIncome + partnerBonusIncome) * 0.22
+    : federalBaseTaxAnnual;
   const stateTaxAnnual = stateIncomeTaxEstimate(
     combinedTotalGross,
     state,

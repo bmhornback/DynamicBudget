@@ -49,6 +49,7 @@ export type SurplusAllocation =
 export type BudgetMode = 'manual' | 'auto';
 export type HousingMode = 'renter' | 'homeowner';
 export type PayFrequency = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+export type BonusTaxMode = 'blended_annual' | 'lump_sum_withholding';
 
 export type IRAType = 'traditional' | 'roth';
 export type LongTermGoalCategory =
@@ -141,6 +142,8 @@ export interface TaxBreakdown {
   totalTaxMonthly: number;
   /** Effective total tax rate */
   effectiveTaxRate: number;
+  /** Annual supplemental income (bonus + ESPP + RSU; plus partner bonus in dual-income mode) */
+  supplementalIncomeAnnual: number;
 }
 
 export interface RetirementBreakdown {
@@ -204,6 +207,9 @@ export interface BudgetInputs {
   employerMatchCapPercent: number; // Cap on employer match (default 100%)
   userAge: number; // User's current age (0 = not specified; 50+ eligible for catch-up)
   bonusIncome: number;
+  bonusTaxMode: BonusTaxMode;
+  esppIncome: number;
+  rsuVestingIncome: number;
   otherMonthlyIncome: number;
   /** Monthly income variability as a percentage (0 = stable salary, 20 = ±20% swings). Used for P25/P50/P75 scenario analysis. */
   incomeVariabilityPercent: number;

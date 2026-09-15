@@ -313,15 +313,17 @@ States to add (in priority order based on population and no-income-tax interest)
 - Add HSA 2024 limits (`$4,150` single, `$8,300` family) and a "max out HSA" checkbox
 - Display HSA contribution in the savings summary
 
-### E3-T4 · Bonus income tax modeling
+### E3-T4 · Bonus income tax modeling ✅ Done
 - Currently `bonusIncome` is simply added to gross and taxed at blended rates
 - Model supplemental wage withholding rate (federal flat 22%) as an option
 - Add a toggle: "Lump-sum withholding" vs "blended annual rate"
+- **Implemented:** Added `bonusTaxMode` toggle in `BudgetForm` and tax engine support for optional federal 22% lump-sum withholding on bonus income (`blended_annual` remains default behavior)
 
-### E3-T5 · ESPP / RSU income modeling
+### E3-T5 · ESPP / RSU income modeling ✅ Done
 - Add optional `esppIncome: number` and `rsuVestingIncome: number` fields
 - Taxed as ordinary income (simplified)
 - Display in the income summary as supplemental income
+- **Implemented:** Added `esppIncome` and `rsuVestingIncome` to `BudgetInputs`, included them in gross/tax calculations as ordinary income, and surfaced supplemental income totals in `IncomeSummary`
 
 ### E3-T6 · 2025+ tax year support ✅ Done
 - Update all federal and state brackets to 2025 values once published (IRS typically publishes in October/November)

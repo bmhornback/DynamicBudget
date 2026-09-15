@@ -55,6 +55,8 @@ const COMPLETED_TASKS = {
   'E3-T1': 'All 50 states + DC in stateIncomeTaxEstimate; full STATE_LABELS map',
   'E3-T2': 'iraType: traditional | roth on BudgetInputs; Traditional phase-out warnings',
   'E3-T3': 'hsaContribution + hsaEligible + maxOutHSA; 2026 limits ($4150/$8300)',
+  'E3-T4': 'bonusTaxMode; lump-sum withholding vs blended annual bonus tax modeling',
+  'E3-T5': 'esppIncome + rsuVestingIncome as supplemental ordinary income in calculations and UI',
   'E3-T6': '2026 federal/state brackets, ANNUAL_401K_LIMIT=$24500, catch-up contributions',
 
   // Epic 4 — Data Visualization

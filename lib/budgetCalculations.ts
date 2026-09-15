@@ -33,6 +33,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
     employerMatchCapPercent,
     userAge,
     bonusIncome,
+    bonusTaxMode,
+    esppIncome,
+    rsuVestingIncome,
     otherMonthlyIncome,
     iraContribution,
     iraType,
@@ -211,7 +214,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       partnerAnnual401kPreTax,
       partnerAnnualRoth401k,
       state,
-      otherMonthlyIncome
+      otherMonthlyIncome,
+      bonusTaxMode,
+      esppIncome + rsuVestingIncome
     );
     // In dual-income mode, combinedCalc provides all tax/income figures.
     // netCalc is only populated in the solo path (below).
@@ -226,13 +231,15 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
       otherMonthlyIncome,
       iraType,
       annualHSA,
-      is401kRoth
+      is401kRoth,
+      bonusTaxMode,
+      esppIncome + rsuVestingIncome
     );
   }
 
   const taxBreakdown: TaxBreakdown = isDualIncome && combinedCalc
     ? {
-        grossAnnual: annualSalary + bonusIncome + partnerAnnualSalary + partnerBonusIncome,
+        grossAnnual: annualSalary + bonusIncome + esppIncome + rsuVestingIncome + partnerAnnualSalary + partnerBonusIncome,
         grossMonthly: combinedCalc.combinedGrossMonthly,
         federalAnnual: combinedCalc.federalTaxAnnual,
         federalMonthly: combinedCalc.federalTaxAnnual / 12,
@@ -243,9 +250,10 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
         totalTaxAnnual: combinedCalc.totalTaxAnnual,
         totalTaxMonthly: combinedCalc.totalTaxAnnual / 12,
         effectiveTaxRate: combinedCalc.effectiveTaxRate,
+        supplementalIncomeAnnual: bonusIncome + esppIncome + rsuVestingIncome + partnerBonusIncome,
       }
     : {
-        grossAnnual: annualSalary + bonusIncome,
+        grossAnnual: annualSalary + bonusIncome + esppIncome + rsuVestingIncome,
         grossMonthly: netCalc!.grossMonthly,
         federalAnnual: netCalc!.federalTaxAnnual,
         federalMonthly: netCalc!.federalTaxMonthly,
@@ -256,6 +264,7 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
         totalTaxAnnual: netCalc!.totalTaxAnnual,
         totalTaxMonthly: netCalc!.totalTaxAnnual / 12,
         effectiveTaxRate: netCalc!.effectiveTaxRate,
+        supplementalIncomeAnnual: bonusIncome + esppIncome + rsuVestingIncome,
       };
 
   // ── Expense Totals ────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import {
   payrollTaxEstimate,
   calculateRetirementContribution,
   calculateNetMonthlyIncome,
+  calculateCombinedNetMonthlyIncome,
   ANNUAL_401K_LIMIT,
 } from '../taxCalculations';
 
@@ -276,6 +277,129 @@ describe('taxCalculations', () => {
       expect(resultWithBonus.totalTaxAnnual).toBeGreaterThan(
         resultWithoutBonus.totalTaxAnnual
       );
+    });
+
+    it('should apply 22% federal withholding model to bonus when enabled', () => {
+      const resultBlended = calculateNetMonthlyIncome(
+        300000,
+        'single',
+        'GA',
+        10000,
+        0,
+        20000,
+        0,
+        'traditional',
+        0,
+        false,
+        'blended_annual'
+      );
+
+      const resultLumpSum = calculateNetMonthlyIncome(
+        300000,
+        'single',
+        'GA',
+        10000,
+        0,
+        20000,
+        0,
+        'traditional',
+        0,
+        false,
+        'lump_sum_withholding'
+      );
+
+      const expectedFederalLumpSum = federalIncomeTaxEstimate(300000, 'single', 10000) + 20000 * 0.22;
+      expect(resultLumpSum.federalTaxAnnual).toBeCloseTo(expectedFederalLumpSum, 2);
+      expect(resultLumpSum.federalTaxAnnual).not.toBeCloseTo(resultBlended.federalTaxAnnual, 2);
+      expect(resultLumpSum.totalTaxAnnual).toBeGreaterThan(0);
+    });
+
+    it('should treat ESPP/RSU supplemental income as ordinary income', () => {
+      const resultWithoutSupplemental = calculateNetMonthlyIncome(
+        100000,
+        'single',
+        'GA',
+        10000,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        false,
+        'blended_annual',
+        0
+      );
+
+      const resultWithSupplemental = calculateNetMonthlyIncome(
+        100000,
+        'single',
+        'GA',
+        10000,
+        0,
+        0,
+        0,
+        'traditional',
+        0,
+        false,
+        'blended_annual',
+        25000
+      );
+
+      expect(resultWithSupplemental.grossMonthly).toBeCloseTo(
+        resultWithoutSupplemental.grossMonthly + 25000 / 12,
+        2
+      );
+      expect(resultWithSupplemental.totalTaxAnnual).toBeGreaterThan(
+        resultWithoutSupplemental.totalTaxAnnual
+      );
+    });
+
+    it('should apply lump-sum bonus withholding in dual-income calculations', () => {
+      const resultBlended = calculateCombinedNetMonthlyIncome(
+        300000,
+        20000,
+        10000,
+        0,
+        0,
+        0,
+        0,
+        150000,
+        10000,
+        5000,
+        0,
+        'GA',
+        0,
+        'blended_annual',
+        15000
+      );
+
+      const resultLumpSum = calculateCombinedNetMonthlyIncome(
+        300000,
+        20000,
+        10000,
+        0,
+        0,
+        0,
+        0,
+        150000,
+        10000,
+        5000,
+        0,
+        'GA',
+        0,
+        'lump_sum_withholding',
+        15000
+      );
+
+      const expectedFederalLumpSum = federalIncomeTaxEstimate(
+        300000 + 15000 + 150000,
+        'married_jointly',
+        15000
+      ) + (20000 + 10000) * 0.22;
+
+      expect(resultLumpSum.federalTaxAnnual).toBeCloseTo(expectedFederalLumpSum, 2);
+      expect(resultLumpSum.federalTaxAnnual).not.toBeCloseTo(resultBlended.federalTaxAnnual, 2);
+      expect(resultLumpSum.combinedGrossMonthly).toBeCloseTo(resultBlended.combinedGrossMonthly, 2);
     });
 
     it('should include other monthly income', () => {

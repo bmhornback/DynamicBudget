@@ -5,6 +5,7 @@ import type {
   BudgetInputs,
   CarSituation,
   DebtAccount,
+  BonusTaxMode,
   FilingStatus,
   HousingMode,
   LongTermGoalCategory,
@@ -49,6 +50,11 @@ const HOUSING_MODE_OPTIONS: Array<{ value: HousingMode; label: string }> = [
 const PAY_FREQUENCY_OPTIONS: Array<{ value: PayFrequency; label: string }> = (
   Object.entries(PAY_FREQUENCY_LABELS) as Array<[PayFrequency, string]>
 ).map(([value, label]) => ({ value, label }));
+
+const BONUS_TAX_MODE_LABELS: Record<BonusTaxMode, string> = {
+  blended_annual: 'Blended annual rate',
+  lump_sum_withholding: 'Lump-sum withholding (federal 22%)',
+};
 
 const LONG_TERM_GOAL_OPTIONS: Array<{ value: LongTermGoalCategory; label: string }> = [
   { value: 'house', label: 'House' },
@@ -425,6 +431,16 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         />
 
         {field('bonusIncome', 'Annual Bonus Income')}
+        <ToggleField
+          label={`Bonus Tax Modeling: ${BONUS_TAX_MODE_LABELS[inputs.bonusTaxMode]}`}
+          value={inputs.bonusTaxMode === 'lump_sum_withholding'}
+          onChange={(enabled) =>
+            onChange({ bonusTaxMode: enabled ? 'lump_sum_withholding' : 'blended_annual' })
+          }
+          description="Toggle between federal flat 22% bonus withholding and blended annual tax treatment"
+        />
+        {field('esppIncome', 'Annual ESPP Income')}
+        {field('rsuVestingIncome', 'Annual RSU Vesting Income')}
         {field('otherMonthlyIncome', 'Other Monthly Income')}
 
         <NumberSlider
