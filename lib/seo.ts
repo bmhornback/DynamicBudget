@@ -5,7 +5,9 @@ export const SITE_NAME = 'DynamicBudget';
 export const SITE_BASE_PATH = '/DynamicBudget';
 
 function buildCanonicalUrl(path?: string): string {
-  const normalizedPath = !path || path === '/' ? '' : path.replace(/^\/+/, '');
+  const normalizedPath = !path || path === '/'
+    ? ''
+    : path.replace(/^\/+/, '').replace(/\/+$/, '');
   const baseUrl = SITE_URL.replace(/\/+$/, '');
 
   return normalizedPath ? `${baseUrl}/${normalizedPath}` : baseUrl;

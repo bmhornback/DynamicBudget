@@ -6,6 +6,7 @@ describe('seo metadata helpers', () => {
 
   afterEach(() => {
     process.env.NODE_ENV = originalNodeEnv;
+    jest.resetModules();
   });
 
   it('preserves the project subpath in canonical and Open Graph URLs', () => {
@@ -23,6 +24,13 @@ describe('seo metadata helpers', () => {
     expect(homeMetadata.openGraph?.url).toBe(SITE_URL);
     expect(learnMetadata.alternates?.canonical).toBe(`${SITE_URL}/learn`);
     expect(learnMetadata.openGraph?.url).toBe(`${SITE_URL}/learn`);
+    expect(
+      buildMetadata({
+        title: 'Learn slash',
+        description: 'Learn page',
+        path: '/learn/',
+      }).alternates?.canonical
+    ).toBe(`${SITE_URL}/learn`);
   });
 
   it('uses the GitHub Pages base path for production exports', async () => {
