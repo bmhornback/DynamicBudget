@@ -27,7 +27,7 @@ export default function BudgetCard({
   return (
     <div
       data-print-card="true"
-      className={`bg-white rounded-xl shadow-sm border border-gray-100 p-5 ${ACCENT_CLASSES[accent]} ${className}`}
+      className={`bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-card-enter ${ACCENT_CLASSES[accent]} ${className}`}
     >
       {title && (
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">

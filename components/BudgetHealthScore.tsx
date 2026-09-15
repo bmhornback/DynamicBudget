@@ -4,6 +4,7 @@ import React from 'react';
 import type { BudgetHealthScore as BudgetHealthScoreType } from '@/types/budget';
 import { HEALTH_SCORE_COLORS, HEALTH_SCORE_BG_COLORS } from '@/lib/budgetHealthScore';
 import BudgetCard from './BudgetCard';
+import { useCountUp } from '@/lib/useCountUp';
 
 interface BudgetHealthScoreProps {
   healthScore: BudgetHealthScoreType;
@@ -33,6 +34,8 @@ const BREAKDOWN_MAX: Record<string, number> = {
 
 export default function BudgetHealthScore({ healthScore }: BudgetHealthScoreProps) {
   const { score, label, breakdown } = healthScore;
+  const animatedScore = useCountUp(score);
+  const displayScore = Math.round(animatedScore);
   const colorClass = HEALTH_SCORE_COLORS[label];
   const bgClass = HEALTH_SCORE_BG_COLORS[label];
 
@@ -58,11 +61,11 @@ export default function BudgetHealthScore({ healthScore }: BudgetHealthScoreProp
               stroke="currentColor"
               strokeWidth="3"
               strokeDasharray={`${score}, 100`}
-              className={colorClass}
+              className={`${colorClass} transition-all duration-500`}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-2xl font-bold ${colorClass}`}>{score}</span>
+            <span className={`text-2xl font-bold tabular-nums ${colorClass}`}>{displayScore}</span>
           </div>
         </div>
         <div>
