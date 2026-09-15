@@ -35,5 +35,10 @@ describe('seo metadata helpers', () => {
 
   it('omits the GitHub Pages base path outside production', () => {
     expect(buildStaticSitePathConfig('test')).toEqual({});
+    expect(buildStaticSitePathConfig('development')).toEqual({});
+  });
+
+  it('falls back to process.env.NODE_ENV when no env is provided', () => {
+    expect(buildStaticSitePathConfig()).toEqual({});
   });
 });

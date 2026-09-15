@@ -4,6 +4,7 @@ import { SITE_BASE_PATH } from '@/lib/siteConfig';
 export const SITE_URL = `https://bmhornback.github.io${SITE_BASE_PATH}`;
 export const SITE_NAME = 'DynamicBudget';
 
+// Normalize route fragments like "/", "/learn/", or "learn" into a canonical site URL.
 export function buildCanonicalUrl(path?: string): string {
   const normalizedPath = !path || path === '/'
     ? ''
