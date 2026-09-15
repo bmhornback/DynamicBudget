@@ -4,8 +4,8 @@ export const SITE_URL = 'https://bmhornback.github.io/DynamicBudget';
 export const SITE_NAME = 'DynamicBudget';
 export const SITE_BASE_PATH = '/DynamicBudget';
 
-function buildCanonicalUrl(path: string): string {
-  const normalizedPath = path === '/' ? '' : path.replace(/^\/+/, '');
+function buildCanonicalUrl(path?: string): string {
+  const normalizedPath = !path || path === '/' ? '' : path.replace(/^\/+/, '');
   const baseUrl = SITE_URL.replace(/\/+$/, '');
 
   return normalizedPath ? `${baseUrl}/${normalizedPath}` : baseUrl;
