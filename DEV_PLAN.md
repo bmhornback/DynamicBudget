@@ -598,10 +598,12 @@ States to add (in priority order based on population and no-income-tax interest)
 - Create a `robots.txt` and `sitemap.xml` ✅ (`app/robots.ts`, `app/sitemap.ts`)
 - Add structured data (JSON-LD) for the app type ✅
 
-### E9-T2 · Landing page
-- Create an `/` marketing route and move the app to `/app`
-- Landing page: hero, feature list, screenshot/demo, CTA
-- Optimized for "salary budget calculator" search terms
+### E9-T2 · Landing page ✅ Done
+- Create an `/` marketing route and move the app to `/app` ✅ `app/app/page.tsx` — planner lives at `/app`; `app/app/layout.tsx` sets SEO metadata for the planner route
+- Landing page: hero, feature list, how-it-works, CTA ✅ `app/page.tsx` — sticky nav, hero with two CTAs, 3-step "How it works", 9-feature grid, CTA banner, footer
+- Optimized for "salary budget calculator" search terms ✅ `buildMetadata` with updated title/description, canonical URL, OpenGraph and Twitter card metadata
+- Sitemap updated to include `/app` route ✅ `app/sitemap.ts`
+- Learn page "Open the planner" link updated to `/app` ✅
 
 ### E9-T3 · Analytics ✅ Done
 - Add privacy-respecting analytics (Plausible or Fathom — no cookies, GDPR-friendly) ✅ Implemented as local-only aggregate counters in browser storage to preserve the static/no-backend model

@@ -64,7 +64,9 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ## Getting Started
 
 ### Try It Online
-Visit the app at: https://bmhornback.github.io/DynamicBudget
+Visit the landing page at: https://bmhornback.github.io/DynamicBudget
+
+Open the budget planner directly at: https://bmhornback.github.io/DynamicBudget/app
 
 ### Run Locally
 ```bash
@@ -175,6 +177,7 @@ All calculations and data are processed entirely in your browser. No data is sen
 - **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, features, tech debt register
 - **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
 - **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
+- **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application
 - **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Short educational guides tied to in-app planning decisions
 
 ## Development

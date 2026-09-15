@@ -57,7 +57,7 @@ export function buildWebApplicationJsonLd() {
     name: SITE_NAME,
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'Web',
-    url: SITE_URL,
+    url: `${SITE_URL}/app`,
     description:
       'Interactive personal finance sandbox for budgeting, scenario planning, savings goals, and practical financial literacy guidance.',
     offers: {

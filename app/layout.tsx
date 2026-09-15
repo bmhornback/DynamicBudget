@@ -3,9 +3,9 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { buildMetadata, buildWebApplicationJsonLd, SITE_URL } from '@/lib/seo';
 
 export const metadata = buildMetadata({
-  title: 'DynamicBudget — Dynamic Salary to Budget Planner',
+  title: 'DynamicBudget — Free Salary & Budget Planner',
   description:
-    'Interactive personal finance sandbox for budgeting, scenario planning, long-term savings goals, retirement planning, and practical financial literacy guidance.',
+    'A free, privacy-first personal finance planner. Model your salary, taxes, expenses, debt payoff, and long-term savings goals — no sign-up, no data collection.',
 });
 
 export default function RootLayout({
