@@ -84,6 +84,19 @@ describe('DynamicBudget page smoke test', () => {
       touches: [{ clientX: 280, clientY: 240 }],
     });
     fireEvent.touchMove(panel, {
+      touches: [
+        { clientX: 180, clientY: 250 },
+        { clientX: 220, clientY: 255 },
+      ],
+    });
+    fireEvent.touchEnd(panel);
+
+    expect(screen.getByRole('button', { name: 'Show dashboard panel' })).toBeTruthy();
+
+    fireEvent.touchStart(panel, {
+      touches: [{ clientX: 280, clientY: 240 }],
+    });
+    fireEvent.touchMove(panel, {
       touches: [{ clientX: 180, clientY: 250 }],
     });
     fireEvent.touchEnd(panel);

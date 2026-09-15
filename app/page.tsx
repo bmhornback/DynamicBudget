@@ -296,10 +296,14 @@ export default function DynamicBudgetPage() {
     return typeof window !== 'undefined' && window.innerWidth < 768;
   }, []);
 
+  const resetSwipeGesture = useCallback(() => {
+    swipeStart.current = null;
+    swipeCurrent.current = null;
+  }, []);
+
   const handleWorkspaceTouchStart = useCallback((event: React.TouchEvent<HTMLElement>) => {
     if (!isMobileViewport() || event.touches.length !== 1) {
-      swipeStart.current = null;
-      swipeCurrent.current = null;
+      resetSwipeGesture();
       return;
     }
 
@@ -307,19 +311,18 @@ export default function DynamicBudgetPage() {
     const position = { x: touch.clientX, y: touch.clientY };
     swipeStart.current = position;
     swipeCurrent.current = position;
-  }, [isMobileViewport]);
+  }, [isMobileViewport, resetSwipeGesture]);
 
   const handleWorkspaceTouchMove = useCallback((event: React.TouchEvent<HTMLElement>) => {
-    if (!swipeStart.current || event.touches.length !== 1) return;
+    if (!swipeStart.current) return;
+    if (event.touches.length !== 1) {
+      resetSwipeGesture();
+      return;
+    }
 
     const touch = event.touches[0];
     swipeCurrent.current = { x: touch.clientX, y: touch.clientY };
-  }, []);
-
-  const resetSwipeGesture = useCallback(() => {
-    swipeStart.current = null;
-    swipeCurrent.current = null;
-  }, []);
+  }, [resetSwipeGesture]);
 
   const handleWorkspaceTouchEnd = useCallback(() => {
     const start = swipeStart.current;
