@@ -776,7 +776,7 @@ export function calculateNetMonthlyIncome(
   annualHSA: number = 0,
   is401kRoth: boolean = false,
   bonusTaxMode: BonusTaxMode = 'blended_annual',
-  supplementalIncomeAnnual: number = 0
+  nonBonusSupplementalIncomeAnnual: number = 0
 ): {
   grossMonthly: number;
   federalTaxMonthly: number;
@@ -790,7 +790,7 @@ export function calculateNetMonthlyIncome(
   totalTaxAnnual: number;
   effectiveTaxRate: number;
 } {
-  const totalAnnualSupplemental = bonusIncome + supplementalIncomeAnnual;
+  const totalAnnualSupplemental = bonusIncome + nonBonusSupplementalIncomeAnnual;
   const totalAnnualGross = grossAnnual + totalAnnualSupplemental;
   const grossMonthly = totalAnnualGross / 12 + otherMonthlyIncome;
 
@@ -802,7 +802,7 @@ export function calculateNetMonthlyIncome(
   const annual401kPreTax = is401kRoth ? 0 : annual401k;
 
   const baseFederalGrossForModel = bonusTaxMode === 'lump_sum_withholding'
-    ? grossAnnual + supplementalIncomeAnnual
+    ? grossAnnual + nonBonusSupplementalIncomeAnnual
     : totalAnnualGross;
   const federalBaseTaxAnnual = federalIncomeTaxEstimate(
     baseFederalGrossForModel,

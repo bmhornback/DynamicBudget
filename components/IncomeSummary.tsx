@@ -72,7 +72,7 @@ export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps)
         )}
         {supplementalIncomeAnnual > 0 && (
           <Row
-            label="Supplemental Income"
+            label="Supplemental Income (included in gross)"
             value={formatCurrency(supplementalIncomeMonthly)}
             sub={`${formatCurrency(supplementalIncomeAnnual)}/yr`}
           />
