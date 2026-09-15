@@ -81,7 +81,10 @@ export default function RebalanceDiffChart({ result }: RebalanceDiffChartProps) 
               width={130}
             />
             <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
+              formatter={(value) => {
+                const numericValue = Array.isArray(value) ? Number(value[0]) : Number(value);
+                return formatCurrency(Number.isFinite(numericValue) ? numericValue : 0);
+              }}
               contentStyle={{
                 backgroundColor: 'var(--tooltip-bg, #fff)',
                 border: '1px solid #e5e7eb',
@@ -117,7 +120,7 @@ export default function RebalanceDiffChart({ result }: RebalanceDiffChartProps) 
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {rows.map((row) => (
-              <tr key={row.label}>
+              <tr key={row.fieldId}>
                 <td className="py-1 text-gray-700 dark:text-gray-300">{row.label}</td>
                 <td className="py-1 text-right tabular-nums text-gray-600 dark:text-gray-400">
                   {formatCurrency(row.before)}

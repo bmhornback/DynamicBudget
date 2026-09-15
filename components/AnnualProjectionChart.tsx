@@ -89,7 +89,10 @@ export default function AnnualProjectionChart({ breakdown, inputs }: AnnualProje
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis tickFormatter={formatYAxis} tick={{ fontSize: 11 }} width={60} />
               <Tooltip
-                formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                formatter={(value, name) => {
+                  const numericValue = Array.isArray(value) ? Number(value[0]) : Number(value);
+                  return [formatCurrency(Number.isFinite(numericValue) ? numericValue : 0), String(name)];
+                }}
                 contentStyle={{
                   backgroundColor: 'var(--tooltip-bg, #fff)',
                   border: '1px solid #e5e7eb',
