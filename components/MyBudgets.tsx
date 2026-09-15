@@ -10,31 +10,42 @@ import {
 
 interface MyBudgetsProps {
   currentInputs: BudgetInputs;
-  onLoad: (inputs: BudgetInputs) => void;
+  budgets?: NamedBudget[];
+  onLoad: (budget: NamedBudget) => void;
+  onBudgetsChange?: (budgets: NamedBudget[]) => void;
 }
 
-export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
+export default function MyBudgets({
+  currentInputs,
+  budgets: budgetsProp,
+  onLoad,
+  onBudgetsChange,
+}: MyBudgetsProps) {
   // Lazy initializer loads once; panel re-reads via deferred callback on open
   const [budgets, setBudgets] = useState<NamedBudget[]>(() => {
     if (typeof window === 'undefined') return [];
-    return loadNamedBudgets();
+    return budgetsProp ?? loadNamedBudgets();
   });
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newNote, setNewNote] = useState('');
   const panelRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const displayedBudgets = budgetsProp ?? budgets;
 
   // Refresh list from storage when panel opens; deferred to avoid setState-in-effect lint error
   useEffect(() => {
     if (!open) return;
     const id = setTimeout(() => {
-      setBudgets(loadNamedBudgets());
+      const nextBudgets = loadNamedBudgets();
+      setBudgets(budgetsProp ?? nextBudgets);
+      onBudgetsChange?.(nextBudgets);
       nameInputRef.current?.focus();
     }, 0);
     return () => clearTimeout(id);
-  }, [open]);
+  }, [budgetsProp, onBudgetsChange, open]);
 
   // Close panel on outside click
   useEffect(() => {
@@ -56,6 +67,7 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
         if (saving) {
           setSaving(false);
           setNewName('');
+          setNewNote('');
         } else {
           setOpen(false);
           triggerRef.current?.focus();
@@ -72,22 +84,28 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
     const budget: NamedBudget = {
       id: crypto.randomUUID(),
       name: trimmed,
+      note: newNote.trim() || undefined,
       inputs: currentInputs,
       createdAt: new Date().toISOString(),
     };
     saveNamedBudget(budget);
-    setBudgets(loadNamedBudgets());
+    const nextBudgets = loadNamedBudgets();
+    setBudgets(nextBudgets);
+    onBudgetsChange?.(nextBudgets);
     setNewName('');
+    setNewNote('');
     setSaving(false);
   };
 
   const handleDelete = (id: string) => {
     deleteNamedBudget(id);
-    setBudgets(loadNamedBudgets());
+    const nextBudgets = loadNamedBudgets();
+    setBudgets(nextBudgets);
+    onBudgetsChange?.(nextBudgets);
   };
 
   const handleLoad = (budget: NamedBudget) => {
-    onLoad(budget.inputs);
+    onLoad(budget);
     setOpen(false);
   };
 
@@ -109,7 +127,7 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
         aria-haspopup="dialog"
         className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 transition-all dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       >
-        💾 My Budgets {budgets.length > 0 && <span className="ml-1 text-blue-500 dark:text-blue-400">({budgets.length})</span>}
+        💾 My Budgets {displayedBudgets.length > 0 && <span className="ml-1 text-blue-500 dark:text-blue-400">({displayedBudgets.length})</span>}
       </button>
 
       {open && (
@@ -132,32 +150,42 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
 
           {/* Save current budget */}
           {saving ? (
-            <div className="flex gap-2">
+            <div className="space-y-2">
               <input
                 ref={nameInputRef}
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setSaving(false); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') { setSaving(false); setNewNote(''); } }}
                 placeholder="Budget name…"
                 maxLength={50}
-                className="flex-1 text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!newName.trim()}
-                className="px-2 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => setSaving(false)}
-                className="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
-              >
-                Cancel
-              </button>
+              <textarea
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                placeholder="Optional note: what does this scenario represent?"
+                maxLength={140}
+                rows={3}
+                className="w-full resize-none text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={!newName.trim()}
+                  className="flex-1 px-2 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSaving(false); setNewName(''); setNewNote(''); }}
+                  className="flex-1 px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
             <button
@@ -170,11 +198,11 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
           )}
 
           {/* Saved budget list */}
-          {budgets.length === 0 ? (
+          {displayedBudgets.length === 0 ? (
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">No saved budgets yet.</p>
           ) : (
             <ul className="space-y-1 max-h-60 overflow-y-auto">
-              {budgets.map((budget) => (
+              {displayedBudgets.map((budget) => (
                 <li
                   key={budget.id}
                   className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
@@ -186,6 +214,11 @@ export default function MyBudgets({ currentInputs, onLoad }: MyBudgetsProps) {
                   >
                     <div className="text-xs font-medium text-gray-800 dark:text-gray-100 truncate">{budget.name}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(budget.createdAt)}</div>
+                    {budget.note && (
+                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 break-words">
+                        {budget.note}
+                      </div>
+                    )}
                   </button>
                   <button
                     type="button"

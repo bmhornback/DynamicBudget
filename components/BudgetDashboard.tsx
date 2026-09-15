@@ -40,6 +40,8 @@ import { calculatePaycheckBreakdown } from '@/lib/paycheckCalculations';
 import { calculateIrregularIncomeAnalysis } from '@/lib/irregularIncome';
 import { useCountUp } from '@/lib/useCountUp';
 import AnnualProjectionChart from './AnnualProjectionChart';
+import DeferredRender from './DeferredRender';
+import PlanningAssumptionsCard from './PlanningAssumptionsCard';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -55,15 +57,20 @@ export default function BudgetDashboard({
   inputs,
   healthScore,
   recommendations,
+  rebalanceResult,
   debtProjection,
 }: BudgetDashboardProps) {
   const { isOverBudget, deficit, surplus, remainingMonthlyBuffer, netMonthlyIncome } = breakdown;
-  const goalProjections = calculateLongTermGoalProjections(inputs, breakdown);
-  const literacyInsights = generateFinancialLiteracyInsights(inputs, breakdown, goalProjections);
-  const paycheckBreakdown = calculatePaycheckBreakdown(inputs, breakdown);
-  const irregularIncomeAnalysis = inputs.incomeVariabilityPercent > 0
-    ? calculateIrregularIncomeAnalysis(inputs, breakdown)
-    : null;
+  const goalProjections = useMemo(() => calculateLongTermGoalProjections(inputs, breakdown), [inputs, breakdown]);
+  const literacyInsights = useMemo(
+    () => generateFinancialLiteracyInsights(inputs, breakdown, goalProjections),
+    [breakdown, goalProjections, inputs]
+  );
+  const paycheckBreakdown = useMemo(() => calculatePaycheckBreakdown(inputs, breakdown), [inputs, breakdown]);
+  const irregularIncomeAnalysis = useMemo(
+    () => (inputs.incomeVariabilityPercent > 0 ? calculateIrregularIncomeAnalysis(inputs, breakdown) : null),
+    [breakdown, inputs]
+  );
 
   // Buffer status banner
   const bufferBanner = isOverBudget ? (
@@ -141,18 +148,27 @@ export default function BudgetDashboard({
         <SavingsSummary breakdown={breakdown} inputs={inputs} />
         <ExpenseSummary breakdown={breakdown} inputs={inputs} />
         <BudgetHealthScore healthScore={healthScore} />
-        <BudgetPieChart breakdown={breakdown} inputs={inputs} />
-        <SavingsProgressCard breakdown={breakdown} inputs={inputs} />
+        <DeferredRender minHeight={320} placeholderLabel="Preparing budget mix chart…">
+          <BudgetPieChart breakdown={breakdown} inputs={inputs} />
+        </DeferredRender>
+        <DeferredRender minHeight={260} placeholderLabel="Preparing savings progress…">
+          <SavingsProgressCard breakdown={breakdown} inputs={inputs} />
+        </DeferredRender>
       </div>
 
       {/* Expense threshold chart — full width */}
-      <ExpenseThresholdChart breakdown={breakdown} inputs={inputs} />
+      <DeferredRender minHeight={320} placeholderLabel="Preparing expense threshold chart…">
+        <ExpenseThresholdChart breakdown={breakdown} inputs={inputs} />
+      </DeferredRender>
 
       {/* Annual projection chart — full width */}
-      <AnnualProjectionChart breakdown={breakdown} inputs={inputs} />
+      <DeferredRender minHeight={360} placeholderLabel="Preparing annual projection chart…">
+        <AnnualProjectionChart breakdown={breakdown} inputs={inputs} />
+      </DeferredRender>
 
       {/* Detailed sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <PlanningAssumptionsCard breakdown={breakdown} inputs={inputs} rebalanceResult={rebalanceResult} />
         <CoreExpensesDetail breakdown={breakdown} inputs={inputs} />
         <TransportationDetail breakdown={breakdown} inputs={inputs} />
         {inputs.petsEnabled && <PetsDetail inputs={inputs} breakdown={breakdown} />}
@@ -160,10 +176,16 @@ export default function BudgetDashboard({
         <DebtPayoffDetail projection={debtProjection} debtCount={inputs.debts.length} strategy={inputs.debtPayoffStrategy} />
         <LongTermGoalsDetail goals={goalProjections} />
         <FinancialLiteracyDetail insights={literacyInsights} />
-        <PaycheckCard paycheckBreakdown={paycheckBreakdown} />
-        <ColiCard currentState={inputs.state} annualSalary={inputs.annualSalary} />
+        <DeferredRender minHeight={280} placeholderLabel="Preparing paycheck planner…">
+          <PaycheckCard paycheckBreakdown={paycheckBreakdown} />
+        </DeferredRender>
+        <DeferredRender minHeight={220} placeholderLabel="Preparing cost-of-living comparison…">
+          <ColiCard currentState={inputs.state} annualSalary={inputs.annualSalary} />
+        </DeferredRender>
         {irregularIncomeAnalysis && (
-          <IrregularIncomeCard analysis={irregularIncomeAnalysis} />
+          <DeferredRender minHeight={280} placeholderLabel="Preparing irregular-income analysis…">
+            <IrregularIncomeCard analysis={irregularIncomeAnalysis} />
+          </DeferredRender>
         )}
       </div>
 

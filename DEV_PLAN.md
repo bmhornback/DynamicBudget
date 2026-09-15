@@ -52,7 +52,7 @@
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
 | Export as CSV | ✅ Done |
-| Test suite | ✅ Jest (259 tests passing) |
+| Test suite | ✅ Jest (275 tests passing) |
 | CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ✅ Done |
@@ -67,6 +67,8 @@
 | Section collapse/expand animation | ✅ Done |
 | Inline field validation (rent warning) | ✅ Done |
 | Debt amortization | ✅ Done |
+| Saved-budget scenario comparison | ✅ Done |
+| Planning assumptions / undo recovery | ✅ Done |
 
 ### New in This Release (v1.0.0)
 
@@ -87,12 +89,12 @@
 - Savings fields automatically locked when in percentage mode to prevent confusion
 - Integration with rebalancing engine for both modes
 - New scenario comparison table for side-by-side relocation and savings tradeoff analysis
-- 259 Jest tests passing
+- 275 Jest tests passing
 
 ### Known gaps / rough edges
 
 - Accessibility polish is improved but not complete — keyboard and ARIA baselines are stronger now, but contrast audits and dedicated screen-reader validation are still desirable.
-- Multi-scenario comparison currently focuses on the live budget plus preset scenarios; named saved budgets are still future work.
+- Multi-scenario comparison now supports saved budgets, but richer compare workflows (more than 2 alternates, grouping, notes filtering) are still future work.
 - 2027 tax brackets not yet published by IRS (typically available late 2026).
 - County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
 

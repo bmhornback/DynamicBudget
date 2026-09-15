@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import type { BudgetInputs, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
+import type { BudgetInputs, NamedBudget, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
 import { DEFAULT_INPUTS, SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
 import { calculateBudgetHealthScore } from '@/lib/budgetHealthScore';
@@ -12,12 +12,14 @@ import {
   buildScenarioComparisonItems,
   getDefaultComparisonPresetIds,
   normalizeComparisonPresetIds,
+  parseComparisonId,
 } from '@/lib/scenarioComparison';
 import { calculateDebtPayoffProjection } from '@/lib/debtPayoff';
 import { initializeSpendingHistory } from '@/lib/spendingTrends';
 import {
   saveBudgetInputs,
   loadBudgetInputs,
+  loadNamedBudgets,
   loadBudgetInputsFromShareUrl,
   SHARE_PARAM_KEY,
 } from '@/lib/storage';
@@ -50,6 +52,21 @@ const MOBILE_SWIPE_THRESHOLD_PX = 60;
 const MOBILE_SWIPE_DIRECTION_RATIO = 1.25;
 type ActiveTab = 'budget' | 'trends' | 'business_expenses';
 
+interface UndoState {
+  label: string;
+  inputs: BudgetInputs;
+  activePreset?: string;
+  comparisonPresetIds: string[];
+}
+
+function cloneInputs(inputs: BudgetInputs): BudgetInputs {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(inputs);
+  }
+
+  return JSON.parse(JSON.stringify(inputs)) as BudgetInputs;
+}
+
 export default function DynamicBudgetPage() {
   const [initialLoad] = useState(() => {
     const fromShareUrl =
@@ -70,7 +87,10 @@ export default function DynamicBudgetPage() {
     return { sharedInputs: null, initialInputs: defaults };
   });
   const [inputs, setInputs] = useState<BudgetInputs>(initialLoad.initialInputs);
-  
+  const [savedBudgets, setSavedBudgets] = useState<NamedBudget[]>(() => {
+    if (typeof window === 'undefined') return [];
+    return loadNamedBudgets();
+  });
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
   const [showForm, setShowForm] = useState(true);
@@ -80,6 +100,8 @@ export default function DynamicBudgetPage() {
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
     () => getDefaultComparisonPresetIds('san_diego_baseline')
   );
+  const [undoState, setUndoState] = useState<UndoState | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
   // Track client-side hydration so we can show the skeleton during SSR/initial paint
   const [isMounted, setIsMounted] = useState(false);
   const previousSavingsFieldLocks = useRef<Record<string, boolean>>({});
@@ -163,8 +185,8 @@ export default function DynamicBudgetPage() {
     [inputs, breakdown]
   );
   const comparisonItems = useMemo(
-    () => buildScenarioComparisonItems(inputs, comparisonPresetIds, activePreset),
-    [inputs, comparisonPresetIds, activePreset]
+    () => buildScenarioComparisonItems(inputs, comparisonPresetIds, activePreset, savedBudgets),
+    [inputs, comparisonPresetIds, activePreset, savedBudgets]
   );
   const debtProjection = useMemo(
     () => calculateDebtPayoffProjection(inputs.debts, inputs.extraDebtPayoff, inputs.debtPayoffStrategy),
@@ -172,6 +194,16 @@ export default function DynamicBudgetPage() {
   );
 
   // ── Handlers ───────────────────────────────────────────────────────────────
+  const rememberUndoState = useCallback((label: string) => {
+    setUndoState({
+      label,
+      inputs: cloneInputs(inputs),
+      activePreset,
+      comparisonPresetIds: [...comparisonPresetIds],
+    });
+    setActionMessage(label);
+  }, [activePreset, comparisonPresetIds, inputs]);
+
   const handleChange = useCallback((updates: Partial<BudgetInputs>) => {
     setInputs((prev) => {
       let next = { ...prev, ...updates };
@@ -218,8 +250,8 @@ export default function DynamicBudgetPage() {
       return next;
     });
     setActivePreset(undefined);
-    setComparisonPresetIds((prev) => normalizeComparisonPresetIds(prev));
-  }, []);
+    setComparisonPresetIds((prev) => normalizeComparisonPresetIds(prev, activePreset, savedBudgets));
+  }, [activePreset, savedBudgets]);
 
   const handleToggleLock = useCallback((fieldId: string) => {
     setInputs((prev) => ({
@@ -232,14 +264,18 @@ export default function DynamicBudgetPage() {
   }, []);
 
   const handleApplyPreset = useCallback((newInputs: BudgetInputs, presetId?: string) => {
+    const presetName = presetId
+      ? SCENARIO_PRESETS.find((item) => item.id === presetId)?.name ?? 'scenario'
+      : 'scenario';
+    rememberUndoState(`Loaded ${presetName}.`);
     setInputs(newInputs);
     setRebalanceResult(null);
     setActivePreset(presetId);
     setComparisonPresetIds((prev) => {
-      const normalized = normalizeComparisonPresetIds(prev, presetId);
+      const normalized = normalizeComparisonPresetIds(prev, presetId, savedBudgets);
       return normalized.length > 0 ? normalized : getDefaultComparisonPresetIds(presetId);
     });
-  }, []);
+  }, [rememberUndoState, savedBudgets]);
 
   const handleStrategyChange = useCallback((strategy: RebalanceStrategy) => {
     setInputs((prev) => ({ ...prev, rebalanceStrategy: strategy }));
@@ -256,17 +292,54 @@ export default function DynamicBudgetPage() {
   }, [inputs]);
 
   const handleReset = useCallback(() => {
+    rememberUndoState('Reset to default budget.');
     setInputs(DEFAULT_INPUTS);
     setRebalanceResult(null);
     setActivePreset('san_diego_baseline');
     setComparisonPresetIds(getDefaultComparisonPresetIds('san_diego_baseline'));
-  }, []);
+  }, [rememberUndoState]);
 
   const handleImport = useCallback((newInputs: BudgetInputs) => {
+    rememberUndoState('Imported budget from JSON.');
     setInputs(newInputs);
     setRebalanceResult(null);
     setActivePreset(undefined);
-  }, []);
+    setComparisonPresetIds((prev) => normalizeComparisonPresetIds(prev, undefined, savedBudgets));
+  }, [rememberUndoState, savedBudgets]);
+
+  const handleLoadNamedBudget = useCallback((budget: NamedBudget) => {
+    rememberUndoState(`Loaded saved budget: ${budget.name}.`);
+    setInputs(budget.inputs);
+    setRebalanceResult(null);
+    setActivePreset(undefined);
+    setComparisonPresetIds((prev) => normalizeComparisonPresetIds(prev, undefined, savedBudgets));
+  }, [rememberUndoState, savedBudgets]);
+
+  const handleApplyComparisonScenario = useCallback((scenarioId: string) => {
+    const parsed = parseComparisonId(scenarioId);
+    if (!parsed) return;
+
+    if (parsed.kind === 'preset') {
+      const preset = SCENARIO_PRESETS.find((item) => item.id === parsed.id);
+      if (!preset) return;
+      handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
+      return;
+    }
+
+    const savedBudget = savedBudgets.find((budget) => budget.id === parsed.id);
+    if (!savedBudget) return;
+    handleLoadNamedBudget(savedBudget);
+  }, [handleApplyPreset, handleLoadNamedBudget, savedBudgets]);
+
+  const handleUndo = useCallback(() => {
+    if (!undoState) return;
+    setInputs(undoState.inputs);
+    setActivePreset(undoState.activePreset);
+    setComparisonPresetIds(undoState.comparisonPresetIds);
+    setRebalanceResult(null);
+    setActionMessage(`Undid: ${undoState.label}`);
+    setUndoState(null);
+  }, [undoState]);
 
   const handleExportPDF = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -376,7 +449,12 @@ export default function DynamicBudgetPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <MyBudgets currentInputs={inputs} onLoad={(newInputs) => { setInputs(newInputs); setRebalanceResult(null); setActivePreset(undefined); }} />
+            <MyBudgets
+              currentInputs={inputs}
+              budgets={savedBudgets}
+              onBudgetsChange={setSavedBudgets}
+              onLoad={handleLoadNamedBudget}
+            />
 
             <ExportImport
               currentInputs={inputs}
@@ -479,6 +557,35 @@ export default function DynamicBudgetPage() {
       {/* Main layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6" data-print-shell="true">
         <ErrorBoundary onReset={handleReset}>
+          {actionMessage && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900"
+              data-print-hidden="true"
+            >
+              <p>{actionMessage}</p>
+              <div className="flex items-center gap-2">
+                {undoState && (
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    className="rounded-md border border-blue-300 bg-white px-3 py-1 text-xs font-medium text-blue-700 hover:border-blue-400"
+                  >
+                    Undo
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { setActionMessage(null); setUndoState(null); }}
+                  aria-label="Dismiss status message"
+                  className="rounded-md px-2 py-1 text-blue-600 hover:bg-blue-100"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
           {activeTab === 'budget' ? (
             <div
               id="budget-panel"
@@ -498,16 +605,13 @@ export default function DynamicBudgetPage() {
               <div data-print-hidden="true">
                 <ScenarioComparison
                   items={comparisonItems}
-                  selectedPresetIds={comparisonPresetIds}
+                  savedBudgets={savedBudgets}
+                  selectedScenarioIds={comparisonPresetIds}
                   activePresetId={activePreset}
-                  onSelectionChange={(presetIds) =>
-                    setComparisonPresetIds(normalizeComparisonPresetIds(presetIds, activePreset))
+                  onSelectionChange={(scenarioIds) =>
+                    setComparisonPresetIds(normalizeComparisonPresetIds(scenarioIds, activePreset, savedBudgets))
                   }
-                  onApplyPreset={(presetId) => {
-                    const preset = SCENARIO_PRESETS.find((item) => item.id === presetId);
-                    if (!preset) return;
-                    handleApplyPreset(applyScenarioPreset(preset.inputs), preset.id);
-                  }}
+                  onApplyScenario={handleApplyComparisonScenario}
                 />
               </div>
 

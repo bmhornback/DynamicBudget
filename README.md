@@ -13,12 +13,12 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
-- ♿ **Accessibility-minded UI** — Keyboard-operable controls, labeled form fields, and live status messaging for key budget updates
+- ♿ **Accessibility-minded UI** — Keyboard-operable controls, labeled form fields, live status messaging, and undoable recovery for major budgeting actions
 - 👆 **Mobile workspace gestures** — Swipe between the editor and dashboard panels on small screens without losing vertical scroll
 - 🎯 **Long-term goal planner** — Track house, vacation, retirement, kids, and custom major-purchase targets
 - 🧾 **Business expense guide** — Categorize, track, and estimate potential business tax write-offs with recordkeeping prompts
 - 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
-- 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset scenarios
+- 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset or saved-budget scenarios
 - 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
 - 💳 **Debt payoff timeline** — Track debt accounts with avalanche/snowball strategy selector, per-debt amortization breakdown, balance-over-time chart, and interest cost per debt
 - 💾 **Data persistence** — Auto-save your budget to your browser (no account needed)
@@ -28,6 +28,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 🔗 **Shareable budget links** — Copy a compact URL payload that loads the current budget configuration
 - 📝 **Clipboard summary export** — Copy a markdown-like budget summary for Slack/Notion sharing
 - 📋 **Named budgets** — Save and reload custom budget snapshots locally
+- 🏷️ **Scenario notes** — Add an optional note to saved budgets so comparisons preserve the scenario's intent
 - 🔒 **Field locking** — Lock specific expenses to protect planned allocations
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 📱 **Responsive design** — Works great on desktop and mobile
@@ -39,6 +40,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 💡 **Smart Insights** — Get alerts when you're overspending or when spending is trending upward
 - 🔮 **Forecasting** — Predict next month's spending using linear regression on historical patterns
 - 🧠 **Financial literacy tips** — Personalized education prompts around emergency funds, retirement, debt, and goal tradeoffs
+- 🧭 **Planning assumptions panel** — See why take-home, savings, and rebalancing changed plus the current tax-model limitations
 - 🔐 **Own Your Data** — All data is stored locally in your browser—no accounts, no servers
 
 - 🏦 **Paycheck calculator** — Select your pay frequency (weekly, bi-weekly, semi-monthly, or monthly) and see every budget line translated into per-paycheck amounts; includes a deduction waterfall (gross → pre-tax → taxes → take-home) and a per-paycheck allocation view with spend-ratio bars
@@ -186,7 +188,7 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** finish accessibility closeout work, then continue the next v1.5 budgeting workflow expansions.
+**Current focus:** finish accessibility closeout work, continue saved-budget decision support, and keep frontend performance strong as planning workflows deepen.
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 

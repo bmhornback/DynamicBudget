@@ -533,7 +533,7 @@ export function loadNamedBudgets(): NamedBudget[] {
       }
     }
     if (stored === null || stored.trim() === '') return [];
-    return JSON.parse(stored) as NamedBudget[];
+    return normalizeNamedBudgets(JSON.parse(stored));
   } catch {
     return [];
   }
@@ -546,11 +546,16 @@ export function saveNamedBudget(budget: NamedBudget): void {
   if (typeof window === 'undefined') return;
   try {
     const existing = loadNamedBudgets();
+    const normalizedBudget: NamedBudget = {
+      ...budget,
+      note: budget.note?.trim() || undefined,
+      inputs: normalizeBudgetInputs(budget.inputs),
+    };
     const idx = existing.findIndex((b) => b.id === budget.id);
     if (idx >= 0) {
-      existing[idx] = budget;
+      existing[idx] = normalizedBudget;
     } else {
-      existing.push(budget);
+      existing.push(normalizedBudget);
     }
     localStorage.setItem(NAMED_BUDGETS_KEY, JSON.stringify(existing));
   } catch (error) {
@@ -569,6 +574,22 @@ export function deleteNamedBudget(id: string): void {
   } catch (error) {
     console.warn('Failed to delete named budget:', error);
   }
+}
+
+function normalizeNamedBudgets(rawBudgets: unknown): NamedBudget[] {
+  if (!Array.isArray(rawBudgets)) return [];
+
+  return rawBudgets
+    .filter((budget): budget is Partial<NamedBudget> => typeof budget === 'object' && budget !== null)
+    .map((budget, index) => ({
+      id: typeof budget.id === 'string' && budget.id.trim() ? budget.id : `named_budget_${index}`,
+      name: typeof budget.name === 'string' && budget.name.trim() ? budget.name : `Saved Budget ${index + 1}`,
+      note: typeof budget.note === 'string' && budget.note.trim() ? budget.note.trim() : undefined,
+      inputs: normalizeBudgetInputs(budget.inputs),
+      createdAt: typeof budget.createdAt === 'string' && budget.createdAt.trim()
+        ? budget.createdAt
+        : new Date(0).toISOString(),
+    }));
 }
 
 // ─── Custom Scenario Presets (E2-T4) ─────────────────────────────────────────

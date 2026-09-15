@@ -483,6 +483,7 @@ export interface SpendingHistory {
 export interface NamedBudget {
   id: string;
   name: string;
+  note?: string;
   inputs: BudgetInputs;
   createdAt: string; // ISO timestamp
 }
