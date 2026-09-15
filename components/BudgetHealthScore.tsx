@@ -61,8 +61,7 @@ export default function BudgetHealthScore({ healthScore }: BudgetHealthScoreProp
               stroke="currentColor"
               strokeWidth="3"
               strokeDasharray={`${score}, 100`}
-              style={{ transition: 'stroke-dasharray 0.6s ease' }}
-              className={colorClass}
+              className={`${colorClass} transition-all duration-500`}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">

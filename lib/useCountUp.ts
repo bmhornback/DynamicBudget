@@ -13,25 +13,41 @@ import { useEffect, useRef, useState } from 'react';
  */
 export function useCountUp(target: number, duration = 600): number {
   const [current, setCurrent] = useState<number>(target);
-  const prevRef = useRef<number>(target);
+  const currentRef = useRef<number>(target);
   const rafRef = useRef<number | null>(null);
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canAnimate =
+    typeof requestAnimationFrame === 'function' &&
+    typeof cancelAnimationFrame === 'function' &&
+    typeof performance !== 'undefined' &&
+    typeof performance.now === 'function' &&
+    duration > 0;
+  const shouldSnap = reducedMotion || !canAnimate;
 
   useEffect(() => {
-    // Respect prefers-reduced-motion
-    const reducedMotion =
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    currentRef.current = current;
+  }, [current]);
 
-    const start = prevRef.current;
+  useEffect(() => {
+    const start = currentRef.current;
     const diff = target - start;
 
     if (diff === 0) return;
 
-    if (reducedMotion) {
-      prevRef.current = target;
-      setCurrent(target);
+    if (shouldSnap) {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      currentRef.current = target;
       return;
+    }
+
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
     }
 
     const startTime = performance.now();
@@ -42,19 +58,17 @@ export function useCountUp(target: number, duration = 600): number {
       // Cubic ease-out: decelerate toward the end
       const eased = 1 - Math.pow(1 - progress, 3);
       const next = start + diff * eased;
+      currentRef.current = next;
       setCurrent(next);
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(animate);
       } else {
-        prevRef.current = target;
+        currentRef.current = target;
         setCurrent(target);
       }
     };
 
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-    }
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
@@ -63,7 +77,7 @@ export function useCountUp(target: number, duration = 600): number {
         rafRef.current = null;
       }
     };
-  }, [target, duration]);
+  }, [target, duration, shouldSnap]);
 
-  return current;
+  return shouldSnap ? target : current;
 }
