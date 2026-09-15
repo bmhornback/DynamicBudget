@@ -78,7 +78,7 @@ export function buildAnnualProjection(
       taxableInvestments: Math.round(retTaxable),
       houseFund: Math.round(retHouse),
       emergencyFund: Math.round(retEmergency),
-      total: Math.round(ret401k + retIRA + retTaxable + retHouse + retEmergency),
+      total: Math.round(ret401k) + Math.round(retIRA) + Math.round(retTaxable) + Math.round(retHouse) + Math.round(retEmergency),
     };
   });
 }
