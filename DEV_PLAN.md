@@ -52,7 +52,7 @@
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
 | Export as CSV | ✅ Done |
-| Test suite | ✅ Jest (92 tests passing) |
+| Test suite | ✅ Jest (259 tests passing) |
 | CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ✅ Done |
@@ -87,7 +87,7 @@
 - Savings fields automatically locked when in percentage mode to prevent confusion
 - Integration with rebalancing engine for both modes
 - New scenario comparison table for side-by-side relocation and savings tradeoff analysis
-- 92 Jest tests passing
+- 259 Jest tests passing
 
 ### Known gaps / rough edges
 
@@ -210,7 +210,7 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Recommendation trigger tests for all `Recommendation` IDs
 - Test that all positive-reinforcement conditions produce the correct recommendation
 
-### E1-T6 · Integration smoke test — page-level
+### E1-T6 · Integration smoke test — page-level ✅ Done
 - Set up `@testing-library/react` + `jest-environment-jsdom`
 - Render `page.tsx` with all DEFAULT_INPUTS and assert no crash
 - Verify the "Surplus" banner renders when budget is balanced
@@ -739,7 +739,7 @@ States to add (in priority order based on population and no-income-tax interest)
 | TD-2 | Tax year constants updated to 2026 (401k limit, IRA limit, and brackets refreshed per IRS 2026 adjustments) | High | ✅ Resolved (2026) | E3-T6 |
 | TD-3 | Scenario preset matching in `page.tsx` uses fragile field-comparison | Low | ✅ Resolved | E2-T4 |
 | TD-4 | No error boundaries — uncaught calculation error crashes the UI | High | ✅ Resolved | E1-T9 |
-| TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (92 tests) | E1 |
+| TD-5 | No tests — any refactor carries risk | Critical | ✅ Resolved (259 tests) | E1 |
 | TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | ✅ Resolved | E5-T2 |
 | TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | Open | General |
 | TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | Open | E3-T2 |
