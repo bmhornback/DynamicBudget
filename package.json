@@ -1,6 +1,6 @@
 {
   "name": "dynamicbudget",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "private": true,
   "description": "Dynamic budget planner for high-income earners — tax modeling, smart rebalancing, real-time recommendations",
   "repository": {
