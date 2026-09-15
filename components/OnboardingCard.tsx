@@ -66,6 +66,14 @@ export default function OnboardingCard() {
               <span className="text-blue-500 shrink-0 mt-0.5">💾</span>
               <span><strong>Save budgets</strong> — Use <em>My Budgets</em> to save and reload named budget snapshots anytime.</span>
             </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 shrink-0 mt-0.5">🆚</span>
+              <span><strong>Compare scenarios</strong> — Mix presets and saved budgets in the comparison table to see tradeoffs before switching.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 shrink-0 mt-0.5">↩️</span>
+              <span><strong>Undo major actions</strong> — Reset, imports, and scenario loads now show an undo option so you can recover quickly.</span>
+            </li>
           </ul>
           <button
             type="button"

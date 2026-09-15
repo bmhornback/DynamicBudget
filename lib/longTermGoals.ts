@@ -1,10 +1,12 @@
 import type {
+  AnnualExpensePlan,
   BudgetBreakdown,
   BudgetInputs,
   FinancialLiteracyInsight,
   LongTermGoalProjection,
   LongTermSavingsGoal,
 } from '@/types/budget';
+import { calculateAnnualExpensePlan } from './annualExpenses';
 
 const GENERAL_GOAL_CATEGORIES = new Set(['vacation', 'kids', 'major_purchase', 'custom']);
 export const MONTHLY_COMPARISON_EPSILON = 0.005;
@@ -189,6 +191,7 @@ export function generateFinancialLiteracyInsights(
     0
   );
   const highInterestDebts = (inputs.debts ?? []).filter((debt) => (debt.interestRate ?? 0) >= 8);
+  const annualExpensePlan: AnnualExpensePlan[] = calculateAnnualExpensePlan(inputs.annualExpenses ?? []);
 
   if (breakdown.retirement.retirementSavingsRate < 0.15) {
     insights.push({
@@ -254,6 +257,15 @@ export function generateFinancialLiteracyInsights(
       priority: 'low',
       title: 'Give every surplus dollar a job',
       detail: 'When your plan already has slack, assigning extra buffer to your most urgent goal can materially shorten the timeline.',
+    });
+  }
+
+  if (annualExpensePlan.some((expense) => expense.isDueSoon && !expense.isFullyFunded)) {
+    insights.push({
+      id: 'recurring_bill_smoothing',
+      priority: 'medium',
+      title: 'Smooth recurring bills with sinking funds',
+      detail: 'Known non-monthly expenses are easier to absorb when you reserve cash ahead of time instead of relying on future buffer or credit.',
     });
   }
 

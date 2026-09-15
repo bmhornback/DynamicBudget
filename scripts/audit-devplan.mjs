@@ -77,6 +77,7 @@ const COMPLETED_TASKS = {
   'E5-T6': 'incomeVariabilityPercent; lib/irregularIncome.ts P25/P50/P75; IrregularIncomeCard.tsx',
   'E5-T7': 'partnerEnabled + 8 partner fields; calculateCombinedNetMonthlyIncome; MFJ combined taxes; Partner Income section in BudgetForm; IncomeSummary household view',
   'E5-T8': 'calculateMonthsToGoal + calculateRequiredContribution helpers; monthsAtCurrentRate on LongTermGoalProjection; goal timeline UI in BudgetDashboard',
+  'E5-T9': 'lib/annualExpenses.ts + decision support surfaces for sinking funds, recurring annual expenses, and planning tradeoffs',
 
   // Epic 6 — UX Polish & Accessibility
   'E6-T1': 'focus-visible rings on all interactive elements; Escape closes dropdowns; focus restored to trigger',
@@ -94,6 +95,12 @@ const COMPLETED_TASKS = {
   'E7-T2': 'exportBudgetAsCSV in storage.ts; wired into ExportImport.tsx dropdown',
   'E7-T3': 'URL-safe Base64 ?b= payload; versioned compact encoding (v:2); app startup preload',
   'E7-T4': 'exportBudgetQuickSummary in storage.ts; Copy Summary action in ExportImport.tsx',
+
+  // Epic 9 — Growth & Discovery
+  'E9-T1': 'Shared SEO metadata helper, JSON-LD, and static-export-safe robots/sitemap routes',
+  'E9-T3': 'local-only aggregate analytics counters for presets, loads, rebalance runs, learn CTA clicks, and feedback submissions',
+  'E9-T4': 'FeedbackWidget opens prefilled GitHub issues with optional budget-summary context',
+  'E9-T5': 'app/learn/page.tsx and lib/learnContent.ts educational hub linked from the app shell',
 };
 
 // ─── Parse DEV_PLAN.md ────────────────────────────────────────────────────────

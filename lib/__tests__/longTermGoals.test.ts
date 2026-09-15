@@ -167,6 +167,32 @@ describe('longTermGoals', () => {
 
     expect(insights.map((insight) => insight.id)).toContain('debt_vs_savings');
   });
+
+  it('adds recurring bill smoothing guidance when a near-term annual expense is underfunded', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      annualExpenses: [
+        {
+          id: 'registration',
+          name: 'Registration',
+          category: 'car' as const,
+          annualAmount: 600,
+          currentSaved: 0,
+          dueMonth: new Date().getMonth() + 1,
+          isEssential: true,
+        },
+      ],
+    };
+
+    const breakdown = calculateBudgetBreakdown(inputs);
+    const insights = generateFinancialLiteracyInsights(
+      inputs,
+      breakdown,
+      calculateLongTermGoalProjections(inputs, breakdown)
+    );
+
+    expect(insights.map((insight) => insight.id)).toContain('recurring_bill_smoothing');
+  });
 });
 
 describe('calculateMonthsToGoal', () => {

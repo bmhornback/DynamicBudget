@@ -208,6 +208,56 @@ describe('budgetCalculations', () => {
       expect(result.totalDebtPayoff).toBeCloseTo(100, 0);
     });
 
+    it('should calculate sinking funds separately from long-term savings', () => {
+      const inputs = {
+        ...DEFAULT_INPUTS,
+        annualExpenses: [
+          {
+            id: 'travel',
+            name: 'Annual Travel',
+            category: 'travel' as const,
+            annualAmount: 2400,
+            currentSaved: 0,
+            dueMonth: 3,
+            isEssential: false,
+          },
+          {
+            id: 'registration',
+            name: 'Car Registration',
+            category: 'car' as const,
+            annualAmount: 600,
+            currentSaved: 300,
+            dueMonth: 10,
+            isEssential: true,
+          },
+        ],
+      };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.totalSinkingFunds).toBeGreaterThan(0);
+      expect(result.totalAnnualRecurringExpenses).toBe(3000);
+      expect(result.totalSavings).toBeCloseTo(
+        inputs.emergencyFundContribution +
+          inputs.houseDownPaymentContribution +
+          inputs.generalCashSavings,
+        0
+      );
+      expect(result.totalAllocated).toBeCloseTo(
+        result.totalHousing +
+          result.totalUtilities +
+          result.totalTransportation +
+          result.totalPets +
+          result.totalGroceriesFood +
+          result.totalHealth +
+          result.totalLifestyle +
+          result.totalSavings +
+          result.totalInvestments +
+          result.totalDebtPayoff +
+          result.totalSinkingFunds,
+        2
+      );
+    });
+
     it('should keep fixed savings and investments separate in fixed savings mode', () => {
       const inputs = {
         ...DEFAULT_INPUTS,

@@ -2,7 +2,7 @@
 
 > **App:** DynamicBudget (repo: DynamicBudget)
 > **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind CSS 4
-> **Deployment target:** Static web app — fully self-hosted in the browser, no server required. `npm run build` outputs to `out/` and can be served via GitHub Pages, any static host, or opened directly as a local file. Follows the same pattern as [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
+> **Deployment target:** Static web app — fully self-hosted in the browser, no server required. `npm run build` outputs to `out/` and can be served via GitHub Pages, any static host, or opened directly as a local file. Production exports preserve the `/DynamicBudget` project-site path for GitHub Pages. Follows the same pattern as [FirstTimeFitness](https://github.com/bmhornback/FirstTimeFitness).
 > **Purpose:** A client-side personal finance tool that takes an annual salary, estimates taxes, ensures savings, and lets the user dynamically budget every remaining dollar.
 
 ---
@@ -52,7 +52,7 @@
 | Spending insights & forecasting | ✅ Done |
 | Export / import JSON | ✅ Done |
 | Export as CSV | ✅ Done |
-| Test suite | ✅ Jest (259 tests passing) |
+| Test suite | ✅ Jest (289 tests passing) |
 | CI/CD | ✅ GitHub Actions (`ci.yml`) |
 | Additional tax states (all 50 + DC) | ✅ Done |
 | Roth vs Traditional IRA | ✅ Done |
@@ -67,6 +67,14 @@
 | Section collapse/expand animation | ✅ Done |
 | Inline field validation (rent warning) | ✅ Done |
 | Debt amortization | ✅ Done |
+| Saved-budget scenario comparison | ✅ Done |
+| Planning assumptions / undo recovery | ✅ Done |
+| Sinking funds / annual expenses | ✅ Done |
+| Decision-support summaries | ✅ Done |
+| SEO / sitemap / structured metadata | ✅ Done |
+| In-app feedback widget | ✅ Done |
+| Learn hub | ✅ Done |
+| Privacy-preserving local analytics | ✅ Done |
 
 ### New in This Release (v1.0.0)
 
@@ -87,12 +95,13 @@
 - Savings fields automatically locked when in percentage mode to prevent confusion
 - Integration with rebalancing engine for both modes
 - New scenario comparison table for side-by-side relocation and savings tradeoff analysis
-- 259 Jest tests passing
+- 289 Jest tests passing
 
 ### Known gaps / rough edges
 
 - Accessibility polish is improved but not complete — keyboard and ARIA baselines are stronger now, but contrast audits and dedicated screen-reader validation are still desirable.
-- Multi-scenario comparison currently focuses on the live budget plus preset scenarios; named saved budgets are still future work.
+- Multi-scenario comparison now supports saved budgets, but richer compare workflows (more than 2 alternates, grouping, notes filtering) are still future work.
+- Growth/discovery foundations are now in place, but a dedicated landing page and deeper educational content are still future work.
 - 2027 tax brackets not yet published by IRS (typically available late 2026).
 - County/local taxes and some state surtaxes are simplified or excluded for brevity (e.g., Maryland county taxes, California surtax on income >$1M fully modeled but county taxes omitted).
 
@@ -448,6 +457,14 @@ States to add (in priority order based on population and no-income-tax interest)
 - Timeline sub-labels on emergency fund and house fund rows in `SavingsDetail` ✅
 - 16 new tests (236 total passing) ✅
 
+### E5-T9 · Sinking funds, recurring annual expenses, and decision support ✅ Done
+- `annualExpenses` array added to `BudgetInputs` so users can track known non-monthly costs like insurance, travel, home maintenance, and fees ✅
+- `lib/annualExpenses.ts` calculates due-month-aware monthly reserve targets, remaining unfunded amounts, and near-term due-soon status ✅
+- Budget calculations now include sinking-fund reserves in `totalAllocated` and emergency-fund planning, while keeping them separate from long-term savings-rate metrics ✅
+- `BudgetForm.tsx` exposes CRUD controls for annual expenses, including category, due month, saved-so-far, and essential/non-essential classification ✅
+- Dashboard adds `SinkingFundsCard` and `DecisionSupportCard` for recurring-bill readiness, home-purchase timing, debt-vs-investing tradeoffs, and dual-income reliance ✅
+- Recommendations, quick summary export, CSV export, storage normalization, and test coverage updated for the new workflow ✅
+
 ---
 
 ## Epic 6 — UX Polish & Accessibility
@@ -576,31 +593,31 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Make the app discoverable, trustworthy, and useful to a broader audience.
 
-### E9-T1 · SEO & metadata
-- Add `<title>`, `<meta description>`, and Open Graph tags in `layout.tsx`
-- Create a `robots.txt` and `sitemap.xml`
-- Add structured data (JSON-LD) for the app type
+### E9-T1 · SEO & metadata ✅ Done
+- Add `<title>`, `<meta description>`, and Open Graph tags in `layout.tsx` ✅
+- Create a `robots.txt` and `sitemap.xml` ✅ (`app/robots.ts`, `app/sitemap.ts`)
+- Add structured data (JSON-LD) for the app type ✅
 
 ### E9-T2 · Landing page
 - Create an `/` marketing route and move the app to `/app`
 - Landing page: hero, feature list, screenshot/demo, CTA
 - Optimized for "salary budget calculator" search terms
 
-### E9-T3 · Analytics
-- Add privacy-respecting analytics (Plausible or Fathom — no cookies, GDPR-friendly)
-- Track: page views, scenario preset usage, rebalance count, export usage
-- No PII collected
+### E9-T3 · Analytics ✅ Done
+- Add privacy-respecting analytics (Plausible or Fathom — no cookies, GDPR-friendly) ✅ Implemented as local-only aggregate counters in browser storage to preserve the static/no-backend model
+- Track: page views, scenario preset usage, rebalance count, export usage ✅ Partial for this tranche: scenario preset usage, saved-budget loads, rebalance count, learn CTA clicks, and feedback submissions
+- No PII collected ✅
 
-### E9-T4 · Feedback widget
-- Simple in-app "Send feedback" button (opens a small form)
-- Submissions go to a GitHub Issue or a simple webhook (e.g., Slack)
+### E9-T4 · Feedback widget ✅ Done
+- Simple in-app "Send feedback" button (opens a small form) ✅
+- Submissions go to a GitHub Issue or a simple webhook (e.g., Slack) ✅ Implemented with a prefilled GitHub issue flow and optional budget-summary context
 
-### E9-T5 · Blog / educational content
-- `/learn` section with articles:
-  - "How much should I spend on rent?"
-  - "The 50/30/20 rule explained"
-  - "How to pick a 401(k) contribution percentage"
-  - "Comparing cost of living: California vs Georgia"
+### E9-T5 · Blog / educational content ✅ Done
+- `/learn` section with articles: ✅ Initial learn hub shipped with short practical guides tied to core planner concepts
+  - "How much should I spend on rent?" ✅
+  - "The 50/30/20 rule explained" ✅
+  - "How to pick a 401(k) contribution percentage" ✅
+  - "Comparing cost of living: California vs Georgia" ✅
 
 ---
 

@@ -5,12 +5,38 @@ import {
   decodeBudgetInputsFromShare,
   encodeBudgetInputsForShare,
   exportBudgetQuickSummary,
+  loadNamedBudgets,
   loadBudgetInputsFromShareUrl,
+  saveNamedBudget,
   SHARE_PAYLOAD_VERSION,
 } from '../storage';
 import { Buffer as NodeBuffer } from 'node:buffer';
 
 describe('shareable budget URL helpers', () => {
+  beforeEach(() => {
+    let store: Record<string, string> = {};
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (key: string) => store[key] ?? null,
+        setItem: (key: string, value: string) => {
+          store[key] = value;
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        },
+      },
+    });
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: globalThis,
+    });
+    globalThis.localStorage.clear();
+  });
+
   it('round-trips budget inputs through encoded payload', () => {
     const encoded = encodeBudgetInputsForShare(DEFAULT_INPUTS);
     const decoded = decodeBudgetInputsFromShare(encoded);
@@ -117,5 +143,22 @@ describe('shareable budget URL helpers', () => {
       globalThis.btoa = originalBtoa;
       globalThis.atob = originalAtob;
     }
+  });
+
+  it('normalizes saved budgets and preserves optional notes', () => {
+    saveNamedBudget({
+      id: 'budget-1',
+      name: 'Move Plan',
+      note: '  Keep daycare and boost the house fund.  ',
+      inputs: { ...DEFAULT_INPUTS, annualSalary: 200000 },
+      createdAt: '2026-09-15T00:00:00.000Z',
+    });
+
+    const saved = loadNamedBudgets();
+
+    expect(saved).toHaveLength(1);
+    expect(saved[0].note).toBe('Keep daycare and boost the house fund.');
+    expect(saved[0].inputs.annualSalary).toBe(200000);
+    expect(saved[0].inputs.payFrequency).toBe(DEFAULT_INPUTS.payFrequency);
   });
 });

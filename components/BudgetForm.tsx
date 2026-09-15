@@ -6,6 +6,7 @@ import type {
   CarSituation,
   DebtAccount,
   BonusTaxMode,
+  AnnualExpenseCategory,
   FilingStatus,
   HousingMode,
   LongTermGoalCategory,
@@ -13,6 +14,7 @@ import type {
   StateOfResidence,
 } from '@/types/budget';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
+import { ANNUAL_EXPENSE_MONTH_LABELS } from '@/lib/annualExpenses';
 import BudgetSection from './BudgetSection';
 import BudgetFieldInput from './BudgetFieldInput';
 import { STATE_LABELS, get401kLimit, ANNUAL_401K_CATCHUP_LIMIT } from '@/lib/taxCalculations';
@@ -62,6 +64,19 @@ const LONG_TERM_GOAL_OPTIONS: Array<{ value: LongTermGoalCategory; label: string
   { value: 'retirement', label: 'Retirement' },
   { value: 'kids', label: 'Kids' },
   { value: 'major_purchase', label: 'Major Purchase' },
+  { value: 'custom', label: 'Custom' },
+];
+
+const ANNUAL_EXPENSE_CATEGORY_OPTIONS: Array<{ value: AnnualExpenseCategory; label: string }> = [
+  { value: 'insurance', label: 'Insurance' },
+  { value: 'travel', label: 'Travel' },
+  { value: 'home', label: 'Home' },
+  { value: 'car', label: 'Car' },
+  { value: 'medical', label: 'Medical' },
+  { value: 'pets', label: 'Pets' },
+  { value: 'holidays', label: 'Holidays' },
+  { value: 'subscriptions', label: 'Subscriptions' },
+  { value: 'taxes_fees', label: 'Taxes & Fees' },
   { value: 'custom', label: 'Custom' },
 ];
 
@@ -330,6 +345,37 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           targetAmount: 10000,
           currentAmount: 0,
           targetDate: '',
+        },
+      ],
+    });
+  };
+
+  const updateAnnualExpense = (id: string, updates: Partial<BudgetInputs['annualExpenses'][number]>) => {
+    onChange({
+      annualExpenses: inputs.annualExpenses.map((expense) =>
+        expense.id === id ? { ...expense, ...updates } : expense
+      ),
+    });
+  };
+
+  const removeAnnualExpense = (id: string) => {
+    onChange({
+      annualExpenses: inputs.annualExpenses.filter((expense) => expense.id !== id),
+    });
+  };
+
+  const addAnnualExpense = () => {
+    onChange({
+      annualExpenses: [
+        ...inputs.annualExpenses,
+        {
+          id: crypto.randomUUID(),
+          name: `Annual Expense ${inputs.annualExpenses.length + 1}`,
+          category: 'custom',
+          annualAmount: 1200,
+          currentSaved: 0,
+          dueMonth: 12,
+          isEssential: false,
         },
       ],
     });
@@ -721,6 +767,110 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
             {field('extraDebtPayoff', 'Extra Debt Payoff')}
             {field('generalCashSavings', 'General Cash Savings')}
           </>
+        )}
+      </BudgetSection>
+
+      <BudgetSection title="Sinking Funds & Annual Expenses" icon="🗓️" defaultOpen={false}>
+        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-1">
+          <p className="text-sm text-gray-700">Reserve monthly cash for known non-monthly bills like car registration, vacations, insurance, and holiday spending.</p>
+          <p className="text-xs text-gray-500">These set-asides reduce your monthly buffer now so the annual bill does not become a surprise later.</p>
+        </div>
+
+        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+          <button
+            type="button"
+            onClick={addAnnualExpense}
+            className="px-2.5 py-1 text-xs font-medium rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            + Add Annual Expense
+          </button>
+        </div>
+
+        {inputs.annualExpenses.length === 0 ? (
+          <p className="text-xs text-gray-500 px-2">No annual expenses yet. Add recurring costs to build sinking funds automatically.</p>
+        ) : (
+          inputs.annualExpenses.map((expense) => (
+            <div key={expense.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor={`annual-expense-name-${expense.id}`} className="text-sm text-gray-700">Expense Name</label>
+                <button
+                  type="button"
+                  onClick={() => removeAnnualExpense(expense.id)}
+                  className="text-xs font-medium text-red-600 hover:text-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+              <input
+                id={`annual-expense-name-${expense.id}`}
+                type="text"
+                value={expense.name}
+                onChange={(e) => updateAnnualExpense(expense.id, { name: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label htmlFor={`annual-expense-category-${expense.id}`} className="text-xs text-gray-500 block mb-1">Category</label>
+                  <select
+                    id={`annual-expense-category-${expense.id}`}
+                    value={expense.category}
+                    onChange={(e) => updateAnnualExpense(expense.id, { category: e.target.value as AnnualExpenseCategory })}
+                    className="w-full text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    {ANNUAL_EXPENSE_CATEGORY_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor={`annual-expense-due-${expense.id}`} className="text-xs text-gray-500 block mb-1">Due Month</label>
+                  <select
+                    id={`annual-expense-due-${expense.id}`}
+                    value={expense.dueMonth}
+                    onChange={(e) => updateAnnualExpense(expense.id, { dueMonth: Number(e.target.value) })}
+                    className="w-full text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    {ANNUAL_EXPENSE_MONTH_LABELS.map((label, index) => (
+                      <option key={label} value={index + 1}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label htmlFor={`annual-expense-amount-${expense.id}`} className="text-xs text-gray-500 block mb-1">Annual Amount</label>
+                  <input
+                    id={`annual-expense-amount-${expense.id}`}
+                    type="number"
+                    min="0"
+                    step="50"
+                    value={expense.annualAmount}
+                    onChange={(e) => updateAnnualExpense(expense.id, { annualAmount: Math.max(0, Number(e.target.value)) })}
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`annual-expense-saved-${expense.id}`} className="text-xs text-gray-500 block mb-1">Already Saved</label>
+                  <input
+                    id={`annual-expense-saved-${expense.id}`}
+                    type="number"
+                    min="0"
+                    step="50"
+                    value={expense.currentSaved}
+                    onChange={(e) => updateAnnualExpense(expense.id, { currentSaved: Math.max(0, Number(e.target.value)) })}
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+              </div>
+
+              <ToggleField
+                label="Essential recurring bill"
+                value={expense.isEssential}
+                onChange={(value) => updateAnnualExpense(expense.id, { isEssential: value })}
+                description="Include this in emergency-fund planning because it behaves more like a required bill than discretionary spending."
+              />
+            </div>
+          ))
         )}
       </BudgetSection>
 

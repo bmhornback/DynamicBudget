@@ -7,6 +7,7 @@ import type { BudgetBreakdown, BudgetInputs, Recommendation } from '@/types/budg
 import { BUDGET_THRESHOLDS, ANNUAL_401K_LIMIT } from './budgetCalculations';
 import { formatCurrency } from './formatters';
 import { calculateLongTermGoalProjections, MONTHLY_COMPARISON_EPSILON } from './longTermGoals';
+import { calculateAnnualExpensePlan } from './annualExpenses';
 import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
@@ -26,6 +27,7 @@ export function generateRecommendations(
   const housingFundLabel = inputs.housingMode === 'homeowner' ? 'home equity fund' : 'house fund';
   const housingFundLabelTitleCase = housingFundLabel.charAt(0).toUpperCase() + housingFundLabel.slice(1);
   const goalProjections = calculateLongTermGoalProjections(inputs, breakdown);
+  const annualExpensePlan = calculateAnnualExpensePlan(inputs.annualExpenses ?? []);
 
   const {
     primaryHousingPaymentAsPercentGross,
@@ -39,6 +41,7 @@ export function generateRecommendations(
     deficit,
     surplus,
     totalLifestyle,
+    totalSinkingFunds,
   } = breakdown;
 
   // ── Over/Under budget ─────────────────────────────────────────────────────
@@ -130,6 +133,25 @@ export function generateRecommendations(
       message: `${housingFundLabelTitleCase} is $${(annualHouseFund / 12).toFixed(0)}/month ($${annualHouseFund.toFixed(0)}/year).`,
       detail: 'In a high-cost market like San Diego, a larger monthly contribution may be needed.',
     });
+  }
+
+  if (annualExpensePlan.length > 0) {
+    const underfundedDueSoon = annualExpensePlan.filter((expense) => expense.isDueSoon && !expense.isFullyFunded);
+    if (underfundedDueSoon.length > 0) {
+      recs.push({
+        id: 'annual_expense_due_soon',
+        severity: 'warning',
+        message: `${underfundedDueSoon.length} annual expense ${underfundedDueSoon.length === 1 ? 'is' : 'are'} due within 3 months and not fully funded.`,
+        detail: `${formatCurrency(underfundedDueSoon.reduce((sum, expense) => sum + expense.remainingAmount, 0))} is still needed across those near-term bills.`,
+      });
+    } else if (totalSinkingFunds > 0) {
+      recs.push({
+        id: 'annual_expense_planning',
+        severity: 'success',
+        message: `You are reserving ${formatCurrency(totalSinkingFunds)}/month for recurring annual expenses.`,
+        detail: 'That helps smooth out insurance, maintenance, travel, and other non-monthly costs.',
+      });
+    }
   }
 
   // ── Long-term goals ────────────────────────────────────────────────────────
@@ -276,4 +298,3 @@ export function generateRecommendations(
 
   return recs;
 }
-

@@ -65,6 +65,8 @@ describe('DynamicBudget page smoke test', () => {
 
     expect(screen.getByRole('heading', { name: 'DynamicBudget' })).toBeTruthy();
     expect(screen.getByText(/^Surplus:/)).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: 'Learn budgeting concepts' }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: '💬 Feedback' })).toBeTruthy();
   });
 
   it('toggles between the form and dashboard on mobile swipe gestures', () => {
@@ -112,5 +114,34 @@ describe('DynamicBudget page smoke test', () => {
     fireEvent.touchEnd(panel);
 
     expect(screen.getByRole('button', { name: 'Show dashboard panel' })).toBeTruthy();
+  });
+
+  it('renders sinking-fund planning when annual expenses exist', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      annualExpenses: [
+        {
+          id: 'registration',
+          name: 'Car Registration',
+          category: 'car' as const,
+          annualAmount: 600,
+          currentSaved: 100,
+          dueMonth: 12,
+          isEssential: true,
+        },
+      ],
+    };
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      version: 1,
+      inputs,
+      timestamp: new Date().toISOString(),
+    }));
+
+    render(<DynamicBudgetPage />);
+
+    expect(screen.getAllByText('Sinking Funds & Annual Expenses').length).toBeGreaterThan(0);
+    expect(screen.getByText('Car Registration')).toBeTruthy();
+    expect(screen.getByText('Decision Support')).toBeTruthy();
   });
 });

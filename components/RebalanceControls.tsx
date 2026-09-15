@@ -60,6 +60,14 @@ export default function RebalanceControls({
           </span>
         </div>
 
+        <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+          <p className="font-medium">Planning guidance</p>
+          <p className="mt-1">
+            Auto mode, savings-by-percentage, and irregular-income analysis are advanced planning tools.
+            Use Manual mode when you want totals to update without changing your entered amounts.
+          </p>
+        </div>
+
         {/* Deficit strategy */}
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">

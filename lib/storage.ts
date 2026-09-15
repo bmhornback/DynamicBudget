@@ -5,6 +5,7 @@ import { calculateBudgetBreakdown } from './budgetCalculations';
 import { calculateBudgetHealthScore } from './budgetHealthScore';
 import { formatCurrency, formatPercent } from './formatters';
 import { STATE_LABELS } from './taxCalculations';
+import { ANNUAL_EXPENSE_MONTH_LABELS, calculateAnnualExpensePlan } from './annualExpenses';
 
 const STORAGE_KEY = 'dynamicbudget_budget_inputs';
 const NAMED_BUDGETS_KEY = 'dynamicbudget_named_budgets';
@@ -260,6 +261,17 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
         lines.push([esc('  Target Date'), esc(goal.targetDate), ''].join(','));
       }
     }
+
+    if (inputs.annualExpenses.length > 0) {
+      lines.push(sep, section('ANNUAL EXPENSES & SINKING FUNDS'));
+      for (const expense of inputs.annualExpenses) {
+        lines.push(title(`  ${expense.name} (${expense.category})`));
+        lines.push([esc('  Annual Amount'), esc(expense.annualAmount.toFixed(2)), ''].join(','));
+        lines.push([esc('  Saved So Far'), esc(expense.currentSaved.toFixed(2)), ''].join(','));
+        lines.push([esc('  Due Month'), esc(ANNUAL_EXPENSE_MONTH_LABELS[Math.max(0, Math.min(11, expense.dueMonth - 1))]), ''].join(','));
+        lines.push([esc('  Essential'), esc(expense.isEssential ? 'Yes' : 'No'), ''].join(','));
+      }
+    }
   }
 
   lines.push(
@@ -282,6 +294,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
  */
 export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
   const breakdown = calculateBudgetBreakdown(inputs);
+  const annualExpensePlan = calculateAnnualExpensePlan(inputs.annualExpenses ?? []);
   const healthScore = calculateBudgetHealthScore(breakdown).score;
   const annualNetIncome = breakdown.netMonthlyIncome * 12;
   const toReadableLabel = (value: string): string =>
@@ -315,9 +328,16 @@ export function exportBudgetQuickSummary(inputs: BudgetInputs): string {
     row('Savings', breakdown.totalSavings, breakdown.totalSavings * 12),
     row('Investments', breakdown.totalInvestments, breakdown.totalInvestments * 12),
     row('Debt Payoff', breakdown.totalDebtPayoff, breakdown.totalDebtPayoff * 12),
+    row('Sinking Funds', breakdown.totalSinkingFunds, breakdown.totalSinkingFunds * 12),
     row('Total Allocated', breakdown.totalAllocated, breakdown.totalAllocated * 12),
     row('Remaining Buffer', breakdown.remainingMonthlyBuffer, breakdown.remainingMonthlyBuffer * 12),
     '',
+    ...(annualExpensePlan.length > 0
+      ? [
+          `Annual Expenses Planned: ${annualExpensePlan.length} item${annualExpensePlan.length === 1 ? '' : 's'} · ${formatCurrency(breakdown.totalAnnualRecurringExpenses)}/yr · ${formatCurrency(breakdown.totalSinkingFunds)}/mo reserved`,
+          '',
+        ]
+      : []),
     statusLine,
   ].join('\n');
 }
@@ -373,6 +393,19 @@ function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
   }
   if (!Array.isArray(mergedInputs.debts)) {
     mergedInputs.debts = [];
+  }
+  if (!Array.isArray(mergedInputs.annualExpenses)) {
+    mergedInputs.annualExpenses = [];
+  } else {
+    mergedInputs.annualExpenses = mergedInputs.annualExpenses.map((expense, index) => ({
+      id: typeof expense.id === 'string' && expense.id.trim() ? expense.id : `annual_expense_${index}`,
+      name: typeof expense.name === 'string' && expense.name.trim() ? expense.name : `Annual Expense ${index + 1}`,
+      category: expense.category ?? 'custom',
+      annualAmount: Math.max(0, Number(expense.annualAmount) || 0),
+      currentSaved: Math.max(0, Number(expense.currentSaved) || 0),
+      dueMonth: Math.min(12, Math.max(1, Number(expense.dueMonth) || 12)),
+      isEssential: Boolean(expense.isEssential),
+    }));
   }
   if (!Array.isArray(mergedInputs.longTermGoals)) {
     mergedInputs.longTermGoals = DEFAULT_INPUTS.longTermGoals.map(g => ({ ...g }));
@@ -533,7 +566,7 @@ export function loadNamedBudgets(): NamedBudget[] {
       }
     }
     if (stored === null || stored.trim() === '') return [];
-    return JSON.parse(stored) as NamedBudget[];
+    return normalizeNamedBudgets(JSON.parse(stored));
   } catch {
     return [];
   }
@@ -546,11 +579,16 @@ export function saveNamedBudget(budget: NamedBudget): void {
   if (typeof window === 'undefined') return;
   try {
     const existing = loadNamedBudgets();
+    const normalizedBudget: NamedBudget = {
+      ...budget,
+      note: budget.note?.trim() || undefined,
+      inputs: normalizeBudgetInputs(budget.inputs),
+    };
     const idx = existing.findIndex((b) => b.id === budget.id);
     if (idx >= 0) {
-      existing[idx] = budget;
+      existing[idx] = normalizedBudget;
     } else {
-      existing.push(budget);
+      existing.push(normalizedBudget);
     }
     localStorage.setItem(NAMED_BUDGETS_KEY, JSON.stringify(existing));
   } catch (error) {
@@ -569,6 +607,22 @@ export function deleteNamedBudget(id: string): void {
   } catch (error) {
     console.warn('Failed to delete named budget:', error);
   }
+}
+
+function normalizeNamedBudgets(rawBudgets: unknown): NamedBudget[] {
+  if (!Array.isArray(rawBudgets)) return [];
+
+  return rawBudgets
+    .filter((budget): budget is Partial<NamedBudget> => typeof budget === 'object' && budget !== null)
+    .map((budget, index) => ({
+      id: typeof budget.id === 'string' && budget.id.trim() ? budget.id : `named_budget_${index}`,
+      name: typeof budget.name === 'string' && budget.name.trim() ? budget.name : `Saved Budget ${index + 1}`,
+      note: typeof budget.note === 'string' && budget.note.trim() ? budget.note.trim() : undefined,
+      inputs: normalizeBudgetInputs(budget.inputs),
+      createdAt: typeof budget.createdAt === 'string' && budget.createdAt.trim()
+        ? budget.createdAt
+        : new Date(0).toISOString(),
+    }));
 }
 
 // ─── Custom Scenario Presets (E2-T4) ─────────────────────────────────────────

@@ -73,4 +73,47 @@ describe('recommendations', () => {
 
     expect(recommendations.map((recommendation) => recommendation.id)).toContain('goal_missing_deadline');
   });
+
+  it('flags underfunded annual expenses that are due soon', () => {
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      annualExpenses: [
+        {
+          id: 'insurance',
+          name: 'Car Insurance',
+          category: 'insurance' as const,
+          annualAmount: 1200,
+          currentSaved: 0,
+          dueMonth: new Date().getMonth() + 1,
+          isEssential: true,
+        },
+      ],
+    };
+
+    const recommendations = generateRecommendations(inputs, calculateBudgetBreakdown(inputs));
+
+    expect(recommendations.map((recommendation) => recommendation.id)).toContain('annual_expense_due_soon');
+  });
+
+  it('acknowledges annual expense planning when recurring bills are funded over time', () => {
+    const laterInYear = ((new Date().getMonth() + 5) % 12) + 1;
+    const inputs = {
+      ...DEFAULT_INPUTS,
+      annualExpenses: [
+        {
+          id: 'travel',
+          name: 'Travel',
+          category: 'travel' as const,
+          annualAmount: 1200,
+          currentSaved: 900,
+          dueMonth: laterInYear,
+          isEssential: false,
+        },
+      ],
+    };
+
+    const recommendations = generateRecommendations(inputs, calculateBudgetBreakdown(inputs));
+
+    expect(recommendations.map((recommendation) => recommendation.id)).toContain('annual_expense_planning');
+  });
 });
