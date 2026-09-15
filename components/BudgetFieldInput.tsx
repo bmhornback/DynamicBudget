@@ -131,7 +131,7 @@ export default function BudgetFieldInput({
             disabled={disabled}
             min={focused ? min : undefined}
             max={focused ? max : undefined}
-            step={focused ? '1' : undefined}
+            step={focused ? 'any' : undefined}
             aria-describedby={describedBy}
             className={`w-28 text-right text-sm rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
               prefix ? 'pl-6' : ''

@@ -8,7 +8,7 @@ import React from 'react';
  */
 export default function DashboardSkeleton() {
   return (
-    <div className="animate-pulse" aria-hidden="true">
+    <div className="animate-pulse" role="status" aria-label="Loading budget dashboard" aria-live="polite">
       {/* Header bar skeleton */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">

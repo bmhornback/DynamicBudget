@@ -360,7 +360,7 @@ export default function DynamicBudgetPage() {
       {/* Skeleton shown before client-side hydration completes (E6-T8) */}
       {!isMounted && <DashboardSkeleton />}
       {/* Full app — hidden from DOM until mounted to prevent layout shift */}
-      <div className={isMounted ? undefined : 'sr-only'}>
+      <div hidden={!isMounted}>
       {/* Header */}
       <header
         className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm"
