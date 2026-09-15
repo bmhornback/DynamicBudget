@@ -38,6 +38,7 @@ import ExpenseThresholdChart from './ExpenseThresholdChart';
 import SavingsProgressCard from './SavingsProgressCard';
 import { calculatePaycheckBreakdown } from '@/lib/paycheckCalculations';
 import { calculateIrregularIncomeAnalysis } from '@/lib/irregularIncome';
+import { useCountUp } from '@/lib/useCountUp';
 
 interface BudgetDashboardProps {
   breakdown: BudgetBreakdown;
@@ -100,24 +101,32 @@ export default function BudgetDashboard({
         <StatPill
           label="Take-Home"
           value={formatCurrency(netMonthlyIncome)}
+          rawValue={netMonthlyIncome}
+          formatValue={formatCurrency}
           sub="per month"
           color="blue"
         />
         <StatPill
           label="Total Spending"
           value={formatCurrency(breakdown.totalAllocated)}
+          rawValue={breakdown.totalAllocated}
+          formatValue={formatCurrency}
           sub="per month"
           color={isOverBudget ? 'red' : 'gray'}
         />
         <StatPill
           label="Savings Rate"
           value={formatPercent(breakdown.savingsRateGross)}
+          rawValue={breakdown.savingsRateGross}
+          formatValue={formatPercent}
           sub="of gross income"
           color={breakdown.savingsRateGross >= 0.15 ? 'green' : 'amber'}
         />
         <StatPill
           label="Health Score"
           value={`${healthScore.score}`}
+          rawValue={healthScore.score}
+          formatValue={(n) => `${Math.round(n)}`}
           sub={healthScore.label}
           color={
             healthScore.score >= 75 ? 'green' : healthScore.score >= 60 ? 'amber' : 'red'
@@ -165,12 +174,19 @@ function StatPill({
   value,
   sub,
   color,
+  rawValue,
+  formatValue,
 }: {
   label: string;
   value: string;
   sub: string;
   color: 'blue' | 'green' | 'amber' | 'red' | 'gray';
+  rawValue?: number;
+  formatValue?: (n: number) => string;
 }) {
+  const animated = useCountUp(rawValue ?? 0);
+  const displayValue =
+    rawValue !== undefined && formatValue ? formatValue(animated) : value;
   const colorMap = {
     blue: 'bg-blue-50 border-blue-100 text-blue-700',
     green: 'bg-green-50 border-green-100 text-green-700',
@@ -182,7 +198,7 @@ function StatPill({
   return (
     <div className={`rounded-xl border p-3 ${colorMap[color]}`}>
       <p className="text-xs font-medium opacity-70 mb-1">{label}</p>
-      <p className="text-xl font-bold">{value}</p>
+      <p className="text-xl font-bold tabular-nums">{displayValue}</p>
       <p className="text-xs opacity-60 mt-0.5">{sub}</p>
     </div>
   );

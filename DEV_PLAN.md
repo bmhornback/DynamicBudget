@@ -480,11 +480,11 @@ States to add (in priority order based on population and no-income-tax interest)
 - Inline field validation (e.g., warn if rent > monthly income) ✅ Done — rent warns at >50% of gross monthly
 - `Tab` key increments numeric inputs (deferred)
 
-### E6-T6 · Animations and transitions
-- Smooth number transitions when values change (count-up animation)
-- Card entrance animations on initial load
-- Rebalance result fade-in
-- Health score gauge animation
+### E6-T6 · Animations and transitions ✅ Done
+- Smooth number transitions when values change (count-up animation) ✅ `lib/useCountUp.ts` — cubic ease-out rAF hook, respects `prefers-reduced-motion`
+- Card entrance animations on initial load ✅ `@keyframes card-enter` in `globals.css`, applied via `.animate-card-enter` on every `BudgetCard`
+- Rebalance result fade-in ✅ `.animate-fade-in` applied to rebalance result block in `RebalanceControls.tsx`
+- Health score gauge animation ✅ CSS `transition: stroke-dasharray 0.6s ease` on SVG arc in `BudgetHealthScore.tsx`; count-up on gauge number via `useCountUp`
 
 ### E6-T7 · Dark mode ✅ Done
 - Respect `prefers-color-scheme` system preference ✅ via `ThemeProvider.tsx`

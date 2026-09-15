@@ -38,6 +38,40 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 }
 
+/* ── Card entrance animation ────────────────────────────────────────────── */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-enter {
+  animation: card-enter 0.35s ease-out both;
+}
+
+/* ── Fade-in (used for rebalance result, banners, etc.) ─────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+
+/* Disable entrance / fade animations when reduced-motion is requested */
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-enter,
+  .animate-fade-in {
+    animation: none !important;
+  }
+}
+
 @media print {
   html,
   body {

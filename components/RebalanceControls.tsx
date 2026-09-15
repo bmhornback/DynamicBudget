@@ -111,7 +111,7 @@ export default function RebalanceControls({
 
         {/* Rebalance result */}
         {rebalanceResult && (
-          <div className={`p-3 rounded-lg text-sm ${
+          <div key={rebalanceResult.message} className={`p-3 rounded-lg text-sm animate-fade-in ${
             rebalanceResult.success
               ? 'bg-green-50 border border-green-200 text-green-800'
               : 'bg-amber-50 border border-amber-200 text-amber-800'
