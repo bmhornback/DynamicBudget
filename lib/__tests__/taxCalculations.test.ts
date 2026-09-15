@@ -280,7 +280,7 @@ describe('taxCalculations', () => {
 
     it('should apply 22% federal withholding model to bonus when enabled', () => {
       const resultBlended = calculateNetMonthlyIncome(
-        100000,
+        300000,
         'single',
         'GA',
         10000,
@@ -294,7 +294,7 @@ describe('taxCalculations', () => {
       );
 
       const resultLumpSum = calculateNetMonthlyIncome(
-        100000,
+        300000,
         'single',
         'GA',
         10000,
@@ -307,7 +307,7 @@ describe('taxCalculations', () => {
         'lump_sum_withholding'
       );
 
-      const expectedFederalLumpSum = federalIncomeTaxEstimate(100000, 'single', 10000) + 20000 * 0.22;
+      const expectedFederalLumpSum = federalIncomeTaxEstimate(300000, 'single', 10000) + 20000 * 0.22;
       expect(resultLumpSum.federalTaxAnnual).toBeCloseTo(expectedFederalLumpSum, 2);
       expect(resultLumpSum.federalTaxAnnual).not.toBeCloseTo(resultBlended.federalTaxAnnual, 2);
       expect(resultLumpSum.totalTaxAnnual).toBeGreaterThan(0);
