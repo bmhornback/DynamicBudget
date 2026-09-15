@@ -1,7 +1,7 @@
 import { buildMetadata, SITE_URL } from '@/lib/seo';
 import { buildStaticSitePathConfig, SITE_BASE_PATH } from '@/lib/siteConfig';
 
-describe('seo metadata helpers', () => {
+describe('buildMetadata', () => {
   it('preserves the project subpath in canonical and Open Graph URLs', () => {
     const homeMetadata = buildMetadata({
       title: 'Home',
@@ -25,7 +25,9 @@ describe('seo metadata helpers', () => {
       }).alternates?.canonical
     ).toBe(`${SITE_URL}/learn`);
   });
+});
 
+describe('buildStaticSitePathConfig', () => {
   it('uses the GitHub Pages base path for production exports', () => {
     expect(buildStaticSitePathConfig('production')).toEqual({
       basePath: SITE_BASE_PATH,
