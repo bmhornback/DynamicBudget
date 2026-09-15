@@ -52,7 +52,7 @@ export default function RebalanceControls({
           }`}>
             {inputs.budgetMode === 'auto' ? '⚡ Auto Mode' : '✋ Manual Mode'}
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-500">
             {inputs.budgetMode === 'auto'
               ? 'Automatically adjusts unlocked fields when budget changes.'
               : 'Only recalculates. Fields not auto-adjusted.'}

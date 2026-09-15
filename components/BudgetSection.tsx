@@ -31,7 +31,7 @@ export default function BudgetSection({
         onClick={() => setIsOpen((o) => !o)}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="w-full flex items-center justify-between py-2 px-1 text-left group"
+        className="w-full flex items-center justify-between py-2 px-1 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded"
       >
         <div className="flex items-center gap-2">
           {icon && <span className="text-lg">{icon}</span>}

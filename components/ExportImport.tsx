@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { BudgetInputs } from '@/types/budget';
 import {
   exportBudgetAsJSON,
@@ -23,21 +23,38 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
   const [importError, setImportError] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   const handleExportJSON = () => {
     const json = exportBudgetAsJSON(currentInputs);
     triggerDownload(json, `dynamicbudget-budget-${todayDateStr()}.json`, 'application/json');
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const handleExportCSV = () => {
     const csv = exportBudgetAsCSV(currentInputs);
     triggerDownload(csv, `dynamicbudget-budget-${todayDateStr()}.csv`, 'text/csv');
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const handleExportPDF = () => {
     setOpen(false);
+    triggerRef.current?.focus();
     onExportPDF();
   };
 
@@ -93,6 +110,7 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
         onImport(imported);
         setOpen(false);
         setImportError(null);
+        triggerRef.current?.focus();
       } else {
         setImportError('The file is incompatible or from a different version. Please export a fresh copy.');
       }
@@ -109,11 +127,12 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
   return (
     <div className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => { setOpen((v) => !v); setImportError(null); setShareMessage(null); }}
         aria-label="Export or import budget"
         aria-expanded={open}
-        className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all"
+        className="px-3 py-1.5 rounded-full text-xs font-medium border bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       >
         ↕ Export / Import
       </button>
@@ -136,46 +155,46 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
             <button
               type="button"
               onClick={handleExportPDF}
-              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-gray-800 dark:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
             >
               🖨️ Export as PDF
-              <span className="block text-xs text-gray-400 dark:text-gray-500">Print-friendly dashboard summary</span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">Print-friendly dashboard summary</span>
             </button>
 
             <button
               type="button"
               onClick={handleExportJSON}
-              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-800 dark:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
             >
               📄 Export as JSON
-              <span className="block text-xs text-gray-400 dark:text-gray-500">Full backup — re-importable</span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">Full backup — re-importable</span>
             </button>
 
             <button
               type="button"
               onClick={handleExportCSV}
-              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-800 dark:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
             >
               📊 Export as CSV
-              <span className="block text-xs text-gray-400 dark:text-gray-500">Monthly &amp; annual columns</span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">Monthly &amp; annual columns</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopyShareLink}
-              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-gray-800 dark:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
             >
               🔗 Copy Share Link
-              <span className="block text-xs text-gray-400 dark:text-gray-500">Loads this budget directly from URL</span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">Loads this budget directly from URL</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopySummary}
-              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-gray-800 dark:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
             >
               📝 Copy Summary
-              <span className="block text-xs text-gray-400 dark:text-gray-500">Plain-text budget summary for Slack/Notion</span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">Plain-text budget summary for Slack/Notion</span>
             </button>
 
             {shareMessage && (
@@ -200,10 +219,10 @@ export default function ExportImport({ currentInputs, onImport, onExportPDF }: E
               <button
                 type="button"
                 onClick={handleImportClick}
-                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 text-gray-800 dark:text-gray-200 transition-colors"
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 text-gray-800 dark:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
               >
                 📂 Import JSON
-                <span className="block text-xs text-gray-400 dark:text-gray-500">Restore a previous backup</span>
+                <span className="block text-xs text-gray-500 dark:text-gray-400">Restore a previous backup</span>
               </button>
 
               {importError && (

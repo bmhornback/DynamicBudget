@@ -48,7 +48,7 @@ function ScenarioColumn({
       <p className="text-[10px] text-gray-500 dark:text-gray-400">{percentile}th percentile</p>
       <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 mt-1">
         {formatCurrency(grossMonthly)}
-        <span className="text-xs font-normal text-gray-400"> gross/mo</span>
+        <span className="text-xs font-normal text-gray-500"> gross/mo</span>
       </p>
       <p className="text-xs text-gray-600 dark:text-gray-300">
         {formatCurrency(netMonthly)} take-home
@@ -131,8 +131,9 @@ export default function IrregularIncomeCard({ analysis }: IrregularIncomeCardPro
 
           {atRiskExpenses.length > 5 && (
             <button
+              type="button"
               onClick={() => setShowAll((prev) => !prev)}
-              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             >
               {showAll ? 'Show less' : `Show ${atRiskExpenses.length - 5} more`}
             </button>

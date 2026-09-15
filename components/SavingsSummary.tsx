@@ -26,10 +26,10 @@ function SavingsRow({ label, monthly, annual, rate, highlight }: {
           {formatCurrency(monthly)}/mo
         </span>
         {annual !== undefined && (
-          <span className="block text-xs text-gray-400">{formatCurrency(annual)}/yr</span>
+          <span className="block text-xs text-gray-500">{formatCurrency(annual)}/yr</span>
         )}
         {rate !== undefined && (
-          <span className="block text-xs text-gray-400">{formatPercent(rate)} of gross</span>
+          <span className="block text-xs text-gray-500">{formatPercent(rate)} of gross</span>
         )}
       </div>
     </div>
@@ -67,7 +67,7 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
   const bufferColor = isOverBudget
     ? 'text-red-600'
     : remainingMonthlyBuffer < 250
-    ? 'text-amber-600'
+    ? 'text-amber-700'
     : 'text-green-600';
 
   return (
@@ -143,11 +143,11 @@ export default function SavingsSummary({ breakdown, inputs }: SavingsSummaryProp
             <span className="text-sm text-gray-900">Total Annual Savings</span>
             <span className="text-sm tabular-nums">{formatCurrency(totalAnnualSavingsIncludingRetirement)}</span>
           </div>
-          <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+          <div className="flex justify-between text-xs text-gray-500 mt-0.5">
             <span>Savings rate (gross)</span>
             <span>{formatPercent(savingsRateGross)}</span>
           </div>
-          <div className="flex justify-between text-xs text-gray-400">
+          <div className="flex justify-between text-xs text-gray-500">
             <span>Savings rate (net)</span>
             <span>{formatPercent(savingsRateNet)}</span>
           </div>

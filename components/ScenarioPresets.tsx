@@ -59,7 +59,7 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset, currentI
           onClick={() => onApplyPreset(applyScenarioPreset(preset.inputs), preset.id)}
           title={preset.description}
           aria-pressed={currentPreset === preset.id}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
             currentPreset === preset.id
               ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'
@@ -77,7 +77,7 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset, currentI
             onClick={() => onApplyPreset(applyScenarioPreset(preset.inputs), preset.id)}
             aria-pressed={currentPreset === preset.id}
             title={`Custom preset: ${preset.name}`}
-            className={`px-3 py-1.5 rounded-l-full text-xs font-medium border transition-all ${
+            className={`px-3 py-1.5 rounded-l-full text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1 ${
               currentPreset === preset.id
                 ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
                 : 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500'
@@ -90,7 +90,7 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset, currentI
             onClick={() => handleDeleteCustomPreset(preset.id)}
             title={`Delete custom preset: ${preset.name}`}
             aria-label={`Delete preset ${preset.name}`}
-            className={`px-1.5 py-1.5 rounded-r-full text-xs border border-l-0 transition-all ${
+            className={`px-1.5 py-1.5 rounded-r-full text-xs border border-l-0 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 ${
               currentPreset === preset.id
                 ? 'bg-purple-700 text-white border-purple-600'
                 : 'bg-purple-50 dark:bg-purple-900/30 text-purple-400 dark:text-purple-500 border-purple-200 dark:border-purple-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-700'

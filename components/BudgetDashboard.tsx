@@ -77,7 +77,7 @@ export default function BudgetDashboard({
       <span className="text-2xl">⚠️</span>
       <div>
         <p className="font-bold text-amber-800">Thin Buffer: {formatCurrency(remainingMonthlyBuffer)}/month</p>
-        <p className="text-sm text-amber-600">Consider reducing some expenses for more breathing room.</p>
+        <p className="text-sm text-amber-700">Consider reducing some expenses for more breathing room.</p>
       </div>
     </div>
   ) : (
@@ -194,7 +194,7 @@ function DetailRow({ label, value, sub }: { label: string; value: string; sub?: 
       <span className="text-sm text-gray-600">{label}</span>
       <div className="text-right">
         <span className="text-sm font-medium tabular-nums text-gray-800">{value}</span>
-        {sub && <span className="block text-xs text-gray-400">{sub}</span>}
+        {sub && <span className="block text-xs text-gray-500 dark:text-gray-400">{sub}</span>}
       </div>
     </div>
   );
