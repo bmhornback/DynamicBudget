@@ -98,6 +98,7 @@ const COMPLETED_TASKS = {
 
   // Epic 9 — Growth & Discovery
   'E9-T1': 'Shared SEO metadata helper, JSON-LD, and static-export-safe robots/sitemap routes',
+  'E9-T2': 'Marketing landing page at `/`, budget planner moved to `/app`',
   'E9-T3': 'local-only aggregate analytics counters for presets, loads, rebalance runs, learn CTA clicks, and feedback submissions',
   'E9-T4': 'FeedbackWidget opens prefilled GitHub issues with optional budget-summary context',
   'E9-T5': 'app/learn/page.tsx and lib/learnContent.ts educational hub linked from the app shell',
