@@ -43,18 +43,20 @@ describe('budgetHealthScore', () => {
   });
 
   it('returns a Workable label for a mid-range budget', () => {
+    // 150k CA with 12% retirement → score in [60, 74] → 'Workable'
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 100000,
+      annualSalary: 150000,
+      retirementContributionPercent: 12,
       rent: 2200,
-      contribution401k: 500,
-      emergencyFundContribution: 150,
+      emergencyFundContribution: 300,
       houseDownPaymentContribution: 300,
-      taxableInvestments: 200,
+      taxableInvestments: 300,
     };
     const result = calculateBudgetHealthScore(calculateBudgetBreakdown(inputs));
-    expect(result.score).toBeGreaterThanOrEqual(0);
-    expect(result.label).toBeDefined();
+    expect(result.score).toBeGreaterThanOrEqual(60);
+    expect(result.score).toBeLessThan(75);
+    expect(result.label).toBe('Workable');
   });
 
   it('scores 0 for housing when housing is above 40% of gross', () => {
