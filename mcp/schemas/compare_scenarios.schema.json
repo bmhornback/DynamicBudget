@@ -150,7 +150,7 @@
       },
       "diffs": {
         "type": "array",
-        "description": "Differences between each non-baseline scenario and the baseline scenario. Empty for 2-scenario comparisons (use the scenarios array directly).",
+        "description": "Differences between each non-baseline scenario and the baseline scenario. Always contains one entry per non-baseline scenario (i.e., one entry for a 2-scenario comparison, two for a 3-scenario comparison, etc.).",
         "items": {
           "type": "object",
           "properties": {
