@@ -149,6 +149,8 @@ const COLI_SCALABLE_FIELDS: (keyof BudgetInputs)[] = [
   'diningOut',
   // Health
   'healthInsurance',
+  'dentalInsurance',
+  'visionInsurance',
   'prescriptions',
   'gymFitness',
   'therapyWellness',

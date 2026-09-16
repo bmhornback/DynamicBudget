@@ -90,7 +90,7 @@ export default function ExpenseSummary({ breakdown, inputs }: ExpenseSummaryProp
           percent={netMonthlyIncome > 0 ? totalGroceriesFood / netMonthlyIncome : 0}
         />
         <SummaryRow
-          label="Health & Medical"
+          label="Health, Medical & Insurance"
           value={totalHealth}
           percent={netMonthlyIncome > 0 ? totalHealth / netMonthlyIncome : 0}
         />

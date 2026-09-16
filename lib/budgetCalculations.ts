@@ -324,6 +324,9 @@ export function calculateBudgetBreakdown(inputs: BudgetInputs): BudgetBreakdown 
 
   const totalHealth =
     inputs.healthInsurance +
+    inputs.dentalInsurance +
+    inputs.visionInsurance +
+    inputs.lifeInsurance +
     inputs.prescriptions +
     inputs.gymFitness +
     inputs.therapyWellness;
