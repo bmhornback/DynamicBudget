@@ -129,7 +129,8 @@ describe('annualExpenses', () => {
     );
 
     expect(plan).toHaveLength(1);
-    expect(plan[0].dueMonth).toBe(12); // NaN → default 12
+    // annualExpenses.ts normalizes dueMonth before storing it on the plan object (line 45-60)
+    expect(plan[0].dueMonth).toBe(12); // NaN → normalized to default 12
   });
 
   it('totals sinking funds across multiple annual expenses', () => {
