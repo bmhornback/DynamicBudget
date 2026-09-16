@@ -294,6 +294,9 @@ export interface BudgetInputs {
 
   // Health
   healthInsurance: number;
+  dentalInsurance: number;
+  visionInsurance: number;
+  lifeInsurance: number;
   prescriptions: number;
   gymFitness: number;
   therapyWellness: number;

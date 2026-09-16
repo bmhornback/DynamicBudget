@@ -159,13 +159,16 @@ describe('budgetCalculations', () => {
       const inputs = {
         ...DEFAULT_INPUTS,
         healthInsurance: 200,
+        dentalInsurance: 30,
+        visionInsurance: 20,
+        lifeInsurance: 75,
         prescriptions: 50,
         gymFitness: 75,
         therapyWellness: 100,
       };
       const result = calculateBudgetBreakdown(inputs);
 
-      expect(result.totalHealth).toBeCloseTo(425, 0);
+      expect(result.totalHealth).toBeCloseTo(550, 0);
     });
 
     it('should calculate lifestyle expense total correctly', () => {

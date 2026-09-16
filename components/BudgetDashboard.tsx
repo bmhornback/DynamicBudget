@@ -285,6 +285,9 @@ function CoreExpensesDetail({ breakdown, inputs }: { breakdown: BudgetBreakdown;
       <DetailRow label="Dining Out" value={formatCurrency(inputs.diningOut)} />
       <DividerLine />
       <DetailRow label="Health Insurance" value={formatCurrency(inputs.healthInsurance)} />
+      <DetailRow label="Dental Insurance" value={formatCurrency(inputs.dentalInsurance)} />
+      <DetailRow label="Vision Insurance" value={formatCurrency(inputs.visionInsurance)} />
+      <DetailRow label="Life Insurance" value={formatCurrency(inputs.lifeInsurance)} />
       <DetailRow label="Prescriptions" value={formatCurrency(inputs.prescriptions)} />
       <DetailRow label="Gym / Fitness" value={formatCurrency(inputs.gymFitness)} />
     </BudgetCard>

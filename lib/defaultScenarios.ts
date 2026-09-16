@@ -81,6 +81,9 @@ export const DEFAULT_INPUTS: BudgetInputs = {
 
   // Health
   healthInsurance: 150,
+  dentalInsurance: 0,
+  visionInsurance: 0,
+  lifeInsurance: 0,
   prescriptions: 30,
   gymFitness: 50,
   therapyWellness: 0,

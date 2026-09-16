@@ -9,7 +9,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ### Core Capabilities
 - 📊 **Real-world tax modeling** — 2026 Federal, state (all 50 US states + DC), payroll, and supplemental income taxation (bonus/ESPP/RSU) with bonus mode toggle (blended annual vs federal 22% lump-sum withholding)
 - 💳 **Retirement-aware tax planning** — Traditional vs. Roth IRA support, HSA modeling, and deduction-aware recommendations
-- 💰 **Comprehensive expense tracking** — Housing, utilities, transport, pets, food, health, lifestyle, and more
+- 💰 **Comprehensive expense tracking** — Housing, utilities, transport, pets, food, health, lifestyle, and more (including separate health, dental, vision, and life insurance inputs)
 - 🎯 **Smart budget modes** — Auto-mode (AI recommendations) or manual mode for full control
 - 🔄 **Dynamic rebalancing** — 6 rebalancing strategies to optimize your budget allocation
 - 📈 **Budget health score** — 0–100 rating with actionable recommendations
