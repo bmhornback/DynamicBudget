@@ -73,7 +73,7 @@ export function calculateAnnualExpensePlan(
 
 /**
  * Sum the recommended monthly sinking-fund contributions across all annual expenses.
- * Equivalent to `calculateAnnualExpensePlan(expenses).reduce(sum, recommendedMonthlyContribution)`.
+ * Equivalent to `calculateAnnualExpensePlan(expenses, now).reduce((sum, e) => sum + e.recommendedMonthlyContribution, 0)`.
  */
 export function calculateTotalSinkingFunds(expenses: AnnualExpense[], now = new Date()): number {
   return calculateAnnualExpensePlan(expenses, now).reduce(

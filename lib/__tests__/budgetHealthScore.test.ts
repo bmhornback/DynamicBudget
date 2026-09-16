@@ -61,18 +61,12 @@ describe('budgetHealthScore', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
       annualSalary: 50000,
-      rent: 2500, // > 40% of monthly gross (~$4,167)
-      contribution401k: 0,
-      emergencyFundContribution: 0,
-      houseDownPaymentContribution: 0,
-      taxableInvestments: 0,
-      generalCashSavings: 0,
+      rent: 2500, // 2500 / (50000/12) = 60% of gross > 40%
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (breakdown.primaryHousingPaymentAsPercentGross > 0.40) {
-      const result = calculateBudgetHealthScore(breakdown);
-      expect(result.breakdown.housingAffordability).toBe(0);
-    }
+    expect(breakdown.primaryHousingPaymentAsPercentGross).toBeGreaterThan(0.40);
+    const result = calculateBudgetHealthScore(breakdown);
+    expect(result.breakdown.housingAffordability).toBe(0);
   });
 
   it('scores 20 for housing when housing is at or below 25% of gross', () => {
@@ -120,10 +114,9 @@ describe('budgetHealthScore', () => {
       emergencyFundContribution: 500,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (breakdown.remainingMonthlyBuffer < 0) {
-      const result = calculateBudgetHealthScore(breakdown);
-      expect(result.breakdown.monthlyBuffer).toBe(0);
-    }
+    expect(breakdown.remainingMonthlyBuffer).toBeLessThan(0);
+    const result = calculateBudgetHealthScore(breakdown);
+    expect(result.breakdown.monthlyBuffer).toBe(0);
   });
 
   it('includes all breakdown sub-scores', () => {

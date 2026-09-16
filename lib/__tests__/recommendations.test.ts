@@ -36,21 +36,14 @@ describe('recommendations', () => {
   });
 
   it('flags low buffer when budget is tight but not over', () => {
-    const inputs = {
-      ...DEFAULT_INPUTS,
-      annualSalary: 75000,
-      rent: 2500,
-      emergencyFundContribution: 50,
-      contribution401k: 200,
-      taxableInvestments: 0,
-      houseDownPaymentContribution: 0,
-      generalCashSavings: 0,
-    };
+    // DEFAULT_INPUTS runs slightly over budget. Adding $700/month other income brings the
+    // buffer into the 0–249 range (verified to be ~$69/month), triggering low_buffer.
+    const inputs = { ...DEFAULT_INPUTS, otherMonthlyIncome: 700 };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (breakdown.remainingMonthlyBuffer < 100 && breakdown.remainingMonthlyBuffer >= 0) {
-      const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
-      expect(ids).toContain('low_buffer');
-    }
+    expect(breakdown.remainingMonthlyBuffer).toBeGreaterThanOrEqual(0);
+    expect(breakdown.remainingMonthlyBuffer).toBeLessThan(250);
+    const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
+    expect(ids).toContain('low_buffer');
   });
 
   it('generates surplus recommendation when budget has room', () => {
@@ -58,7 +51,6 @@ describe('recommendations', () => {
       ...DEFAULT_INPUTS,
       annualSalary: 200000,
       rent: 1000,
-      contribution401k: 500,
       emergencyFundContribution: 200,
       taxableInvestments: 0,
       houseDownPaymentContribution: 0,
@@ -94,37 +86,35 @@ describe('recommendations', () => {
       annualSalary: 60000,
       petsEnabled: true,
       petFood: 800,
-      petVetCare: 400,
-      petDaycare: 600,
-      petMisc: 200,
+      vetMedications: 400,
+      dogDaycare: 600,
+      groomingSupplies: 200,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (breakdown.petCostsAsPercentTakeHome > 0.10) {
-      const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
-      expect(ids).toContain('pet_costs_high');
-    }
+    expect(breakdown.petCostsAsPercentTakeHome).toBeGreaterThan(0.15);
+    const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
+    expect(ids).toContain('pet_costs_high');
   });
 
   it('flags high car costs', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
       annualSalary: 60000,
-      carLoanPayment: 1200,
+      carPayment: 1200,
       carInsurance: 400,
-      gasAndParking: 300,
+      fuel: 300,
       carMaintenance: 200,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (breakdown.carCostsAsPercentTakeHome > 0.20) {
-      const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
-      expect(ids).toContain('car_costs_high');
-    }
+    expect(breakdown.carCostsAsPercentTakeHome).toBeGreaterThan(0.15);
+    const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
+    expect(ids).toContain('car_costs_high');
   });
 
   it('flags high lifestyle spending', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 60000,
+      annualSalary: 80000,
       diningOut: 1500,
       funEntertainment: 1500,
       clothing: 500,
@@ -135,10 +125,9 @@ describe('recommendations', () => {
     const lifestyleRate = breakdown.netMonthlyIncome > 0
       ? breakdown.totalLifestyle / breakdown.netMonthlyIncome
       : 0;
-    if (lifestyleRate > 0.40) {
-      const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
-      expect(ids).toContain('lifestyle_high');
-    }
+    expect(lifestyleRate).toBeGreaterThan(0.30);
+    const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
+    expect(ids).toContain('lifestyle_high');
   });
 
   it('flags budget_risky for very high housing + low retirement + thin buffer', () => {
@@ -146,7 +135,7 @@ describe('recommendations', () => {
       ...DEFAULT_INPUTS,
       annualSalary: 72000,
       rent: 2800,
-      contribution401k: 100,
+      retirementContributionPercent: 1, // 1% → well below 10%
       emergencyFundContribution: 50,
       taxableInvestments: 0,
       houseDownPaymentContribution: 0,
@@ -154,37 +143,33 @@ describe('recommendations', () => {
       iraContribution: 0,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (
-      breakdown.primaryHousingPaymentAsPercentGross > 0.35 &&
-      breakdown.retirement.retirementSavingsRate < 0.10 &&
-      breakdown.remainingMonthlyBuffer < 200
-    ) {
-      const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
-      expect(ids).toContain('budget_risky');
-    }
+    expect(breakdown.primaryHousingPaymentAsPercentGross).toBeGreaterThan(0.35);
+    expect(breakdown.retirement.retirementSavingsRate).toBeLessThan(0.10);
+    expect(breakdown.remainingMonthlyBuffer).toBeLessThan(200);
+    const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
+    expect(ids).toContain('budget_risky');
   });
 
   it('flags budget_healthy for a well-structured budget', () => {
+    // salary=160000 TX (no state income tax) with 15% retirement → 401k=$24k/year (15% of gross, under cap)
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 200000,
+      annualSalary: 160000,
+      state: 'TX' as const,
+      retirementContributionPercent: 15,
       rent: 2000,
-      contribution401k: 2041, // ~maxing out ($24,500/yr)
       emergencyFundContribution: 500,
       taxableInvestments: 500,
       houseDownPaymentContribution: 500,
-      generalCashSavings: 500,
+      generalCashSavings: 0,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (
-      !breakdown.isOverBudget &&
-      breakdown.remainingMonthlyBuffer >= 100 &&
-      breakdown.retirement.isSaving15Percent &&
-      breakdown.primaryHousingPaymentAsPercentGross <= 0.30
-    ) {
-      const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
-      expect(ids).toContain('budget_healthy');
-    }
+    expect(breakdown.isOverBudget).toBe(false);
+    expect(breakdown.remainingMonthlyBuffer).toBeGreaterThanOrEqual(250);
+    expect(breakdown.retirement.isSaving15Percent).toBe(true);
+    expect(breakdown.primaryHousingPaymentAsPercentGross).toBeLessThanOrEqual(0.30);
+    const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
+    expect(ids).toContain('budget_healthy');
   });
 
   it('warns when Traditional IRA income is in the partial phase-out range (single)', () => {
