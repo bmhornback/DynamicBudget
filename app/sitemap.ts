@@ -10,6 +10,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
     },
     {
+      url: `${SITE_URL}/app`,
+      lastModified: new Date(),
+    },
+    {
       url: `${SITE_URL}/learn`,
       lastModified: new Date(),
     },

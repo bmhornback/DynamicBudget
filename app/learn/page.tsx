@@ -28,7 +28,7 @@ export default function LearnPage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href="/"
+              href="/app"
               className="rounded-full bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"
             >
               Open the planner
