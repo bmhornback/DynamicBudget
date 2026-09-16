@@ -1,6 +1,12 @@
 import { calculateBudgetBreakdown } from '../budgetCalculations';
 import { DEFAULT_INPUTS } from '../defaultScenarios';
 import { generateRecommendations } from '../recommendations';
+import {
+  TRADITIONAL_IRA_PHASEOUT_MFJ_START,
+  TRADITIONAL_IRA_PHASEOUT_MFJ_END,
+  TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
+  TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
+} from '../taxCalculations';
 
 describe('recommendations', () => {
   it('uses housing payment ids for homeowner housing warnings', () => {
@@ -173,7 +179,7 @@ describe('recommendations', () => {
   it('warns when Traditional IRA income is in the partial phase-out range (single)', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 82000,
+      annualSalary: TRADITIONAL_IRA_PHASEOUT_SINGLE_START + 5000,
       filingStatus: 'single' as const,
       iraType: 'traditional' as const,
       iraContribution: 500,
@@ -185,7 +191,7 @@ describe('recommendations', () => {
   it('warns when Traditional IRA income exceeds the full phase-out (single)', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 100000,
+      annualSalary: TRADITIONAL_IRA_PHASEOUT_SINGLE_END + 13000,
       filingStatus: 'single' as const,
       iraType: 'traditional' as const,
       iraContribution: 500,
@@ -195,10 +201,9 @@ describe('recommendations', () => {
   });
 
   it('warns when Traditional IRA income is in the partial phase-out range (MFJ)', () => {
-    // MFJ phase-out range defined by TRADITIONAL_IRA_PHASEOUT_MFJ_START/END in taxCalculations.ts
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 133000,
+      annualSalary: TRADITIONAL_IRA_PHASEOUT_MFJ_START + 10000,
       filingStatus: 'married_jointly' as const,
       iraType: 'traditional' as const,
       iraContribution: 500,
@@ -210,7 +215,7 @@ describe('recommendations', () => {
   it('warns when Traditional IRA income exceeds the full phase-out (MFJ)', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
-      annualSalary: 160000,
+      annualSalary: TRADITIONAL_IRA_PHASEOUT_MFJ_END + 17000,
       filingStatus: 'married_jointly' as const,
       iraType: 'traditional' as const,
       iraContribution: 500,
