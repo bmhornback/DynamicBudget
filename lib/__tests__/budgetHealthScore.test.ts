@@ -10,7 +10,7 @@ describe('budgetHealthScore', () => {
     expect(result.score).toBeLessThanOrEqual(100);
   });
 
-  it('assigns an Excellent label for a very healthy budget', () => {
+  it('assigns an Excellent or Strong label for a very healthy budget', () => {
     const inputs = {
       ...DEFAULT_INPUTS,
       annualSalary: 250000,
