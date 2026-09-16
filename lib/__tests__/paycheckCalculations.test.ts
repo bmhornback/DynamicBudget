@@ -354,14 +354,14 @@ describe('calculatePaycheckBreakdown', () => {
   });
 
   describe('allocations', () => {
-    it('contains housing, utilities, transportation, food, health/insurance, lifestyle, savings', () => {
+    it('contains housing, utilities, transportation, food, health/medical/insurance, lifestyle, savings', () => {
       const b = calculatePaycheckBreakdown(makeInputs({ payFrequency: 'monthly' }), makeBreakdown());
       const labels = b.allocations.map((a) => a.label);
       expect(labels).toContain('Housing');
       expect(labels).toContain('Utilities');
       expect(labels).toContain('Transportation');
       expect(labels).toContain('Groceries & Food');
-      expect(labels).toContain('Health & Insurance');
+      expect(labels).toContain('Health, Medical & Insurance');
       expect(labels).toContain('Lifestyle');
       expect(labels).toContain('Savings & Investments');
     });
