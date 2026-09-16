@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import DynamicBudgetPage from '../page';
+import DynamicBudgetPage from '../app/page';
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 
 jest.mock('recharts', () => {
