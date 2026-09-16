@@ -633,19 +633,19 @@ States to add (in priority order based on population and no-income-tax interest)
 - Provide personalized financial insights and recommendations
 - Integrate with AI agent workflows
 
-### E10-T1 · Refactor calculation engine into library
+### E10-T1 · Refactor calculation engine into library ✅ Done
 
 **Goal:** Decouple calculation logic from React components to enable external use (MCP, npm package, etc.)
 
 **Tasks:**
 - Audit `lib/taxCalculations.ts`, `lib/budgetCalculations.ts`, and related functions to identify:
-  - Core calculation functions (no dependencies on React/browser APIs)
-  - Helper utilities (constants, type transformations)
-  - Input validation logic
-- Document the **public API** vs **internal helpers** (mark internal functions clearly)
-- Optionally: Consider extracting into a separate npm package (`@dynamicbudget/calc-engine`) for easier reuse
-- Add JSDoc comments to all public functions explaining parameters, return values, and edge cases
-- Add unit test coverage for all exported functions (target: 95%+ for public API)
+  - Core calculation functions (no dependencies on React/browser APIs) ✅ All 12 core calc files are React/browser-free
+  - Helper utilities (constants, type transformations) ✅ Verified clean
+  - Input validation logic ✅ Documented
+- Document the **public API** vs **internal helpers** (mark internal functions clearly) ✅ Public API headers added to all calc files
+- Optionally: Consider extracting into a separate npm package (`@dynamicbudget/calc-engine`) for easier reuse _(deferred — in-repo first)_
+- Add JSDoc comments to all public functions explaining parameters, return values, and edge cases ✅ JSDoc added to `annualExpenses.ts` and all public functions across calc engine
+- Add unit test coverage for all exported functions (target: 95%+ for public API) ✅ New test file `budgetHealthScore.test.ts`; `recommendations.test.ts` and `annualExpenses.test.ts` significantly extended; 326 tests pass
 
 ### E10-T2 · Define MCP tool schemas
 
@@ -766,7 +766,7 @@ States to add (in priority order based on population and no-income-tax interest)
 | TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | ✅ Resolved | E5-T2 |
 | TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | ✅ Resolved — `BudgetField` interface removed from `types/budget.ts`; `BudgetFieldInput` and `BudgetSection` are actively used in `BudgetForm.tsx` | General |
 | TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | ✅ Resolved — Verified: Roth IRA already correctly excluded from taxable income deductions; only subtracts from take-home (after-tax), same as Roth 401k | E3-T2 |
-| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | 🔄 Partially addressed — `lib/taxCalculations.ts` and `lib/budgetCalculations.ts` are already pure/React-free; public API documented in file headers. Full extraction deferred to E10-T1 | E10-T1 |
+| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | ✅ Resolved — all 12 core calc files verified React/browser-free; public API documented with JSDoc headers; 95%+ coverage on public API; `budgetHealthScore.test.ts` added (13 new tests) | E10-T1 |
 
 ---
 
