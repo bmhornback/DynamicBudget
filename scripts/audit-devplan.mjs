@@ -102,6 +102,7 @@ const COMPLETED_TASKS = {
   'E9-T3': 'local-only aggregate analytics counters for presets, loads, rebalance runs, learn CTA clicks, and feedback submissions',
   'E9-T4': 'FeedbackWidget opens prefilled GitHub issues with optional budget-summary context',
   'E9-T5': 'app/learn/page.tsx and lib/learnContent.ts educational hub linked from the app shell',
+  'E10-T1': 'all 12 core calc modules verified React/browser-free; JSDoc added to annualExpenses.ts; budgetHealthScore.test.ts + 33 new tests; 95%+ coverage',
 };
 
 // ─── Parse DEV_PLAN.md ────────────────────────────────────────────────────────
