@@ -195,7 +195,7 @@ describe('recommendations', () => {
   });
 
   it('warns when Traditional IRA income is in the partial phase-out range (MFJ)', () => {
-    // MFJ phase-out per TRADITIONAL_IRA_PHASEOUT_MFJ_START/END in taxCalculations.ts ($123k–$143k, labeled 2026)
+    // MFJ phase-out range defined by TRADITIONAL_IRA_PHASEOUT_MFJ_START/END in taxCalculations.ts
     const inputs = {
       ...DEFAULT_INPUTS,
       annualSalary: 133000,
