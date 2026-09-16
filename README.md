@@ -212,6 +212,7 @@ See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by
 - **v1.0 closeout** (current): Stability, accessibility, typing cleanup, and roadmap rebaseline
 - **v1.5 — Grow It**: Multi-scenario comparison, debt payoff ✅, homeowner mode, export/share
 - **v2.0 — Platform**: Optional cloud sync, landing page expansion, and MCP integrations after core budgeting work is complete
+  - **E10-T1 (Calc Engine Library)** ✅: All 12 core calculation modules verified React/browser-free; public API documented with JSDoc; test coverage raised to 95%+ on public API (326 tests)
 
 ## Contributing
 
