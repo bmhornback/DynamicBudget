@@ -15,7 +15,7 @@ describe('budgetHealthScore', () => {
       ...DEFAULT_INPUTS,
       annualSalary: 250000,
       rent: 1500,
-      contribution401k: 2041,
+      // retirementContributionPercent kept at DEFAULT_INPUTS value (15%)
       emergencyFundContribution: 1000,
       houseDownPaymentContribution: 2000,
       taxableInvestments: 1000,

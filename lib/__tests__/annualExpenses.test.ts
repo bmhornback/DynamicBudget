@@ -106,7 +106,7 @@ describe('annualExpenses', () => {
   });
 
   it('handles null/undefined expenses array gracefully', () => {
-    // calculateAnnualExpensePlan uses `expenses ?? []` (line 41) — null is safe
+    // calculateAnnualExpensePlan null-coalesces the expenses parameter to [] — passing null is safe
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(calculateAnnualExpensePlan(null as any, referenceDate)).toHaveLength(0);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
