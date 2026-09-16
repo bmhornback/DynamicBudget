@@ -122,10 +122,8 @@ describe('recommendations', () => {
       personalCare: 200,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    const lifestyleRate = breakdown.netMonthlyIncome > 0
-      ? breakdown.totalLifestyle / breakdown.netMonthlyIncome
-      : 0;
-    expect(lifestyleRate).toBeGreaterThan(0.30);
+    // Production computes lifestyleRate = totalLifestyle / netMonthlyIncome
+    expect(breakdown.totalLifestyle).toBeGreaterThan(breakdown.netMonthlyIncome * 0.30);
     const ids = generateRecommendations(inputs, breakdown).map((r) => r.id);
     expect(ids).toContain('lifestyle_high');
   });
