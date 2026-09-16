@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dynamicbudget.app/mcp/schemas/compare_scenarios",
+  "title": "compare_scenarios",
+  "description": "Compares 2–4 named budget scenarios side by side. Returns a breakdown for each scenario including net income, taxes, expense totals, savings rates, budget health score, and a diff table showing how each scenario differs from the first (baseline) scenario.",
+  "type": "object",
+  "required": ["scenarios"],
+  "additionalProperties": false,
+  "properties": {
+    "scenarios": {
+      "type": "array",
+      "description": "List of budget scenarios to compare. The first item is the baseline. All others are compared against it.",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["name", "salary", "state"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable label for the scenario.",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": ["Current Budget", "Move to Texas", "Max Out 401k"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional longer description of what this scenario represents.",
+            "maxLength": 300
+          },
+          "salary": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000000,
+            "description": "Annual gross salary in USD."
+          },
+          "state": {
+            "type": "string",
+            "description": "Two-letter US state abbreviation or 'no_state_tax'.",
+            "enum": [
+              "AL","AK","AZ","AR","CA","CO","CT","DE","DC",
+              "FL","GA","HI","ID","IL","IN","IA","KS","KY",
+              "LA","ME","MD","MA","MI","MN","MS","MO","MT",
+              "NE","NV","NH","NJ","NM","NY","NC","ND","OH",
+              "OK","OR","PA","RI","SC","SD","TN","TX","UT",
+              "VT","VA","WA","WV","WI","WY","no_state_tax"
+            ]
+          },
+          "filing_status": {
+            "type": "string",
+            "enum": ["single", "married_jointly", "head_of_household"],
+            "default": "single"
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 18,
+            "maximum": 99,
+            "default": 30
+          },
+          "housing_mode": {
+            "type": "string",
+            "enum": ["renter", "homeowner"],
+            "default": "renter"
+          },
+          "rent": { "type": "number", "minimum": 0, "default": 0 },
+          "mortgage": { "type": "number", "minimum": 0, "default": 0 },
+          "retirement_contribution_percent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 6
+          },
+          "max_out_401k": { "type": "boolean", "default": false },
+          "employer_match_percent": { "type": "number", "minimum": 0, "maximum": 100, "default": 3 },
+          "ira_contribution": { "type": "number", "minimum": 0, "default": 0 },
+          "ira_type": { "type": "string", "enum": ["traditional", "roth"], "default": "traditional" },
+          "hsa_contribution": { "type": "number", "minimum": 0, "default": 0 },
+          "monthly_taxable_investments": { "type": "number", "minimum": 0, "default": 0 },
+          "monthly_house_fund_contribution": { "type": "number", "minimum": 0, "default": 0 },
+          "emergency_fund_months": { "type": "number", "minimum": 0, "maximum": 24, "default": 3 },
+          "groceries": { "type": "number", "minimum": 0, "default": 0 },
+          "dining_out": { "type": "number", "minimum": 0, "default": 0 },
+          "electric": { "type": "number", "minimum": 0, "default": 0 },
+          "gas_utility": { "type": "number", "minimum": 0, "default": 0 },
+          "internet": { "type": "number", "minimum": 0, "default": 0 },
+          "phone": { "type": "number", "minimum": 0, "default": 0 },
+          "health_insurance": { "type": "number", "minimum": 0, "default": 0 },
+          "fuel": { "type": "number", "minimum": 0, "default": 0 },
+          "car_insurance": { "type": "number", "minimum": 0, "default": 0 },
+          "car_payment": { "type": "number", "minimum": 0, "default": 0 },
+          "fun_entertainment": { "type": "number", "minimum": 0, "default": 0 },
+          "clothes": { "type": "number", "minimum": 0, "default": 0 },
+          "misc_buffer": { "type": "number", "minimum": 0, "default": 0 }
+        }
+      }
+    }
+  },
+  "x-response-schema": {
+    "type": "object",
+    "description": "Side-by-side scenario comparison result.",
+    "properties": {
+      "scenarios": {
+        "type": "array",
+        "description": "One result object per input scenario, in the same order.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "is_baseline": { "type": "boolean", "description": "True for the first scenario (the baseline)." },
+            "gross_monthly": { "type": "number" },
+            "net_monthly_income": { "type": "number" },
+            "taxes": {
+              "type": "object",
+              "properties": {
+                "federal_monthly": { "type": "number" },
+                "state_monthly": { "type": "number" },
+                "fica_monthly": { "type": "number" },
+                "effective_total_rate": { "type": "number" }
+              }
+            },
+            "expense_totals": {
+              "type": "object",
+              "properties": {
+                "housing": { "type": "number" },
+                "utilities": { "type": "number" },
+                "transportation": { "type": "number" },
+                "groceries_food": { "type": "number" },
+                "health": { "type": "number" },
+                "lifestyle": { "type": "number" },
+                "savings": { "type": "number" },
+                "investments": { "type": "number" },
+                "debt_payoff": { "type": "number" }
+              }
+            },
+            "remaining_monthly_buffer": { "type": "number" },
+            "is_over_budget": { "type": "boolean" },
+            "savings_rate_gross": { "type": "number" },
+            "savings_rate_net": { "type": "number" },
+            "health_score": {
+              "type": "object",
+              "properties": {
+                "score": { "type": "number" },
+                "label": { "type": "string", "enum": ["Excellent", "Strong", "Workable", "Tight", "Risky"] }
+              }
+            }
+          }
+        }
+      },
+      "diffs": {
+        "type": "array",
+        "description": "Differences between each non-baseline scenario and the baseline scenario. Empty for 2-scenario comparisons (use the scenarios array directly).",
+        "items": {
+          "type": "object",
+          "properties": {
+            "scenario_name": { "type": "string" },
+            "vs_baseline": {
+              "type": "object",
+              "description": "Delta values (scenario minus baseline). Positive = higher in this scenario.",
+              "properties": {
+                "net_monthly_income_delta": { "type": "number" },
+                "total_taxes_monthly_delta": { "type": "number" },
+                "total_allocated_delta": { "type": "number" },
+                "remaining_buffer_delta": { "type": "number" },
+                "savings_rate_gross_delta": { "type": "number" },
+                "health_score_delta": { "type": "number" }
+              }
+            }
+          }
+        }
+      },
+      "winner": {
+        "type": "object",
+        "description": "The scenario with the best overall budget health score.",
+        "properties": {
+          "name": { "type": "string" },
+          "health_score": { "type": "number" },
+          "reason": { "type": "string", "description": "One-sentence explanation of why this scenario ranks highest." }
+        }
+      },
+      "insights": {
+        "type": "array",
+        "description": "AI-style narrative observations about tradeoffs between scenarios.",
+        "items": { "type": "string" }
+      }
+    }
+  }
+}

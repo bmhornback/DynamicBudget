@@ -1,0 +1,211 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dynamicbudget.app/mcp/schemas/get_recommendations",
+  "title": "get_recommendations",
+  "description": "Generates a prioritized list of financial recommendations based on a user's budget profile. Analyzes housing ratio, savings rate, emergency fund coverage, retirement contributions, debt burden, and spending balance.",
+  "type": "object",
+  "required": ["salary", "state"],
+  "additionalProperties": false,
+  "properties": {
+    "salary": {
+      "type": "number",
+      "description": "Annual gross salary in USD.",
+      "minimum": 1,
+      "maximum": 10000000,
+      "examples": [75000]
+    },
+    "state": {
+      "type": "string",
+      "description": "Two-letter US state abbreviation or 'no_state_tax'.",
+      "enum": [
+        "AL","AK","AZ","AR","CA","CO","CT","DE","DC",
+        "FL","GA","HI","ID","IL","IN","IA","KS","KY",
+        "LA","ME","MD","MA","MI","MN","MS","MO","MT",
+        "NE","NV","NH","NJ","NM","NY","NC","ND","OH",
+        "OK","OR","PA","RI","SC","SD","TN","TX","UT",
+        "VT","VA","WA","WV","WI","WY","no_state_tax"
+      ],
+      "examples": ["TX"]
+    },
+    "filing_status": {
+      "type": "string",
+      "enum": ["single", "married_jointly", "head_of_household"],
+      "default": "single"
+    },
+    "age": {
+      "type": "integer",
+      "minimum": 18,
+      "maximum": 99,
+      "default": 30
+    },
+    "housing_mode": {
+      "type": "string",
+      "enum": ["renter", "homeowner"],
+      "default": "renter"
+    },
+    "rent": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Monthly rent payment (renter mode).",
+      "default": 0
+    },
+    "mortgage": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Monthly mortgage payment (homeowner mode).",
+      "default": 0
+    },
+    "retirement_contribution_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 6,
+      "description": "401(k) contribution as a percentage of gross salary."
+    },
+    "max_out_401k": {
+      "type": "boolean",
+      "default": false
+    },
+    "employer_match_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 3
+    },
+    "ira_contribution": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "ira_type": {
+      "type": "string",
+      "enum": ["traditional", "roth"],
+      "default": "traditional"
+    },
+    "hsa_contribution": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "emergency_fund_months": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24,
+      "default": 3,
+      "description": "Target months of essential expenses in emergency fund."
+    },
+    "monthly_house_fund_contribution": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0,
+      "description": "Monthly contribution toward house down payment fund."
+    },
+    "monthly_taxable_investments": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "car_payment": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "total_monthly_debt_payments": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0,
+      "description": "Total monthly payments on all non-mortgage debts (credit cards, personal loans, student loans, etc.)."
+    },
+    "groceries": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "dining_out": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "fun_entertainment": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "misc_budget": {
+      "type": "object",
+      "description": "Additional expense fields for a more detailed recommendations analysis. All optional.",
+      "additionalProperties": false,
+      "properties": {
+        "electric": { "type": "number", "minimum": 0 },
+        "gas": { "type": "number", "minimum": 0 },
+        "water": { "type": "number", "minimum": 0 },
+        "internet": { "type": "number", "minimum": 0 },
+        "phone": { "type": "number", "minimum": 0 },
+        "health_insurance": { "type": "number", "minimum": 0 },
+        "fuel": { "type": "number", "minimum": 0 },
+        "car_insurance": { "type": "number", "minimum": 0 },
+        "streaming_subscriptions": { "type": "number", "minimum": 0 },
+        "clothes": { "type": "number", "minimum": 0 }
+      }
+    }
+  },
+  "x-response-schema": {
+    "type": "object",
+    "description": "Financial recommendations result.",
+    "properties": {
+      "recommendations": {
+        "type": "array",
+        "description": "Prioritized list of financial recommendations. Warnings appear before info and success items.",
+        "items": {
+          "type": "object",
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Stable identifier for the recommendation (e.g., 'over_budget', 'low_retirement', 'high_rent')."
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["warning", "info", "success"],
+              "description": "warning = action required; info = suggestion; success = goal met."
+            },
+            "message": {
+              "type": "string",
+              "description": "Human-readable recommendation message."
+            }
+          }
+        }
+      },
+      "health_score": {
+        "type": "object",
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100, "description": "Overall budget health score (0–100)." },
+          "label": { "type": "string", "enum": ["Excellent", "Strong", "Workable", "Tight", "Risky"] },
+          "breakdown": {
+            "type": "object",
+            "description": "Sub-scores by dimension.",
+            "properties": {
+              "housing_ratio": { "type": "number" },
+              "savings_rate": { "type": "number" },
+              "emergency_fund_coverage": { "type": "number" },
+              "debt_ratio": { "type": "number" },
+              "retirement_adequacy": { "type": "number" }
+            }
+          }
+        }
+      },
+      "budget_summary": {
+        "type": "object",
+        "description": "Key budget metrics used to derive recommendations.",
+        "properties": {
+          "net_monthly_income": { "type": "number" },
+          "total_allocated": { "type": "number" },
+          "remaining_buffer": { "type": "number" },
+          "is_over_budget": { "type": "boolean" },
+          "housing_percent_of_gross": { "type": "number" },
+          "savings_rate_gross": { "type": "number" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "request": {
+    "tool": "analyze_state_move",
+    "description": "Software engineer considering a move from San Francisco (CA) to Austin (TX) at $150k salary",
+    "params": {
+      "current_state": "CA",
+      "target_state": "TX",
+      "salary": 150000,
+      "filing_status": "single",
+      "age": 34,
+      "retirement_contribution_percent": 10
+    }
+  },
+  "expected_response": {
+    "current_state": {
+      "state": "CA",
+      "coli_index": 137.6,
+      "coli_tier": "Very High",
+      "annual_state_tax": 9870,
+      "monthly_state_tax": 822,
+      "net_monthly_income": 8340
+    },
+    "target_state": {
+      "state": "TX",
+      "coli_index": 93.4,
+      "coli_tier": "Below Average",
+      "annual_state_tax": 0,
+      "monthly_state_tax": 0,
+      "net_monthly_income": 9162
+    },
+    "tax_impact": {
+      "annual_state_tax_delta": -9870,
+      "monthly_state_tax_delta": -822,
+      "net_monthly_income_delta": 822
+    },
+    "coli_impact": {
+      "from_index": 137.6,
+      "to_index": 93.4,
+      "index_delta": -44.2,
+      "percent_change": -32.1,
+      "purchasing_power_equivalent_salary": 101850
+    },
+    "summary": "Moving from CA to TX saves ~$9,870/year in state income taxes and your cost of living drops ~32%, giving you roughly $101,850 of equivalent purchasing power in Texas.",
+    "recommendations": [
+      {
+        "severity": "success",
+        "message": "Texas has no state income tax — moving saves you $822/month ($9,870/year) compared to California."
+      },
+      {
+        "severity": "info",
+        "message": "Austin's cost of living is about 32% lower than San Francisco; your housing, groceries, and everyday expenses should drop significantly."
+      },
+      {
+        "severity": "info",
+        "message": "Your $150k California salary has the purchasing power of ~$102k in Austin. If you're negotiating a new role, be mindful of location-adjusted offers."
+      },
+      {
+        "severity": "info",
+        "message": "Consider redirecting the state tax savings ($822/month) into retirement or taxable investments — you could reach your financial goals years sooner."
+      }
+    ]
+  }
+}

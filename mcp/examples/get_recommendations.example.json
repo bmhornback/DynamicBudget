@@ -1,0 +1,81 @@
+{
+  "request": {
+    "tool": "get_recommendations",
+    "description": "28-year-old renter in NYC earning $85k — high rent, no savings, no retirement contributions",
+    "params": {
+      "salary": 85000,
+      "state": "NY",
+      "filing_status": "single",
+      "age": 28,
+      "housing_mode": "renter",
+      "rent": 2800,
+      "retirement_contribution_percent": 0,
+      "max_out_401k": false,
+      "employer_match_percent": 3,
+      "ira_contribution": 0,
+      "emergency_fund_months": 1,
+      "monthly_house_fund_contribution": 0,
+      "monthly_taxable_investments": 0,
+      "car_payment": 0,
+      "total_monthly_debt_payments": 400,
+      "groceries": 400,
+      "dining_out": 300,
+      "fun_entertainment": 250,
+      "misc_budget": {
+        "internet": 60,
+        "phone": 90,
+        "health_insurance": 200,
+        "streaming_subscriptions": 40,
+        "clothes": 120
+      }
+    }
+  },
+  "expected_response": {
+    "recommendations": [
+      {
+        "id": "high_rent",
+        "severity": "warning",
+        "message": "Your rent ($2,800) is 39.5% of your gross income — well above the recommended 30%. Consider finding a lower-cost apartment or a roommate."
+      },
+      {
+        "id": "no_retirement",
+        "severity": "warning",
+        "message": "You're not contributing to your 401(k). At minimum, contribute 3% to capture your full employer match — that's $212/month in free compensation you're leaving behind."
+      },
+      {
+        "id": "low_emergency_fund",
+        "severity": "warning",
+        "message": "Your emergency fund target covers only 1 month of expenses. Aim for 3–6 months ($9,000–$18,000) to protect against job loss or unexpected costs."
+      },
+      {
+        "id": "high_debt",
+        "severity": "info",
+        "message": "Your non-mortgage debt payments ($400/month) are a significant burden. Consider accelerating payoff using the avalanche method (highest interest first)."
+      },
+      {
+        "id": "dining_spending",
+        "severity": "info",
+        "message": "You're spending $300/month dining out. Even reducing this by $100/month frees up $1,200/year for emergency savings or retirement."
+      }
+    ],
+    "health_score": {
+      "score": 34,
+      "label": "Risky",
+      "breakdown": {
+        "housing_ratio": 20,
+        "savings_rate": 5,
+        "emergency_fund_coverage": 25,
+        "debt_ratio": 55,
+        "retirement_adequacy": 0
+      }
+    },
+    "budget_summary": {
+      "net_monthly_income": 4980,
+      "total_allocated": 5060,
+      "remaining_buffer": -80,
+      "is_over_budget": true,
+      "housing_percent_of_gross": 0.395,
+      "savings_rate_gross": 0
+    }
+  }
+}

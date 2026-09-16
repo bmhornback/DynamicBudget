@@ -1,0 +1,205 @@
+{
+  "request": {
+    "tool": "compare_scenarios",
+    "description": "Comparing 3 scenarios: current budget in CA, moving to TX (same salary), and moving to TX with a 20% pay cut",
+    "params": {
+      "scenarios": [
+        {
+          "name": "Current — California $120k",
+          "description": "Baseline: current life in San Francisco earning $120k",
+          "salary": 120000,
+          "state": "CA",
+          "filing_status": "single",
+          "age": 32,
+          "housing_mode": "renter",
+          "rent": 2800,
+          "retirement_contribution_percent": 6,
+          "employer_match_percent": 3,
+          "ira_contribution": 6000,
+          "ira_type": "roth",
+          "groceries": 400,
+          "dining_out": 200,
+          "electric": 80,
+          "internet": 70,
+          "phone": 80,
+          "health_insurance": 180,
+          "fuel": 100,
+          "car_insurance": 140,
+          "fun_entertainment": 200,
+          "misc_buffer": 150
+        },
+        {
+          "name": "Move to Texas — same salary $120k",
+          "description": "Same salary, same contribution rates, but living in Austin TX",
+          "salary": 120000,
+          "state": "TX",
+          "filing_status": "single",
+          "age": 32,
+          "housing_mode": "renter",
+          "rent": 1700,
+          "retirement_contribution_percent": 6,
+          "employer_match_percent": 3,
+          "ira_contribution": 6000,
+          "ira_type": "roth",
+          "groceries": 320,
+          "dining_out": 180,
+          "electric": 95,
+          "internet": 65,
+          "phone": 80,
+          "health_insurance": 160,
+          "fuel": 110,
+          "car_insurance": 120,
+          "fun_entertainment": 160,
+          "misc_buffer": 150
+        },
+        {
+          "name": "Move to Texas — 20% pay cut $96k",
+          "description": "Accepting a remote-to-local job in Austin at $96k (20% below current salary)",
+          "salary": 96000,
+          "state": "TX",
+          "filing_status": "single",
+          "age": 32,
+          "housing_mode": "renter",
+          "rent": 1700,
+          "retirement_contribution_percent": 6,
+          "employer_match_percent": 3,
+          "ira_contribution": 6000,
+          "ira_type": "roth",
+          "groceries": 320,
+          "dining_out": 180,
+          "electric": 95,
+          "internet": 65,
+          "phone": 80,
+          "health_insurance": 160,
+          "fuel": 110,
+          "car_insurance": 120,
+          "fun_entertainment": 160,
+          "misc_buffer": 150
+        }
+      ]
+    }
+  },
+  "expected_response": {
+    "scenarios": [
+      {
+        "name": "Current — California $120k",
+        "is_baseline": true,
+        "gross_monthly": 10000,
+        "net_monthly_income": 6820,
+        "taxes": {
+          "federal_monthly": 1620,
+          "state_monthly": 755,
+          "fica_monthly": 765,
+          "effective_total_rate": 0.314
+        },
+        "expense_totals": {
+          "housing": 2800,
+          "utilities": 230,
+          "transportation": 340,
+          "groceries_food": 600,
+          "health": 180,
+          "lifestyle": 550,
+          "savings": 1200,
+          "investments": 600,
+          "debt_payoff": 0
+        },
+        "remaining_monthly_buffer": 320,
+        "is_over_budget": false,
+        "savings_rate_gross": 0.15,
+        "savings_rate_net": 0.22,
+        "health_score": { "score": 58, "label": "Workable" }
+      },
+      {
+        "name": "Move to Texas — same salary $120k",
+        "is_baseline": false,
+        "gross_monthly": 10000,
+        "net_monthly_income": 7575,
+        "taxes": {
+          "federal_monthly": 1620,
+          "state_monthly": 0,
+          "fica_monthly": 765,
+          "effective_total_rate": 0.238
+        },
+        "expense_totals": {
+          "housing": 1700,
+          "utilities": 215,
+          "transportation": 310,
+          "groceries_food": 500,
+          "health": 160,
+          "lifestyle": 510,
+          "savings": 1200,
+          "investments": 600,
+          "debt_payoff": 0
+        },
+        "remaining_monthly_buffer": 2380,
+        "is_over_budget": false,
+        "savings_rate_gross": 0.18,
+        "savings_rate_net": 0.24,
+        "health_score": { "score": 79, "label": "Strong" }
+      },
+      {
+        "name": "Move to Texas — 20% pay cut $96k",
+        "is_baseline": false,
+        "gross_monthly": 8000,
+        "net_monthly_income": 6135,
+        "taxes": {
+          "federal_monthly": 1185,
+          "state_monthly": 0,
+          "fica_monthly": 612,
+          "effective_total_rate": 0.225
+        },
+        "expense_totals": {
+          "housing": 1700,
+          "utilities": 215,
+          "transportation": 310,
+          "groceries_food": 500,
+          "health": 160,
+          "lifestyle": 510,
+          "savings": 960,
+          "investments": 480,
+          "debt_payoff": 0
+        },
+        "remaining_monthly_buffer": 1300,
+        "is_over_budget": false,
+        "savings_rate_gross": 0.18,
+        "savings_rate_net": 0.24,
+        "health_score": { "score": 72, "label": "Strong" }
+      }
+    ],
+    "diffs": [
+      {
+        "scenario_name": "Move to Texas — same salary $120k",
+        "vs_baseline": {
+          "net_monthly_income_delta": 755,
+          "total_taxes_monthly_delta": -755,
+          "total_allocated_delta": -1285,
+          "remaining_buffer_delta": 2060,
+          "savings_rate_gross_delta": 0.03,
+          "health_score_delta": 21
+        }
+      },
+      {
+        "scenario_name": "Move to Texas — 20% pay cut $96k",
+        "vs_baseline": {
+          "net_monthly_income_delta": -685,
+          "total_taxes_monthly_delta": -1185,
+          "total_allocated_delta": -1525,
+          "remaining_buffer_delta": 980,
+          "savings_rate_gross_delta": 0.03,
+          "health_score_delta": 14
+        }
+      }
+    ],
+    "winner": {
+      "name": "Move to Texas — same salary $120k",
+      "health_score": 79,
+      "reason": "Same income but no state income tax and lower cost of living produces the best budget health score, nearly $2,400/month in buffer, and the highest savings rate."
+    },
+    "insights": [
+      "Moving to Texas at the same salary is the clear financial winner — you'd take home $755 more per month simply by eliminating California state income tax.",
+      "Even with a 20% salary cut ($96k in TX), your budget health score (72) beats your current California score (58). Texas's lower housing and cost of living more than offset the pay reduction.",
+      "The $96k Texas scenario still leaves $1,300/month in buffer vs. only $320 today — a 4× improvement despite earning $24k less per year.",
+      "If a new role in Austin offers below $96k, that's the financial breakeven threshold below which staying in California becomes more favorable on paper."
+    ]
+  }
+}

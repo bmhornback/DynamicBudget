@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dynamicbudget.app/mcp/schemas/analyze_state_move",
+  "title": "analyze_state_move",
+  "description": "Analyzes the financial impact of relocating from one US state to another. Returns state income tax differences, cost-of-living index comparison, purchasing power equivalence, and actionable financial recommendations.",
+  "type": "object",
+  "required": ["current_state", "target_state", "salary"],
+  "additionalProperties": false,
+  "properties": {
+    "current_state": {
+      "type": "string",
+      "description": "Two-letter US state abbreviation of the current residence, or 'no_state_tax'.",
+      "enum": [
+        "AL","AK","AZ","AR","CA","CO","CT","DE","DC",
+        "FL","GA","HI","ID","IL","IN","IA","KS","KY",
+        "LA","ME","MD","MA","MI","MN","MS","MO","MT",
+        "NE","NV","NH","NJ","NM","NY","NC","ND","OH",
+        "OK","OR","PA","RI","SC","SD","TN","TX","UT",
+        "VT","VA","WA","WV","WI","WY","no_state_tax"
+      ],
+      "examples": ["CA", "NY"]
+    },
+    "target_state": {
+      "type": "string",
+      "description": "Two-letter US state abbreviation of the prospective new residence, or 'no_state_tax'.",
+      "enum": [
+        "AL","AK","AZ","AR","CA","CO","CT","DE","DC",
+        "FL","GA","HI","ID","IL","IN","IA","KS","KY",
+        "LA","ME","MD","MA","MI","MN","MS","MO","MT",
+        "NE","NV","NH","NJ","NM","NY","NC","ND","OH",
+        "OK","OR","PA","RI","SC","SD","TN","TX","UT",
+        "VT","VA","WA","WV","WI","WY","no_state_tax"
+      ],
+      "examples": ["TX", "FL"]
+    },
+    "salary": {
+      "type": "number",
+      "description": "Annual gross salary in USD.",
+      "minimum": 1,
+      "maximum": 10000000,
+      "examples": [120000]
+    },
+    "filing_status": {
+      "type": "string",
+      "description": "Federal filing status used for tax calculations.",
+      "enum": ["single", "married_jointly", "head_of_household"],
+      "default": "single"
+    },
+    "age": {
+      "type": "integer",
+      "description": "User age. Used for 401(k)/IRA catch-up eligibility and tax calculations.",
+      "minimum": 18,
+      "maximum": 99,
+      "default": 30
+    },
+    "retirement_contribution_percent": {
+      "type": "number",
+      "description": "401(k) contribution percentage used when computing taxes. Affects pre-tax deductions.",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 6
+    }
+  },
+  "x-response-schema": {
+    "type": "object",
+    "description": "State-move financial impact analysis.",
+    "properties": {
+      "current_state": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string" },
+          "coli_index": { "type": "number", "description": "Cost-of-living index (100 = national average)." },
+          "coli_tier": { "type": "string", "enum": ["Very Low", "Low", "Below Average", "Average", "Above Average", "High", "Very High"] },
+          "annual_state_tax": { "type": "number" },
+          "monthly_state_tax": { "type": "number" },
+          "net_monthly_income": { "type": "number" }
+        }
+      },
+      "target_state": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string" },
+          "coli_index": { "type": "number" },
+          "coli_tier": { "type": "string" },
+          "annual_state_tax": { "type": "number" },
+          "monthly_state_tax": { "type": "number" },
+          "net_monthly_income": { "type": "number" }
+        }
+      },
+      "tax_impact": {
+        "type": "object",
+        "properties": {
+          "annual_state_tax_delta": { "type": "number", "description": "Annual state tax change (negative = savings, positive = increase)." },
+          "monthly_state_tax_delta": { "type": "number" },
+          "net_monthly_income_delta": { "type": "number", "description": "Monthly take-home change after state tax difference." }
+        }
+      },
+      "coli_impact": {
+        "type": "object",
+        "properties": {
+          "from_index": { "type": "number" },
+          "to_index": { "type": "number" },
+          "index_delta": { "type": "number", "description": "Raw COLI difference (target minus current)." },
+          "percent_change": { "type": "number", "description": "Percentage cost-of-living change (negative = cheaper)." },
+          "purchasing_power_equivalent_salary": {
+            "type": "number",
+            "description": "Salary in the target state with equivalent purchasing power to the current salary in the current state."
+          }
+        }
+      },
+      "summary": {
+        "type": "string",
+        "description": "Human-readable one-sentence summary of the financial impact of the move."
+      },
+      "recommendations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "severity": { "type": "string", "enum": ["warning", "info", "success"] },
+            "message": { "type": "string" }
+          }
+        },
+        "description": "Prioritized list of financial recommendations for the move."
+      }
+    }
+  }
+}
