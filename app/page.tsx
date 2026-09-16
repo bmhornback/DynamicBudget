@@ -187,7 +187,7 @@ export default function LandingPage() {
                 key={feat.title}
                 className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
               >
-                <span className="text-3xl">{feat.icon}</span>
+                <span className="text-3xl" aria-hidden="true">{feat.icon}</span>
                 <h3 className="mt-3 text-base font-semibold text-slate-900 dark:text-white">
                   {feat.title}
                 </h3>
