@@ -72,7 +72,7 @@ export default function ExpenseThresholdChart({ breakdown, inputs }: ExpenseThre
     { name: 'Transportation', value: pct(breakdown.totalTransportation), threshold: BUDGET_THRESHOLDS.carPercentTakeHome },
     { name: 'Food & Groceries', value: pct(breakdown.totalGroceriesFood), threshold: 0.15 },
     { name: 'Utilities & Phone', value: pct(breakdown.totalUtilities), threshold: 0.10 },
-    { name: 'Health & Medical', value: pct(breakdown.totalHealth), threshold: 0.10 },
+    { name: 'Health, Medical & Insurance', value: pct(breakdown.totalHealth), threshold: 0.10 },
     { name: 'Lifestyle', value: pct(breakdown.totalLifestyle), threshold: BUDGET_THRESHOLDS.maxLifestylePercentTakeHome },
     ...(inputs.petsEnabled
       ? [{ name: 'Pets', value: pct(breakdown.totalPets), threshold: BUDGET_THRESHOLDS.petPercentTakeHome }]

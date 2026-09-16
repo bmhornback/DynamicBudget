@@ -26,7 +26,7 @@ const SLICE_COLORS: Record<string, string> = {
   Transportation: '#fb923c', // orange-400
   Pets: '#f472b6',         // pink-400
   'Food & Groceries': '#facc15', // yellow-400
-  'Health & Medical': '#34d399', // emerald-400
+  'Health, Medical & Insurance': '#34d399', // emerald-400
   Lifestyle: '#2dd4bf',    // teal-400
   'Savings & Investing': '#4ade80', // green-400
   'Debt Payoff': '#c084fc', // purple-400
@@ -76,7 +76,7 @@ export default function BudgetPieChart({ breakdown, inputs }: BudgetPieChartProp
     { name: 'Transportation', value: breakdown.totalTransportation },
     ...(inputs.petsEnabled ? [{ name: 'Pets', value: breakdown.totalPets }] : []),
     { name: 'Food & Groceries', value: breakdown.totalGroceriesFood },
-    { name: 'Health & Medical', value: breakdown.totalHealth },
+    { name: 'Health, Medical & Insurance', value: breakdown.totalHealth },
     { name: 'Lifestyle', value: breakdown.totalLifestyle },
     { name: 'Savings & Investing', value: savingsTotal },
     ...(breakdown.totalDebtPayoff > 0 ? [{ name: 'Debt Payoff', value: breakdown.totalDebtPayoff }] : []),

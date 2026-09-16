@@ -184,7 +184,7 @@ export function calculatePaycheckBreakdown(
     { label: 'Utilities', perPaycheck: toPerPaycheck(breakdown.totalUtilities, frequency), monthly: breakdown.totalUtilities },
     { label: 'Transportation', perPaycheck: toPerPaycheck(breakdown.totalTransportation, frequency), monthly: breakdown.totalTransportation },
     { label: 'Groceries & Food', perPaycheck: toPerPaycheck(breakdown.totalGroceriesFood, frequency), monthly: breakdown.totalGroceriesFood },
-    { label: 'Health', perPaycheck: toPerPaycheck(breakdown.totalHealth, frequency), monthly: breakdown.totalHealth },
+    { label: 'Health & Insurance', perPaycheck: toPerPaycheck(breakdown.totalHealth, frequency), monthly: breakdown.totalHealth },
     ...(breakdown.totalPets > 0
       ? [{ label: 'Pets', perPaycheck: toPerPaycheck(breakdown.totalPets, frequency), monthly: breakdown.totalPets }]
       : []),

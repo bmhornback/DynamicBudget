@@ -721,7 +721,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       </BudgetSection>
 
       {/* ── Health ───────────────────────────────────────────────────── */}
-      <BudgetSection title="Health & Medical" icon="🏥" defaultOpen={false}>
+      <BudgetSection title="Health, Medical & Insurance" icon="🏥" defaultOpen={false}>
         {field('healthInsurance', 'Health Insurance')}
         {field('dentalInsurance', 'Dental Insurance')}
         {field('visionInsurance', 'Vision Insurance')}
