@@ -89,10 +89,9 @@ describe('budgetHealthScore', () => {
       iraContribution: 500,
     };
     const breakdown = calculateBudgetBreakdown(inputs);
-    if (breakdown.retirement.retirementSavingsRate >= 0.20) {
-      const result = calculateBudgetHealthScore(breakdown);
-      expect(result.breakdown.retirementRate).toBe(20);
-    }
+    expect(breakdown.retirement.retirementSavingsRate).toBeGreaterThanOrEqual(0.20);
+    const result = calculateBudgetHealthScore(breakdown);
+    expect(result.breakdown.retirementRate).toBe(20);
   });
 
   it('awards maximum house fund score when contribution >= $2000/month', () => {

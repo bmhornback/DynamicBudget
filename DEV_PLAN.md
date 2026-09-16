@@ -766,7 +766,7 @@ States to add (in priority order based on population and no-income-tax interest)
 | TD-6 | `totalInvestments` in `budgetCalculations.ts` includes `extraDebtPayoff` (a debt payment, not an investment) | Medium | ✅ Resolved | E5-T2 |
 | TD-7 | `BudgetFieldInput.tsx` and `BudgetSection.tsx` are defined but not fully used; `BudgetField` type in `budget.ts` is unused | Low | ✅ Resolved — `BudgetField` interface removed from `types/budget.ts`; `BudgetFieldInput` and `BudgetSection` are actively used in `BudgetForm.tsx` | General |
 | TD-8 | `calculateNetMonthlyIncome` treats IRA as subtracting from take-home alongside 401k, but Roth IRA is after-tax — needs to be split | Medium | ✅ Resolved — Verified: Roth IRA already correctly excluded from taxable income deductions; only subtracts from take-home (after-tax), same as Roth 401k | E3-T2 |
-| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | ✅ Resolved — all 12 core calc files verified React/browser-free; public API documented with JSDoc headers; 95%+ coverage on public API; `budgetHealthScore.test.ts` added (33 new tests) | E10-T1 |
+| TD-9 | Calculation engine tightly coupled to React components — needs refactoring for MCP/library use | Medium | ✅ Resolved — all 12 core calc files verified React/browser-free; public API documented with JSDoc headers; 95%+ coverage on public API; `budgetHealthScore.test.ts` added (13 new tests) | E10-T1 |
 
 ---
 
