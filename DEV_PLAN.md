@@ -664,22 +664,26 @@ States to add (in priority order based on population and no-income-tax interest)
 - Example queries and responses ✅ `mcp/examples/*.example.json`
 - Error handling strategy ✅ `mcp/MCP_TOOLS.md` — Error Handling Strategy section
 
-### E10-T3 · Build MCP server implementation
+### E10-T3 · Build MCP server implementation ✅ Done
 
 **Goal:** Create a Node.js MCP server that exposes budget tools to AI assistants.
 
 **Tasks:**
-- Choose MCP framework (e.g., [anthropic/mcp-sdk-js](https://github.com/anthropic/mcp-sdk-js))
-- Implement server skeleton with tool registration
-- Connect each tool to the calculation engine (using E10-T1 refactoring)
-- Add error handling and input validation
-- Handle context management (e.g., persist user budget across multiple queries)
-- Create a demo/test client to verify tools work end-to-end
+- Choose MCP framework (`@modelcontextprotocol/sdk@1.30.1`) ✅
+- Implement server skeleton with tool registration (`src/mcp-server/index.ts`) ✅
+- Connect each tool to the calculation engine (using E10-T1 refactoring) ✅
+- Add error handling and input validation (zod schemas + try/catch per tool) ✅
+- MCP tools are stateless by design — each call is fully self-contained ✅
+- Create integration tests to verify tools work end-to-end ✅
 
 **Deliverables:**
-- A runnable MCP server (`src/mcp-server/index.ts`)
-- Dependency list and installation instructions
-- Integration tests (Jest)
+- Runnable MCP server: `src/mcp-server/index.ts` ✅
+- Adapter layer: `src/mcp-server/adapters.ts` ✅
+- Five tool implementations: `src/mcp-server/tools/*.ts` ✅
+- 31 integration tests: `src/mcp-server/__tests__/mcp-tools.test.ts` ✅
+- Build: `npm run build:mcp` → `dist/mcp-server/` ✅
+- Start: `npm run mcp:start` ✅
+- Deps added to root `package.json`: `@modelcontextprotocol/sdk`, `zod` ✅
 
 ### E10-T4 · Test with Claude/ChatGPT integrations
 

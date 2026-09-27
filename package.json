@@ -14,13 +14,17 @@
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "audit:devplan": "node scripts/audit-devplan.mjs"
+    "audit:devplan": "node scripts/audit-devplan.mjs",
+    "build:mcp": "tsc --project src/mcp-server/tsconfig.json",
+    "mcp:start": "node dist/mcp-server/src/mcp-server/index.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "recharts": "^3.10.1"
+    "recharts": "^3.10.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

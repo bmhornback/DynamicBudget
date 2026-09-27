@@ -213,6 +213,8 @@ See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by
 - **v1.5 — Grow It**: Multi-scenario comparison, debt payoff ✅, homeowner mode, export/share
 - **v2.0 — Platform**: Optional cloud sync, landing page expansion, and MCP integrations after core budgeting work is complete
 - **E10-T1 (Calc Engine Library)** ✅: All 12 core calculation modules verified React/browser-free; public API documented with JSDoc; test coverage raised to 95%+ on public API (326 tests)
+- **E10-T2 (MCP Tool Schemas)** ✅: JSON Schema definitions for 5 MCP tools in `mcp/schemas/`; full reference in `mcp/MCP_TOOLS.md`
+- **E10-T3 (MCP Server)** ✅: Runnable MCP server in `src/mcp-server/` using `@modelcontextprotocol/sdk`; 5 tools connected to the calc engine; 31 integration tests; build via `npm run build:mcp`
 
 ## Contributing
 
