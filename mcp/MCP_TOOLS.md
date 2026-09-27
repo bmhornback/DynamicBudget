@@ -1,6 +1,6 @@
 # DynamicBudget MCP Tool Reference
 
-> **Status:** E10-T2 complete — schemas defined, ready for E10-T3 (server implementation).
+> **Status:** E10-T3 complete — MCP server built and tested. Ready for E10-T4 (Claude Desktop integration).
 
 This document is the authoritative reference for the five MCP tools exposed by DynamicBudget. It covers tool purposes, input/output contracts, validation rules, example prompts, and the error handling strategy.
 

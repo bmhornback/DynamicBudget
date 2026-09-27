@@ -10,7 +10,7 @@
 
 import type { BudgetInputs, FilingStatus, HousingMode, IRAType, StateOfResidence } from '@/types/budget';
 
-const STATE_ENUM = [
+export const STATE_ENUM = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','DC',
   'FL','GA','HI','ID','IL','IN','IA','KS','KY',
   'LA','ME','MD','MA','MI','MN','MS','MO','MT',

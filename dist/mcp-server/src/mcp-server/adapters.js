@@ -9,10 +9,11 @@
  * not the app's demo defaults).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.STATE_ENUM = void 0;
 exports.buildBudgetInputs = buildBudgetInputs;
 exports.isValidState = isValidState;
 exports.round2 = round2;
-const STATE_ENUM = [
+exports.STATE_ENUM = [
     'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC',
     'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY',
     'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT',
@@ -145,7 +146,7 @@ function buildBudgetInputs(params) {
 }
 /** Validate that a state string is a recognised US state code. */
 function isValidState(value) {
-    return STATE_ENUM.includes(value);
+    return exports.STATE_ENUM.includes(value);
 }
 /** Round to two decimal places (safe for currency display). */
 function round2(n) {

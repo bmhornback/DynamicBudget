@@ -35,16 +35,9 @@ const analyze_state_move_1 = require("./tools/analyze_state_move");
 const calculate_retirement_savings_1 = require("./tools/calculate_retirement_savings");
 const get_recommendations_1 = require("./tools/get_recommendations");
 const compare_scenarios_1 = require("./tools/compare_scenarios");
+const adapters_1 = require("./adapters");
 // ─── Shared sub-schemas ────────────────────────────────────────────────────
-const STATE_ENUM = [
-    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC',
-    'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY',
-    'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT',
-    'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH',
-    'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT',
-    'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'no_state_tax',
-];
-const stateEnum = zod_1.z.enum(STATE_ENUM);
+const stateEnum = zod_1.z.enum(adapters_1.STATE_ENUM);
 const filingStatusEnum = zod_1.z.enum(['single', 'married_jointly', 'head_of_household']).optional();
 const housingModeEnum = zod_1.z.enum(['renter', 'homeowner']).optional();
 const iraTypeEnum = zod_1.z.enum(['traditional', 'roth']).optional();

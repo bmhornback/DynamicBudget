@@ -99,7 +99,7 @@ function calculateRetirementSavings(params) {
         projection_by_year: projectionPoints.map((p) => ({
             year: p.year,
             label: p.label,
-            retirement_401k: Math.round(p.retirement401k + p.ira),
+            retirement_401k: Math.round(p.retirement401k),
             ira: Math.round(p.ira),
             total: Math.round(p.total),
         })),

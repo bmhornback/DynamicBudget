@@ -146,7 +146,7 @@ export function analyzeStateMove(params: StateMoveParams): StateMoveResult {
     `Moving from ${params.current_state} to ${params.target_state} on a $${params.salary.toLocaleString('en-US', { maximumFractionDigits: 0 })} salary ` +
     `${summaryDirection} your estimated monthly take-home by $${summaryAmount.toFixed(0)} ` +
     `(state tax ${annualStateTaxDelta < 0 ? 'savings' : 'increase'}: $${Math.abs(annualStateTaxDelta).toFixed(0)}/yr) ` +
-    `while cost of living is ${percentChange >= 0 ? '' : ''}${percentChange.toFixed(1)}% ${percentChange >= 0 ? 'higher' : 'lower'}.`;
+    `while cost of living is ${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}% ${percentChange >= 0 ? 'higher' : 'lower'}.`;
 
   return {
     current_state: current,

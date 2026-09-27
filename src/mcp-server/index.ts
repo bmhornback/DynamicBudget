@@ -35,17 +35,9 @@ import { analyzeStateMove } from './tools/analyze_state_move';
 import { calculateRetirementSavings } from './tools/calculate_retirement_savings';
 import { getRecommendations } from './tools/get_recommendations';
 import { compareScenarios } from './tools/compare_scenarios';
+import { STATE_ENUM } from './adapters';
 
 // ─── Shared sub-schemas ────────────────────────────────────────────────────
-
-const STATE_ENUM = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','DC',
-  'FL','GA','HI','ID','IL','IN','IA','KS','KY',
-  'LA','ME','MD','MA','MI','MN','MS','MO','MT',
-  'NE','NV','NH','NJ','NM','NY','NC','ND','OH',
-  'OK','OR','PA','RI','SC','SD','TN','TX','UT',
-  'VT','VA','WA','WV','WI','WY','no_state_tax',
-] as const;
 
 const stateEnum = z.enum(STATE_ENUM);
 const filingStatusEnum = z.enum(['single', 'married_jointly', 'head_of_household']).optional();
