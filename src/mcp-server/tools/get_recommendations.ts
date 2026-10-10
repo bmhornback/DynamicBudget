@@ -5,9 +5,9 @@
  * retirement contributions, debt burden, and spending balance.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
-import { generateRecommendations } from '../../../lib/recommendations.js';
-import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters.js';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
+import { generateRecommendations } from '../../../lib/recommendations';
+import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters';
 
 export interface RecommendationItem {
   id: string;

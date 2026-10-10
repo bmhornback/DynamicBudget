@@ -8,7 +8,7 @@
  * not the app's demo defaults).
  */
 
-import type { BudgetInputs, FilingStatus, HousingMode, IRAType, StateOfResidence } from '../../types/budget.js';
+import type { BudgetInputs, FilingStatus, HousingMode, IRAType, StateOfResidence } from '../../types/budget';
 
 export const STATE_ENUM = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','DC',

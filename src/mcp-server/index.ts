@@ -30,12 +30,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
-import { calculateMonthlyBudget } from './tools/calculate_monthly_budget.js';
-import { analyzeStateMove } from './tools/analyze_state_move.js';
-import { calculateRetirementSavings } from './tools/calculate_retirement_savings.js';
-import { getRecommendations } from './tools/get_recommendations.js';
-import { compareScenarios } from './tools/compare_scenarios.js';
-import { STATE_ENUM } from './adapters.js';
+import { calculateMonthlyBudget } from './tools/calculate_monthly_budget';
+import { analyzeStateMove } from './tools/analyze_state_move';
+import { calculateRetirementSavings } from './tools/calculate_retirement_savings';
+import { getRecommendations } from './tools/get_recommendations';
+import { compareScenarios } from './tools/compare_scenarios';
+import { STATE_ENUM } from './adapters';
 
 // ─── Shared sub-schemas ────────────────────────────────────────────────────
 

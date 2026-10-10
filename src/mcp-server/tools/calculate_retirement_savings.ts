@@ -4,8 +4,8 @@
  * tax implications, and a projected balance at retirement.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
-import { buildAnnualProjection } from '../../../lib/annualProjection.js';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
+import { buildAnnualProjection } from '../../../lib/annualProjection';
 import {
   get401kLimit,
   getIRALimit,
@@ -13,9 +13,9 @@ import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
   TRADITIONAL_IRA_PHASEOUT_MFJ_START,
   TRADITIONAL_IRA_PHASEOUT_MFJ_END,
-} from '../../../lib/taxCalculations.js';
-import { buildBudgetInputs, round2 } from '../adapters.js';
-import type { StateOfResidence } from '../../../types/budget.js';
+} from '../../../lib/taxCalculations';
+import { buildBudgetInputs, round2 } from '../adapters';
+import type { StateOfResidence } from '../../../types/budget';
 
 export interface RetirementSavingsParams {
   salary: number;

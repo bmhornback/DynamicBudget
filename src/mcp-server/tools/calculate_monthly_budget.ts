@@ -4,8 +4,8 @@
  * expenses, and savings configuration.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
-import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters.js';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
+import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters';
 
 export interface MonthlyBudgetResult {
   gross_monthly: number;
