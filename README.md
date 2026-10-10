@@ -165,6 +165,8 @@ Display Updated Budget
 
 All calculations are **pure functions** — no side effects, making them trivially unit-testable.
 
+Cloud sync and external integrations are planned behind a **backend adapter/provider model** so managed and self-hosted options can be evaluated without changing product workflows.
+
 ## Data Privacy
 
 All calculations and data are processed entirely in your browser. No data is sent to any server:
@@ -180,6 +182,10 @@ All calculations and data are processed entirely in your browser. No data is sen
 - **[mcp/MCP_TOOLS.md](./mcp/MCP_TOOLS.md)** — Tool reference, validation rules, and example calls for the AI integration
 - **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
 - **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
+- **[docs/decision-records/backend-provider-evaluation.md](./docs/decision-records/backend-provider-evaluation.md)** — Backend provider scorecard framework and staged recommendation criteria
+- **[docs/decision-records/ai-determinism-policy.md](./docs/decision-records/ai-determinism-policy.md)** — Deterministic AI/JEV policy and explainability requirements
+- **[docs/decision-records/receipt-data-privacy-policy.md](./docs/decision-records/receipt-data-privacy-policy.md)** — Receipt OCR data handling and privacy controls
+- **[docs/decision-records/integration-security-model.md](./docs/decision-records/integration-security-model.md)** — Security model for accounting integrations and sync workflows
 - **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application
 - **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Short educational guides tied to in-app planning decisions
 
@@ -208,19 +214,46 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** validate the MCP server with real AI clients and keep the static deployment/package docs aligned with the repo’s current production flow.
+**Current focus:** prioritize platform-readiness work in this order:
+1. Backend provider evaluation and adapter architecture decision
+2. Deterministic AI decision engine (JEV scoring + explainability traces)
+3. Receipt OCR ingestion MVP with confirmation/quality controls
+4. QuickBooks read-only integration MVP
+5. Connector framework expansion for broader accounting ecosystem integrations
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
 - **v1.0 closeout** (current): Stability, accessibility, typing cleanup, and roadmap rebaseline
 - **v1.5 — Grow It**: Multi-scenario comparison, debt payoff ✅, homeowner mode, export/share
-- **v2.0 — Platform**: Optional cloud sync, landing page expansion, and MCP integrations after core budgeting work is complete
+- **v2.0 — Platform**: Optional provider-agnostic cloud sync, deterministic AI decision support, receipt ingestion, and accounting integrations
 - **E1-T7b (GitHub Pages deployment)** ✅: `.github/workflows/deploy-pages.yml` publishes the static export to Pages
 - **E10-T1 (Calc Engine Library)** ✅: All 12 core calculation modules verified React/browser-free; public API documented with JSDoc; test coverage raised to 95%+ on public API
 - **E10-T2 (MCP Tool Schemas)** ✅: JSON Schema definitions for 5 MCP tools in `mcp/schemas/`; full reference in `mcp/MCP_TOOLS.md`
 - **E10-T3 (MCP Server)** ✅: Runnable MCP server in `src/mcp-server/` using `@modelcontextprotocol/sdk`; 5 tools connected to the calc engine; 31 integration tests; build via `npm run build:mcp`
 - **E10-T4 (AI Client Integration)** ▶️ Remaining: verify real Claude/ChatGPT usage, capture feedback, and fix any integration issues
 - **E10-T5 (Publish & Document)** ✅: package metadata and docs are prepared for external publication; real registry publication remains a maintainer-side release action
+
+## Planned Enhancements (Phased)
+
+### Phase A — Platform Foundations
+- Backend provider abstraction with scorecard-driven selection across managed and self-hosted options
+- Provider recommendation by growth stage (MVP, growth, enterprise)
+
+### Phase B — Deterministic Decision Intelligence
+- Rule-bound AI assistance (deterministic output mode)
+- JEV scoring for tradeoffs (debt vs investing, relocation, emergency fund timing)
+- Transparent decision traces and policy profiles (conservative, balanced, aggressive)
+
+### Phase C — Receipt-to-Budget Automation
+- Receipt upload/capture + OCR extraction of merchant/date/total/tax/category candidates
+- User confirmation and manual correction before commit
+- Duplicate detection and confidence-based review rules
+
+### Phase D — Accounting Integrations
+- QuickBooks read-only import (accounts, categories, expenses, transactions)
+- Category mapping and sync status/error surfacing
+- Connector framework expansion: Xero, Wave, CSV flows, Plaid transaction feeds
+- Accountant package export + year-end readiness checklist
 
 ## Contributing
 
