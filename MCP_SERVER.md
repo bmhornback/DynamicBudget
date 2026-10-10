@@ -22,7 +22,7 @@ This compiles the TypeScript source in `src/mcp-server/` to `dist/mcp-server/` u
 npm run mcp:start
 ```
 
-The server listens on stdin/stdout (MCP stdio transport). It will appear idle until an AI client sends a request. After build, the compiled entrypoint is located at `src/mcp-server/dist/index.js`.
+The server listens on stdin/stdout (MCP stdio transport). It will appear idle until an AI client sends a request. After build, the compiled entrypoint is located at `src/mcp-server/dist/src/mcp-server/index.js`.
 
 ### 3. Register with Claude Desktop
 
@@ -33,7 +33,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "dynamicbudget": {
       "command": "node",
-      "args": ["/absolute/path/to/DynamicBudget/src/mcp-server/dist/index.js"]
+      "args": ["/absolute/path/to/DynamicBudget/src/mcp-server/dist/src/mcp-server/index.js"]
     }
   }
 }

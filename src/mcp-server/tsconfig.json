@@ -6,6 +6,9 @@
     "lib": ["ES2022"],
     "types": ["node"],
     "outDir": "./dist",
+    // Keep rootDir at the repo root so shared lib/types files compile alongside
+    // src/mcp-server sources. The emitted entrypoint is therefore
+    // ./dist/src/mcp-server/index.js.
     "rootDir": "../../",
     "paths": {
       "@/*": ["../../*"]

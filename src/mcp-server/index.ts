@@ -17,13 +17,13 @@
  *     "mcpServers": {
  *       "dynamicbudget": {
  *         "command": "node",
- *         "args": ["/path/to/DynamicBudget/src/mcp-server/dist/index.js"]
+ *         "args": ["/path/to/DynamicBudget/src/mcp-server/dist/src/mcp-server/index.js"]
  *       }
  *     }
  *   }
  *
  * Build: npm run build:mcp
- * Run directly: node src/mcp-server/dist/index.js
+ * Run directly: node src/mcp-server/dist/src/mcp-server/index.js
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
