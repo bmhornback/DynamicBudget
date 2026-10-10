@@ -1,7 +1,9 @@
 import {
   createDeterministicDecisionContract,
+  createScenarioRankingContract,
   getDecisionInputSignature,
   getDeterministicDecisionPolicy,
+  rankScenarioOptions,
   sortRecommendationsDeterministically,
 } from '../deterministicDecision';
 
@@ -135,5 +137,58 @@ describe('deterministicDecision', () => {
 
     expect(contractA.signature).toBe(contractB.signature);
     expect(contractA.trace.totalScore).toBe(contractB.trace.totalScore);
+  });
+
+  it('ranks scenario options deterministically with weighted dimensions', () => {
+    const options = [
+      { id: 'stay', name: 'Stay in California', severity: 'info' as const, housing: 10, emergencyFund: 6, debt: 4, retirement: 7, flexibility: 8 },
+      { id: 'move', name: 'Move to Texas', severity: 'info' as const, housing: 30, emergencyFund: 20, debt: 15, retirement: 18, flexibility: 20 },
+    ];
+
+    const ranked = rankScenarioOptions(options, (item) => ({
+      housing: item.housing,
+      emergencyFund: item.emergencyFund,
+      debt: item.debt,
+      retirement: item.retirement,
+      flexibility: item.flexibility,
+      total: item.housing + item.emergencyFund + item.debt + item.retirement + item.flexibility,
+    }), 'balanced');
+
+    expect(ranked.map((entry) => entry.id)).toEqual(['move', 'stay']);
+    expect(ranked[0].rank).toBe(1);
+    expect(ranked[0].weightedTotal).toBeGreaterThan(ranked[1].weightedTotal);
+    expect(ranked[0].dimensionBreakdown.housing).toBeGreaterThan(ranked[1].dimensionBreakdown.housing);
+  });
+
+  it('creates a deterministic scenario ranking contract with a stable signature', () => {
+    const first = [
+      { id: 'stay', name: 'Stay in California', housing: 10, emergencyFund: 6, debt: 4, retirement: 7, flexibility: 8 },
+      { id: 'move', name: 'Move to Texas', housing: 30, emergencyFund: 20, debt: 15, retirement: 18, flexibility: 20 },
+    ];
+    const second = [
+      { id: 'move', name: 'Move to Texas', housing: 30, emergencyFund: 20, debt: 15, retirement: 18, flexibility: 20 },
+      { id: 'stay', name: 'Stay in California', housing: 10, emergencyFund: 6, debt: 4, retirement: 7, flexibility: 8 },
+    ];
+
+    const contractA = createScenarioRankingContract(first, (item) => ({
+      housing: item.housing,
+      emergencyFund: item.emergencyFund,
+      debt: item.debt,
+      retirement: item.retirement,
+      flexibility: item.flexibility,
+      total: item.housing + item.emergencyFund + item.debt + item.retirement + item.flexibility,
+    }), 'balanced');
+    const contractB = createScenarioRankingContract(second, (item) => ({
+      housing: item.housing,
+      emergencyFund: item.emergencyFund,
+      debt: item.debt,
+      retirement: item.retirement,
+      flexibility: item.flexibility,
+      total: item.housing + item.emergencyFund + item.debt + item.retirement + item.flexibility,
+    }), 'balanced');
+
+    expect(contractA.signature).toBe(contractB.signature);
+    expect(contractA.ranked.map((entry) => entry.id)).toEqual(['move', 'stay']);
+    expect(contractA.trace.jevScore).toBeGreaterThan(0);
   });
 });

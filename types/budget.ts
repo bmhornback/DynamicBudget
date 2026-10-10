@@ -459,6 +459,26 @@ export interface DecisionTrace {
   rationale: string;
 }
 
+export interface ScenarioRankingDimensionBreakdown {
+  housing: number;
+  emergencyFund: number;
+  debt: number;
+  retirement: number;
+  flexibility: number;
+}
+
+export interface ScenarioRankingEntry<T extends { id: string } = { id: string }> {
+  id: string;
+  name?: string;
+  description?: string;
+  severity?: RecommendationSeverity;
+  score?: number;
+  weightedTotal: number;
+  rank: number;
+  dimensionBreakdown: ScenarioRankingDimensionBreakdown;
+  item: T;
+}
+
 export type HealthScoreLabel = 'Excellent' | 'Strong' | 'Workable' | 'Tight' | 'Risky';
 
 export interface BudgetHealthScore {
