@@ -183,7 +183,7 @@ All calculations and data are processed entirely in your browser. No data is sen
 - **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
 - **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
 - **[docs/decision-records/backend-provider-evaluation.md](./docs/decision-records/backend-provider-evaluation.md)** — Backend provider scorecard framework and staged recommendation criteria
-- **[docs/decision-records/ai-determinism-policy.md](./docs/decision-records/ai-determinism-policy.md)** — Deterministic AI/JEV policy and explainability requirements
+- **[docs/decision-records/ai-determinism-policy.md](./docs/decision-records/ai-determinism-policy.md)** — Deterministic AI/JEV policy and explainability requirements, including the in-app “Why this recommendation?” trace panel
 - **[docs/decision-records/receipt-data-privacy-policy.md](./docs/decision-records/receipt-data-privacy-policy.md)** — Receipt OCR data handling and privacy controls
 - **[docs/decision-records/integration-security-model.md](./docs/decision-records/integration-security-model.md)** — Security model for accounting integrations and sync workflows
 - **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application

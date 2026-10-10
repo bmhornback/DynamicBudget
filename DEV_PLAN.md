@@ -765,13 +765,13 @@ States to add (in priority order based on population and no-income-tax interest)
 - Require explicit assumptions and confidence ranges per profile
 - Implemented in `lib/deterministicDecision.ts` with normalized input signatures, stable ordering, policy confidence bands, and decision trace/JEV scoring
 
-### E11-T3 · Decision trace and explainability UI
+### E11-T3 · Decision trace and explainability UI ✅ Done
 - Store decision traces including:
   - normalized inputs
   - assumptions used
   - rule weights/scores
   - final ranking rationale
-- Add a "Why this recommendation?" panel with auditable breakdowns
+- Add a "Why this recommendation?" panel with auditable breakdowns ✅ `components/DecisionTracePanel.tsx` and recommendation trace attachment in `lib/deterministicDecision.ts`
 
 ### E11-T4 · Scenario ranking workflow
 - Rank scenarios using deterministic scoring outputs

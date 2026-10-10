@@ -295,3 +295,33 @@ export function createDeterministicDecisionContract<T extends { id: string; seve
 
   return { policy, items: orderedItems, signature, trace };
 }
+
+export function attachDecisionTraceToRecommendation(
+  recommendation: Recommendation,
+  profile: DecisionPolicyProfile = 'balanced'
+): Recommendation {
+  const policy = getDeterministicDecisionPolicy(profile);
+  const trace = createDecisionTrace(
+    [{
+      id: recommendation.id,
+      severity: recommendation.severity,
+      score: recommendation.score ?? 0,
+      message: recommendation.message,
+    }],
+    policy,
+    {
+      profile: policy.profile,
+      recommendation: {
+        id: recommendation.id,
+        severity: recommendation.severity,
+        message: recommendation.message,
+        detail: recommendation.detail,
+      },
+    }
+  );
+
+  return {
+    ...recommendation,
+    trace,
+  };
+}

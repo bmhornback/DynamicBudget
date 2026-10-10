@@ -440,6 +440,8 @@ export interface Recommendation {
   severity: RecommendationSeverity;
   message: string;
   detail?: string;
+  score?: number;
+  trace?: DecisionTrace;
 }
 
 export interface DecisionTrace {

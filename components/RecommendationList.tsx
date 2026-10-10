@@ -3,6 +3,7 @@
 import React from 'react';
 import type { Recommendation } from '@/types/budget';
 import BudgetCard from './BudgetCard';
+import DecisionTracePanel from './DecisionTracePanel';
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
@@ -55,11 +56,12 @@ export default function RecommendationList({ recommendations }: RecommendationLi
               className={`flex gap-3 p-3 rounded-lg border ${style.container}`}
             >
               <span className="text-base shrink-0 mt-0.5">{style.icon}</span>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className={`text-sm font-medium ${style.title}`}>{rec.message}</p>
                 {rec.detail && (
                   <p className={`text-xs mt-0.5 ${style.detail}`}>{rec.detail}</p>
                 )}
+                <DecisionTracePanel recommendation={rec} />
               </div>
             </div>
           );
