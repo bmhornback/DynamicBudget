@@ -497,19 +497,8 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
           return null;
         }
 
-        if (normalizedVersion === 2 && 'i' in objectPayload) {
-          const compactInputs = objectPayload.i;
-          if (
-            compactInputs !== null &&
-            typeof compactInputs === 'object' &&
-            !Array.isArray(compactInputs)
-          ) {
-            return normalizeBudgetInputs(compactInputs);
-          }
-        }
-
-        // Migration guardrail: unknown future versions are rejected, but older payloads
-        // that already look like full budget inputs are still tolerated for compatibility.
+        // Migration guardrail: unknown future versions are rejected, but legacy payloads
+        // that already look like full budget inputs remain loadable for compatibility.
         if ('inputs' in objectPayload && typeof objectPayload.inputs === 'object' && objectPayload.inputs !== null) {
           return normalizeBudgetInputs(objectPayload.inputs as unknown);
         }
