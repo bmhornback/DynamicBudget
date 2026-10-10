@@ -879,9 +879,10 @@ States to add (in priority order based on population and no-income-tax interest)
 1. E8-T1 backend provider evaluation + architecture decision
 2. E11-T1 through E11-T2 deterministic decision engine and JEV scoring design
 3. E12-T1 through E12-T3 receipt ingestion MVP
-4. E13-T2 QuickBooks read-only integration MVP
-5. E13-T3 QuickBooks write-back and reconciliation phase
-6. E13-T4 through E13-T5 broader accounting connector expansion + accountant outputs
+4. E13-T1 integration connector framework
+5. E13-T2 QuickBooks read-only integration MVP
+6. E13-T3 QuickBooks write-back and reconciliation phase
+7. E13-T4 through E13-T5 broader accounting connector expansion + accountant outputs
 
 ---
 
