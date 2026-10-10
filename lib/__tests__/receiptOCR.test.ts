@@ -1,6 +1,7 @@
 import {
   confirmReceiptReview,
   createReceiptReviewState,
+  createReceiptSpendEntry,
   getReceiptCategoryHint,
   normalizeReceiptText,
   parseReceiptText,
@@ -97,5 +98,32 @@ describe('receiptOCR', () => {
 
     expect(review.tax).toBeNull();
     expect(review.changedFields).toEqual(['tax']);
+  });
+
+  it('maps confirmed receipts into trackable spending entries with source metadata', () => {
+    const extraction = parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+      'TAX 3.34',
+    ].join('\n'));
+
+    const review = confirmReceiptReview(createReceiptReviewState(extraction), {}, {
+      receiptId: 'receipt_123',
+      ingestedAt: new Date('2026-09-23T12:00:00Z'),
+    });
+
+    const { entry, history } = createReceiptSpendEntry(review, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+      note: 'Whole Foods Market',
+    });
+
+    expect(entry.category).toBe('groceries');
+    expect(entry.amount).toBe(45.84);
+    expect(entry.source).toBe('receipt');
+    expect(entry.receiptId).toBe('receipt_123');
+    expect(entry.ingestTimestamp).toBe('2026-09-23T12:00:00.000Z');
+    expect(history.entries).toHaveLength(1);
+    expect(history.entries[0].id).toBe(entry.id);
   });
 });

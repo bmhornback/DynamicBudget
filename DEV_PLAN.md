@@ -794,10 +794,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Allow manual correction of all OCR outputs before save ✅ review state accepts merchant/date/total/tax/category overrides and tracks changed fields
 - Require explicit user confirmation before writing spending data ✅ confirmation is explicit through `confirmed` status and review gating in the review contract
 
-### E12-T3 · Category mapping and spending updates
-- Auto-map receipt line items/total to DynamicBudget spending categories
-- Post confirmed entries into monthly actuals for spending trends
-- Track source metadata for traceability (receipt ID, ingest timestamp)
+### E12-T3 · Category mapping and spending updates ✅ Done
+- Auto-map receipt line items/total to DynamicBudget spending categories ✅ `lib/receiptOCR.ts` adds receipt-to-trackable category mapping and confirmed spend-entry generation
+- Post confirmed entries into monthly actuals for spending trends ✅ `createReceiptSpendEntry` appends entries to `SpendingHistory` with source metadata and receipt traceability
+- Track source metadata for traceability (receipt ID, ingest timestamp) ✅ `ReceiptReviewState` and `SpendingEntry` now carry `receiptId` / `ingestTimestamp` and `source: 'receipt'`
 
 ### E12-T4 · Quality controls and duplicate handling
 - Add confidence thresholds and review rules
