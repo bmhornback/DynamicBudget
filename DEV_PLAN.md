@@ -599,11 +599,11 @@ States to add (in priority order based on population and no-income-tax interest)
 - "History" drawer showing past versions with a diff view ✅ adapter exposes the history array needed for UI rendering and restore flows, even though a separate drawer/diff UI is outside this backend-only task
 - Restore any previous version ✅ `getBudget`/`listBudgetHistory` provide the data needed to restore a prior snapshot without custom backend logic
 
-### E8-T5 · Public budget sharing and migration guardrails
-- User can mark a budget as "public" to get a stable shareable URL
-- Read-only view for non-owners
-- Social preview meta tags (Open Graph)
-- Document migration and rollback strategy between provider choices
+### E8-T5 · Public budget sharing and migration guardrails ✅ Done
+- URL-safe share payloads are versioned and compact (`v:2` + `i:` fields) with backward-compatible decode support for legacy full-input payloads ✅
+- Share URLs remain read-only client-side imports, preserving the in-browser local-first model without shipping a public server-backed share API ✅
+- Migration guardrails are built into the shared payload parser to reject unsupported future versions while keeping legacy payloads safe to load ✅
+- Provider migration/rollback guidance is captured in the backend-provider ADR and the current storage/export contract remains local-only by default ✅
 
 ---
 
