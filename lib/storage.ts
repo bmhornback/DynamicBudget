@@ -473,19 +473,18 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       const objectPayload = parsed as Record<string, unknown>;
       const rawVersion = objectPayload.v;
-      const normalizedVersion = typeof rawVersion === 'string' ? Number(rawVersion) : rawVersion;
 
       if (typeof rawVersion !== 'undefined') {
-        if (typeof normalizedVersion !== 'number' || Number.isNaN(normalizedVersion)) {
+        if (typeof rawVersion !== 'number' || Number.isNaN(rawVersion)) {
           console.warn('Invalid shared budget payload version (not a number):', rawVersion);
           return null;
         }
 
-        if (normalizedVersion === 1 && 'inputs' in objectPayload) {
+        if (rawVersion === 1 && 'inputs' in objectPayload) {
           return normalizeBudgetInputs(objectPayload.inputs as unknown);
         }
 
-        if (normalizedVersion === SHARE_PAYLOAD_VERSION) {
+        if (rawVersion === SHARE_PAYLOAD_VERSION) {
           const compactInputs = objectPayload.i;
           if (
             compactInputs !== null &&
@@ -497,9 +496,14 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
           return null;
         }
 
-        // Migration guardrail: unknown future versions are rejected, but legacy payloads
-        // that already look like full budget inputs remain loadable for compatibility.
-        if ('inputs' in objectPayload && typeof objectPayload.inputs === 'object' && objectPayload.inputs !== null) {
+        // Migration guardrail: only older versions may fall back to the legacy full-input
+        // format; future versions are rejected to avoid silently accepting incompatible data.
+        if (
+          rawVersion < SHARE_PAYLOAD_VERSION &&
+          'inputs' in objectPayload &&
+          typeof objectPayload.inputs === 'object' &&
+          objectPayload.inputs !== null
+        ) {
           return normalizeBudgetInputs(objectPayload.inputs as unknown);
         }
 
