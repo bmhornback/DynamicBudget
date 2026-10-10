@@ -79,5 +79,23 @@ describe('receiptOCR', () => {
     expect(confirmed.confirmed).toBe(true);
     expect(confirmed.needsReview).toBe(false);
     expect(confirmed.reviewedAt).not.toBeNull();
+    expect(confirmed.changedFields).toContain('merchant');
+    expect(confirmed.changedFields).toContain('total');
+  });
+
+  it('treats explicit null edits as deliberate clears without reverting to the original value', () => {
+    const extraction = parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+      'TAX 3.34',
+    ].join('\n'));
+
+    const review = createReceiptReviewState(extraction, {
+      tax: null,
+    });
+
+    expect(review.tax).toBeNull();
+    expect(review.changedFields).toEqual(['tax']);
   });
 });

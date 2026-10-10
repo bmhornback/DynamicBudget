@@ -32,6 +32,7 @@ const BASE_MERCHANT_CONFIDENCE = 0.46;
 const MERCHANT_LENGTH_DIVISOR = 80;
 const DUPLICATE_RISK_STRENGTH = 0.8;
 const DUPLICATE_RISK_WEAK = 0.35;
+const MANUAL_REVIEW_DEFAULT_CONFIDENCE = 0.8;
 
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
@@ -246,27 +247,38 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
 export function createReceiptReviewState(
   extraction: ReceiptExtractionResult,
   edits: ReceiptReviewEdits = {},
-  options?: { confirmed?: boolean; reviewedAt?: Date | null }
+  options?: { confirmed?: boolean; reviewedAt?: Date | null; changedFields?: ReceiptReviewField[] }
 ): ReceiptReviewState {
-  const normalizedEdits = Object.entries(edits).filter(([, value]) => value !== undefined) as Array<[
-    ReceiptReviewField,
-    string | number | null
-  ]>;
+  const explicitFieldNames = Object.entries(edits).reduce((fields, [field, value]) => {
+    if (value === undefined) return fields;
+    if (value === null && !['date', 'total', 'tax'].includes(field)) return fields;
+    fields.push(field as ReceiptReviewField);
+    return fields;
+  }, [] as ReceiptReviewField[]);
 
-  const reviewedFields = normalizedEdits.map(([field]) => field);
-  const merchantValue = (edits.merchant ?? extraction.merchant.value).toString().trim() || 'Unknown merchant';
-  const dateValue = edits.date ?? extraction.date?.value ?? null;
-  const totalValue = edits.total ?? extraction.total?.value ?? null;
-  const taxValue = edits.tax ?? extraction.tax?.value ?? null;
+  const reviewedFields = [...new Set([
+    ...(options?.changedFields ?? []),
+    ...explicitFieldNames,
+  ])];
+
+  const merchantValue = (edits.merchant ?? extraction.merchant.value).toString().trim();
+  const normalizedMerchantValue = merchantValue || 'Unknown merchant';
+  const dateValue = edits.date !== undefined ? edits.date : extraction.date?.value ?? null;
+  const totalValue = edits.total !== undefined ? edits.total : extraction.total?.value ?? null;
+  const taxValue = edits.tax !== undefined ? edits.tax : extraction.tax?.value ?? null;
   const categoryValue = (edits.category ?? extraction.category.value) as ReceiptCategory;
 
-  const finalMerchant = buildFieldCandidate(merchantValue, extraction.merchant.confidence, 'manual_review');
-  const finalDate = dateValue ? buildFieldCandidate(dateValue, extraction.date?.confidence ?? 0.8, 'manual_review') : null;
-  const finalTotal = totalValue !== null ? buildFieldCandidate(totalValue, extraction.total?.confidence ?? 0.8, 'manual_review') : null;
-  const finalTax = taxValue !== null ? buildFieldCandidate(taxValue, extraction.tax?.confidence ?? 0.8, 'manual_review') : null;
+  const finalMerchant = buildFieldCandidate(normalizedMerchantValue, extraction.merchant.confidence, 'manual_review');
+  const finalDate = dateValue !== null ? buildFieldCandidate(dateValue, extraction.date?.confidence ?? MANUAL_REVIEW_DEFAULT_CONFIDENCE, 'manual_review') : null;
+  const finalTotal = totalValue !== null ? buildFieldCandidate(totalValue, extraction.total?.confidence ?? MANUAL_REVIEW_DEFAULT_CONFIDENCE, 'manual_review') : null;
+  const finalTax = taxValue !== null ? buildFieldCandidate(taxValue, extraction.tax?.confidence ?? MANUAL_REVIEW_DEFAULT_CONFIDENCE, 'manual_review') : null;
   const finalCategory = buildFieldCandidate(categoryValue, extraction.category.confidence, 'manual_review');
 
   const explicitConfirmation = options?.confirmed ?? false;
+  const needsReview = explicitConfirmation
+    ? false
+    : finalMerchant.value === 'Unknown merchant' || !finalDate || !finalTotal;
+
   const reviewState: ReceiptReviewState = {
     merchant: finalMerchant,
     date: finalDate,
@@ -274,13 +286,13 @@ export function createReceiptReviewState(
     tax: finalTax,
     category: finalCategory,
     duplicateRisk: extraction.duplicateRisk,
-    needsReview: explicitConfirmation ? false : finalMerchant.value === 'Unknown merchant' || !finalDate || !finalTotal,
+    needsReview,
     rawText: extraction.rawText,
     normalizedText: extraction.normalizedText,
     source: 'ocr',
     confirmed: explicitConfirmation,
     reviewedAt: options?.reviewedAt ? options.reviewedAt.toISOString() : null,
-    changedFields: [...new Set(reviewedFields)],
+    changedFields: reviewedFields,
   };
 
   return reviewState;
@@ -301,5 +313,5 @@ export function confirmReceiptReview(
     rawText: reviewState.rawText,
     normalizedText: reviewState.normalizedText,
     source: 'ocr',
-  }, overrides, { confirmed: true, reviewedAt: new Date() });
+  }, overrides, { confirmed: true, reviewedAt: new Date(), changedFields: reviewState.changedFields });
 }
