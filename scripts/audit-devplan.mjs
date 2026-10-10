@@ -111,6 +111,7 @@ const COMPLETED_TASKS = {
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',
   'E8-T4': 'provider-local sync snapshot store with versioned history and restore-oriented history entries; client-side debounce/diff UI remain future work',
+  'E8-T5': 'public share links for budget snapshots with compact versioned payloads and documented migration/rollback guardrails',
 };
 
 // ─── Parse DEV_PLAN.md ────────────────────────────────────────────────────────

@@ -72,6 +72,22 @@ describe('shareable budget URL helpers', () => {
     expect(decodeBudgetInputsFromShare(encoded)).toBeNull();
   });
 
+  it('returns null for future payloads that only include legacy-style inputs', () => {
+    const encoded = NodeBuffer.from(
+      JSON.stringify({ v: SHARE_PAYLOAD_VERSION + 1, inputs: { annualSalary: 1 } }),
+      'utf-8'
+    ).toString('base64url');
+    expect(decodeBudgetInputsFromShare(encoded)).toBeNull();
+  });
+
+  it('returns null for payloads with a non-numeric version value', () => {
+    const encoded = NodeBuffer.from(
+      JSON.stringify({ v: '2', i: { annualSalary: 1 } }),
+      'utf-8'
+    ).toString('base64url');
+    expect(decodeBudgetInputsFromShare(encoded)).toBeNull();
+  });
+
   it('returns null for versioned payloads with null inputs', () => {
     const encoded = NodeBuffer.from(
       JSON.stringify({ v: SHARE_PAYLOAD_VERSION, i: null }),

@@ -469,26 +469,47 @@ export function decodeBudgetInputsFromShare(encoded: string): BudgetInputs | nul
     if (!encoded || encoded.trim() === '') return null;
     const decoded = decodeBase64Url(encoded.trim());
     const parsed = JSON.parse(decoded) as unknown;
-    if (parsed && typeof parsed === 'object' && 'v' in parsed) {
-      const version = (parsed as { v?: unknown }).v;
-      if (typeof version !== 'number') {
-        console.warn('Invalid shared budget payload version (not a number):', version);
+
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const objectPayload = parsed as Record<string, unknown>;
+      const rawVersion = objectPayload.v;
+
+      if (typeof rawVersion !== 'undefined') {
+        if (typeof rawVersion !== 'number' || Number.isNaN(rawVersion)) {
+          console.warn('Invalid shared budget payload version (not a number):', rawVersion);
+          return null;
+        }
+
+        if (rawVersion === 1 && 'inputs' in objectPayload) {
+          return normalizeBudgetInputs(objectPayload.inputs as unknown);
+        }
+
+        if (rawVersion === SHARE_PAYLOAD_VERSION) {
+          const compactInputs = objectPayload.i;
+          if (
+            compactInputs !== null &&
+            typeof compactInputs === 'object' &&
+            !Array.isArray(compactInputs)
+          ) {
+            return normalizeBudgetInputs(compactInputs);
+          }
+          return null;
+        }
+
+        // Migration guardrail: only older versions may fall back to the legacy full-input
+        // format; future versions are rejected to avoid silently accepting incompatible data.
+        if (
+          rawVersion < SHARE_PAYLOAD_VERSION &&
+          'inputs' in objectPayload &&
+          typeof objectPayload.inputs === 'object' &&
+          objectPayload.inputs !== null
+        ) {
+          return normalizeBudgetInputs(objectPayload.inputs as unknown);
+        }
+
+        console.warn('Unsupported shared budget payload version:', rawVersion);
         return null;
       }
-      if (version !== SHARE_PAYLOAD_VERSION) {
-        // Outdated or future payload version.
-        console.warn('Unsupported shared budget payload version:', version);
-        return null;
-      }
-      if (
-        'i' in parsed &&
-        (parsed as { i?: unknown }).i !== null &&
-        typeof (parsed as { i?: unknown }).i === 'object' &&
-        !Array.isArray((parsed as { i?: unknown }).i)
-      ) {
-        return normalizeBudgetInputs((parsed as { i: unknown }).i);
-      }
-      return null;
     }
 
     // Backward compatibility for legacy full-input payloads.
