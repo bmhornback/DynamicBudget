@@ -564,7 +564,7 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Optional cross-device sync and budget history via a provider-agnostic backend model — no custom app server.
 
-> **Static-first constraint:** The app is a fully static web app (see Architecture section). There are no Next.js API routes and no custom backend server. Any cloud features in this epic must be implemented using a client-side BaaS SDK (Supabase JS client, Firebase SDK, etc.) that the static bundle calls directly.
+> **Static-first constraint:** The app is a fully static web app (see Architecture section). There are no Next.js API routes and no custom backend server. Any cloud features in this epic must be implemented using client-side provider SDKs/APIs that the static bundle calls directly.
 >
 > **Note:** This epic is Phase 2 and should not be started until v1.0 core features are solid.
 
@@ -880,7 +880,8 @@ States to add (in priority order based on population and no-income-tax interest)
 2. E11-T1 through E11-T2 deterministic decision engine and JEV scoring design
 3. E12-T1 through E12-T3 receipt ingestion MVP
 4. E13-T2 QuickBooks read-only integration MVP
-5. E13-T4 through E13-T5 broader accounting connector expansion + accountant outputs
+5. E13-T3 QuickBooks write-back and reconciliation phase
+6. E13-T4 through E13-T5 broader accounting connector expansion + accountant outputs
 
 ---
 
