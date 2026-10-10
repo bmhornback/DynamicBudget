@@ -1,4 +1,10 @@
-import type { DecisionPolicyProfile, DecisionTrace, Recommendation } from '@/types/budget';
+import type {
+  DecisionPolicyProfile,
+  DecisionTrace,
+  Recommendation,
+  ScenarioRankingDimensionBreakdown,
+  ScenarioRankingEntry,
+} from '@/types/budget';
 
 export const DECISION_POLICY_VERSION = '2026.10.1';
 
@@ -322,6 +328,129 @@ export function attachDecisionTraceToRecommendation(
 
   return {
     ...recommendation,
+    trace,
+  };
+}
+
+function createDefaultScenarioDimensionBreakdown(): ScenarioRankingDimensionBreakdown {
+  return {
+    housing: 0,
+    emergencyFund: 0,
+    debt: 0,
+    retirement: 0,
+    flexibility: 0,
+  };
+}
+
+function normalizeScenarioRankingScore(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Number(value.toFixed(4));
+}
+
+export function rankScenarioOptions<T extends { id: string }>(
+  options: T[],
+  scorer: (item: T) => ScenarioRankingDimensionBreakdown & { total?: number },
+  profile: DecisionPolicyProfile = 'balanced'
+): ScenarioRankingEntry<T>[] {
+  const policy = getDeterministicDecisionPolicy(profile);
+
+  const ranked = [...options]
+    .map((item, index) => {
+      const breakdown = scorer(item);
+      const dimensions = {
+        housing: Number(breakdown.housing ?? 0),
+        emergencyFund: Number(breakdown.emergencyFund ?? 0),
+        debt: Number(breakdown.debt ?? 0),
+        retirement: Number(breakdown.retirement ?? 0),
+        flexibility: Number(breakdown.flexibility ?? 0),
+      };
+
+      const weightedTotal = POLICY_DIMENSION_KEYS.reduce((sum, key) => {
+        const dimensionValue = Number(dimensions[key as keyof typeof dimensions] ?? 0);
+        const weight = Number(policy.scoreWeights[key] ?? 1);
+        return sum + dimensionValue * weight;
+      }, 0);
+
+      return {
+        id: item.id,
+        name: 'name' in item && typeof item.name === 'string' ? String(item.name) : `option-${index + 1}`,
+        description: 'description' in item && typeof item.description === 'string' ? String(item.description) : undefined,
+        severity: 'severity' in item && typeof item.severity === 'string' ? item.severity as Recommendation['severity'] : undefined,
+        score: normalizeScenarioRankingScore(weightedTotal),
+        weightedTotal: normalizeScenarioRankingScore(weightedTotal),
+        rank: 0,
+        dimensionBreakdown: {
+          ...createDefaultScenarioDimensionBreakdown(),
+          ...dimensions,
+        },
+        item,
+      } satisfies ScenarioRankingEntry<T>;
+    })
+    .sort((left, right) => {
+      const leftPriority = DECISION_SEVERITY_WEIGHT[left.severity ?? 'info'];
+      const rightPriority = DECISION_SEVERITY_WEIGHT[right.severity ?? 'info'];
+
+      if (leftPriority !== rightPriority) {
+        return rightPriority - leftPriority;
+      }
+
+      if (left.weightedTotal !== right.weightedTotal) {
+        return right.weightedTotal - left.weightedTotal;
+      }
+
+      return compareStrings(left.id, right.id);
+    })
+    .map((entry, index) => ({
+      ...entry,
+      rank: index + 1,
+      score: normalizeScenarioRankingScore(entry.weightedTotal),
+      weightedTotal: normalizeScenarioRankingScore(entry.weightedTotal),
+    }));
+
+  return ranked;
+}
+
+export function createScenarioRankingContract<T extends { id: string }>(
+  options: T[],
+  scorer: (item: T) => ScenarioRankingDimensionBreakdown & { total?: number },
+  profile: DecisionPolicyProfile = 'balanced'
+): {
+  profile: DecisionPolicyProfile;
+  policy: ReturnType<typeof getDeterministicDecisionPolicy>;
+  signature: string;
+  ranked: ScenarioRankingEntry<T>[];
+  trace: DecisionTrace;
+} {
+  const policy = getDeterministicDecisionPolicy(profile);
+  const ranked = rankScenarioOptions(options, scorer, profile);
+  const snapshot = {
+    profile: policy.profile,
+    scoreWeights: policy.scoreWeights,
+    options: ranked.map((entry) => ({
+      id: entry.id,
+      weightedTotal: entry.weightedTotal,
+      dimensionBreakdown: entry.dimensionBreakdown,
+    })),
+  };
+  const signature = getDecisionInputSignature(snapshot, profile);
+  const trace = createDecisionTrace(
+    ranked.map((entry) => ({
+      id: entry.id,
+      severity: entry.severity ?? 'info',
+      score: entry.weightedTotal,
+    })),
+    policy,
+    snapshot
+  );
+
+  return {
+    profile,
+    policy,
+    signature,
+    ranked,
     trace,
   };
 }

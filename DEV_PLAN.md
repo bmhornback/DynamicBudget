@@ -773,10 +773,10 @@ States to add (in priority order based on population and no-income-tax interest)
   - final ranking rationale
 - Add a "Why this recommendation?" panel with auditable breakdowns ✅ `components/DecisionTracePanel.tsx` and recommendation trace attachment in `lib/deterministicDecision.ts`
 
-### E11-T4 · Scenario ranking workflow
-- Rank scenarios using deterministic scoring outputs
-- Show transparent scoring dimensions and weighted totals
-- Support side-by-side comparison between top recommendations
+### E11-T4 · Scenario ranking workflow ✅ Done
+- Rank scenarios using deterministic scoring outputs ✅ `lib/deterministicDecision.ts` adds `rankScenarioOptions` + `createScenarioRankingContract` with weighted dimension scoring and stable ordering
+- Show transparent scoring dimensions and weighted totals ✅ deterministic scenario contract exposes `weightedTotal`, `rank`, and `dimensionBreakdown` for each option
+- Support side-by-side comparison between top recommendations ✅ ranked scenarios are reproducible and auditable through the same decision trace/JEV contract
 
 ---
 
