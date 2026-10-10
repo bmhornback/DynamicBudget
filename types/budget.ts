@@ -452,7 +452,7 @@ export interface DecisionTrace {
   judgmentScore: number;
   expectedValue: number;
   jevScore: number;
-  scoreBreakdown: Record<string, number>;
+  scoreBreakdown: Array<{ id: string; score: number }>;
   totalScore: number;
   rationale: string;
 }

@@ -20,6 +20,7 @@ const JEV_EXPECTED_VALUE_WEIGHT = 0.4;
 const EXPECTED_VALUE_CONFIDENCE_BASE = 0.5;
 const SEVERITY_SCORE_SCALE = 10;
 const POLICY_DIMENSION_KEYS = ['housing', 'emergencyFund', 'debt', 'retirement', 'flexibility'] as const;
+const TRACE_ID_SALT = 'deterministic-decision-trace';
 
 const DECISION_POLICY_DEFINITIONS: Record<DecisionPolicyProfile, DecisionPolicyDefinition> = {
   conservative: {
@@ -135,14 +136,37 @@ export function getDecisionInputSignature(
   profile: DecisionPolicyProfile = 'balanced'
 ): string {
   const policy = getDeterministicDecisionPolicy(profile);
+  const normalizedInputs = normalizeDecisionInputs({
+    profile: policy.profile,
+    scoreWeights: policy.scoreWeights,
+    inputs,
+  });
 
-  return `${policy.version}:${JSON.stringify(
-    normalizeDecisionInputs({
-      profile: policy.profile,
-      scoreWeights: policy.scoreWeights,
-      inputs,
-    })
-  )}`;
+  return `${policy.version}:${JSON.stringify(normalizedInputs)}`;
+}
+
+function hashDecisionTraceValue(value: string): string {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    hash ^= code;
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(36).padStart(8, '0');
+}
+
+function signatureForTrace(normalizedInput: unknown, orderedItems: Array<{ id: string }>): string {
+  const ids = orderedItems.map((item) => item.id).join('|');
+  const serialized = JSON.stringify(normalizedInput);
+  const material = `${TRACE_ID_SALT}:${serialized}:${ids}`;
+
+  return hashDecisionTraceValue(material);
+}
+
+function createTraceIdentifier(policy: ReturnType<typeof getDeterministicDecisionPolicy>, normalizedInput: unknown, orderedItems: Array<{ id: string }>): string {
+  return `trace:${policy.profile}:${policy.version}:${signatureForTrace(normalizedInput, orderedItems)}`;
 }
 
 export function sortRecommendationsDeterministically(recommendations: Recommendation[]): Recommendation[] {
@@ -191,6 +215,14 @@ export function calculateJevScore(
   return Number(((judgmentScore * JEV_JUDGMENT_WEIGHT + expectedValue * JEV_EXPECTED_VALUE_WEIGHT) * normalizedConfidence).toFixed(4));
 }
 
+function averageScoreBreakdown(scores: Array<{ id: string; score: number }>): number {
+  if (scores.length === 0) {
+    return 0;
+  }
+
+  return Number((scores.reduce((sum, item) => sum + item.score, 0) / scores.length).toFixed(4));
+}
+
 function sortDecisionItems<T extends { id: string; severity?: Recommendation['severity'] }>(items: T[]): T[] {
   return [...items].sort((left, right) => {
     const leftPriority = DECISION_SEVERITY_WEIGHT[(left as { severity?: Recommendation['severity'] }).severity ?? 'info'];
@@ -212,20 +244,20 @@ export function createDecisionTrace<T extends { id: string; severity?: Recommend
   const policy = getDeterministicDecisionPolicy(profile);
   const orderedItems = sortDecisionItems(items);
 
-  const scoreBreakdown = orderedItems.reduce<Record<string, number>>((acc, item) => {
-    acc[item.id] = scoreDecisionItem(item, profile);
-    return acc;
-  }, {});
+  const scoreBreakdown = orderedItems.map((item) => ({
+    id: item.id,
+    score: scoreDecisionItem(item, profile),
+  }));
 
-  const totalScore = Object.values(scoreBreakdown).reduce((sum, value) => sum + value, 0);
-  const judgmentScore = Number((totalScore / Math.max(orderedItems.length, 1)).toFixed(4));
+  const totalScore = scoreBreakdown.reduce((sum, value) => sum + value.score, 0);
+  const judgmentScore = averageScoreBreakdown(scoreBreakdown);
   const confidenceCenter = (policy.confidenceRange[0] + policy.confidenceRange[1]) / 2;
-  const expectedValue = Number((judgmentScore * confidenceCenter + totalScore * EXPECTED_VALUE_CONFIDENCE_BASE).toFixed(4));
+  const expectedValue = Number((judgmentScore * confidenceCenter + judgmentScore * EXPECTED_VALUE_CONFIDENCE_BASE).toFixed(4));
   const finalJev = calculateJevScore(judgmentScore, expectedValue, confidenceCenter, profile);
   const normalizedInputs = normalizeDecisionInputs(inputSnapshot);
 
   return {
-    id: `trace:${policy.profile}:${signatureForTrace(normalizedInputs, orderedItems)}`,
+    id: createTraceIdentifier(policy, normalizedInputs, orderedItems),
     profile: policy.profile,
     version: policy.version,
     normalizedInputs,
@@ -238,13 +270,6 @@ export function createDecisionTrace<T extends { id: string; severity?: Recommend
     totalScore: Number(totalScore.toFixed(4)),
     rationale: `Ranked by ${policy.tieBreakers.join(' → ')} using ${policy.profile} policy assumptions, yielding a JEV score of ${finalJev} within a ${policy.confidenceRange[0]}-${policy.confidenceRange[1]} confidence band.`,
   };
-}
-
-function signatureForTrace(normalizedInput: unknown, orderedItems: Array<{ id: string }>): string {
-  const ids = orderedItems.map((item) => item.id).join('|');
-  const serialized = JSON.stringify(normalizeDecisionInputs(normalizedInput));
-
-  return `${serialized}:${ids}`;
 }
 
 export function createDeterministicDecisionContract<T extends { id: string; severity?: Recommendation['severity']; score?: number }>(
