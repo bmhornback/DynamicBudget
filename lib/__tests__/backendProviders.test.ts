@@ -31,6 +31,34 @@ describe('backendProviders', () => {
 
     await expect(unconfigured.saveBudget({ id: 'demo' })).resolves.toBeUndefined();
     await expect(unconfigured.listBudgetHistory()).resolves.toEqual([]);
+
+    const created = await configured.upsertBudget({ id: 'demo-budget', name: 'Demo', annualSalary: 120000 });
+    expect(created).toMatchObject({ id: 'demo-budget', name: 'Demo', version: 1 });
+
+    const history = await configured.listBudgetHistory();
+    expect(history.length).toBeGreaterThan(0);
+    expect(history[0]).toMatchObject({ action: 'create', version: 1 });
+
+    const budgets = await configured.listBudgets();
+    expect(budgets).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'demo-budget' })]));
+
+    const actual = await configured.getBudget('demo-budget');
+    expect(actual).toMatchObject({ id: 'demo-budget', name: 'Demo' });
+
+    const deleted = await configured.deleteBudget('demo-budget');
+    expect(deleted).toBe(true);
+
+    const afterDelete = await configured.listBudgetHistory();
+    expect(afterDelete[0]).toMatchObject({ action: 'delete', version: 1 });
+    expect(afterDelete[0].previousVersion).toBeUndefined();
+
+    await configured.upsertBudget({ id: 'multi-version', name: 'Multi', annualSalary: 120000 });
+    await configured.upsertBudget({ id: 'multi-version', name: 'Multi revised', annualSalary: 130000 });
+    const deletedRevision = await configured.deleteBudget('multi-version');
+    expect(deletedRevision).toBe(true);
+
+    const historyWithPrevious = await configured.listBudgetHistory();
+    expect(historyWithPrevious[0]).toMatchObject({ action: 'delete', version: 2, previousVersion: 1 });
   });
 
   it('returns a human-readable scorecard summary', () => {

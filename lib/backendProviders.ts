@@ -53,6 +53,20 @@ export interface AuthResult {
   userId?: string;
 }
 
+export interface BudgetSnapshotRecord {
+  id: string;
+  name?: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface BudgetHistoryEntry extends BudgetSnapshotRecord {
+  action: 'create' | 'update' | 'delete';
+  previousVersion?: number;
+}
+
 export interface BackendProviderAdapter {
   readonly providerId: BackendProviderId;
   readonly auth: StaticAuthFlow;
@@ -62,6 +76,10 @@ export interface BackendProviderAdapter {
   signOut(): Promise<void>;
   saveBudget(payload: Record<string, unknown>): Promise<void>;
   listBudgetHistory(): Promise<Array<Record<string, unknown>>>;
+  listBudgets(): Promise<Array<Record<string, unknown>>>;
+  getBudget(id: string): Promise<Record<string, unknown> | null>;
+  upsertBudget(payload: Record<string, unknown>): Promise<Record<string, unknown>>;
+  deleteBudget(id: string): Promise<boolean>;
 }
 
 const SCORE_WEIGHTS = {
@@ -269,6 +287,102 @@ export function getStaticAuthFlow(providerId: BackendProviderId): StaticAuthFlow
   };
 }
 
+type BudgetStoreEntry = {
+  id: string;
+  name: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+};
+
+function createBudgetState() {
+  return {
+    store: new Map<string, BudgetStoreEntry>(),
+    history: new Array<BudgetHistoryEntry>(),
+  };
+}
+
+function normalizeBudgetName(payload: Record<string, unknown>, fallback: string): string {
+  if (typeof payload.name === 'string' && payload.name.trim()) {
+    return payload.name.trim();
+  }
+  if (typeof payload.id === 'string' && payload.id.trim()) {
+    return payload.id.trim();
+  }
+  return fallback;
+}
+
+function normalizeBudgetId(payload: Record<string, unknown>): string {
+  if (typeof payload.id === 'string' && payload.id.trim()) {
+    return payload.id.trim();
+  }
+  return `budget-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function buildHistoryId(prefix: string, timestamp: string): string {
+  return `${prefix}-${timestamp.replace(/[:.]/g, '-')}`;
+}
+
+function recordBudgetHistory(
+  state: ReturnType<typeof createBudgetState>,
+  record: BudgetStoreEntry,
+  action: BudgetHistoryEntry['action'],
+  previousVersion?: number,
+): void {
+  const timestamp = new Date().toISOString();
+  const entry: BudgetHistoryEntry = {
+    id: buildHistoryId(record.id, timestamp),
+    name: record.name,
+    payload: record.payload,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    version: record.version,
+    action,
+    previousVersion,
+  };
+  state.history.unshift(entry);
+}
+
+function buildBudgetRecord(state: ReturnType<typeof createBudgetState>, payload: Record<string, unknown>): BudgetStoreEntry {
+  const id = normalizeBudgetId(payload);
+  const existing = state.store.get(id);
+  const now = new Date().toISOString();
+  const nextVersion = existing ? existing.version + 1 : 1;
+
+  const record: BudgetStoreEntry = {
+    id,
+    name: normalizeBudgetName(payload, existing?.name ?? 'Untitled budget'),
+    payload: { ...payload },
+    createdAt: existing?.createdAt ?? now,
+    updatedAt: now,
+    version: nextVersion,
+  };
+
+  state.store.set(id, record);
+  recordBudgetHistory(state, record, existing ? 'update' : 'create', existing?.version);
+  return record;
+}
+
+function deleteBudgetRecord(state: ReturnType<typeof createBudgetState>, id: string): boolean {
+  const existing = state.store.get(id);
+  const existed = state.store.delete(id);
+  if (existed && existing) {
+    const deletedAt = new Date().toISOString();
+    state.history.unshift({
+      id: buildHistoryId(id, deletedAt),
+      name: existing.name,
+      payload: existing.payload,
+      createdAt: existing.createdAt,
+      updatedAt: deletedAt,
+      version: existing.version,
+      action: 'delete',
+      previousVersion: existing.version > 1 ? existing.version - 1 : undefined,
+    });
+  }
+  return existed;
+}
+
 export function createBackendProviderAdapter(
   providerId: BackendProviderId,
   options: { configured?: boolean } = {},
@@ -276,6 +390,21 @@ export function createBackendProviderAdapter(
   const configured = options.configured ?? false;
   const definition = BACKEND_PROVIDER_CATALOG.find((candidate) => candidate.id === providerId) ?? BACKEND_PROVIDER_CATALOG[BACKEND_PROVIDER_CATALOG.length - 1];
   const auth = getStaticAuthFlow(providerId);
+  const state = createBudgetState();
+
+  const listBudgetsFromStore = async (): Promise<Array<Record<string, unknown>>> => {
+    if (!configured) {
+      return [];
+    }
+    return [...state.store.values()].map((entry) => ({ ...entry }));
+  };
+
+  const upsertBudgetIfConfigured = async (payload: Record<string, unknown>): Promise<Record<string, unknown>> => {
+    if (!configured) {
+      throw new Error('This backend adapter is not configured. Enable the provider before saving budget records.');
+    }
+    return { ...buildBudgetRecord(state, payload) };
+  };
 
   const localOnlyAdapter: BackendProviderAdapter = {
     providerId,
@@ -298,8 +427,33 @@ export function createBackendProviderAdapter(
       };
     },
     signOut: async () => undefined,
-    saveBudget: async () => undefined,
-    listBudgetHistory: async () => [],
+    saveBudget: async (payload: Record<string, unknown>) => {
+      if (!configured) {
+        return;
+      }
+      buildBudgetRecord(state, payload);
+    },
+    listBudgetHistory: async () => {
+      if (!configured) {
+        return [] as Record<string, unknown>[];
+      }
+      return [...state.history].map((entry) => ({ ...entry }));
+    },
+    listBudgets: listBudgetsFromStore,
+    getBudget: async (id: string) => {
+      if (!configured || !id) {
+        return null;
+      }
+      const record = state.store.get(id);
+      return record ? { ...record } : null;
+    },
+    upsertBudget: upsertBudgetIfConfigured,
+    deleteBudget: async (id: string) => {
+      if (!configured || !id) {
+        return false;
+      }
+      return deleteBudgetRecord(state, id);
+    },
   };
 
   if (providerId === 'local_only') {
@@ -308,7 +462,6 @@ export function createBackendProviderAdapter(
 
   return {
     ...localOnlyAdapter,
-    isConfigured: () => configured,
     signInWithOAuth: async (provider: OAuthProviderId) => {
       if (!configured) {
         return {
@@ -331,20 +484,6 @@ export function createBackendProviderAdapter(
         status: 'success',
         userId: `provider-${provider}-session`,
       };
-    },
-    saveBudget: async (payload: Record<string, unknown>) => {
-      if (!configured) {
-        return;
-      }
-
-      void payload;
-    },
-    listBudgetHistory: async () => {
-      if (!configured) {
-        return [];
-      }
-
-      return [];
     },
   };
 }

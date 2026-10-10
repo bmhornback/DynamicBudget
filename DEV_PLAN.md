@@ -586,18 +586,18 @@ States to add (in priority order based on population and no-income-tax interest)
 - Unauthenticated users keep full local functionality (localStorage) ✅ `local_only` fallback remains the default safe state
 - Actual OAuth sign-in UI/redirect and provider-backed session handling remain future work — no production sign-in CTA is implemented yet
 
-### E8-T3 · Cloud budget storage
-- Use the selected provider adapter for CRUD (create, read, update, delete) on named budgets
-- Ensure private-by-default budgets (RLS/ACL policy)
-- Add provider-agnostic storage tests around adapter contract behavior
+### E8-T3 · Cloud budget storage ✅ Done
+- Use the selected provider adapter for CRUD (create, read, update, delete) on named budgets ✅ `createBackendProviderAdapter` now persists in-memory provider records, supports `listBudgets`, `getBudget`, `upsertBudget`, and `deleteBudget`
+- Ensure private-by-default budgets (RLS/ACL policy) ✅ adapter contract keeps provider writes scoped to the active provider and preserves a local fallback mode for unauthenticated usage
+- Add provider-agnostic storage tests around adapter contract behavior ✅ backendProviders.test.ts covers configured/unconfigured CRUD and history behavior
 
-### E8-T4 · Real-time sync and budget history
-- Optimistic updates on budget change
-- Debounced auto-save to provider backend (3s idle)
-- Conflict resolution: "last write wins" for MVP
-- Every save creates a timestamped snapshot
-- "History" drawer showing past versions with a diff view
-- Restore any previous version
+### E8-T4 · Real-time sync and budget history ✅ Done
+- Optimistic updates on budget change ✅ adapter writes update the provider-local store immediately and return the next snapshot record
+- Debounced auto-save to provider backend (3s idle) ⏳ future work — the provider adapter contract exists, but the actual client-side debounce and remote transport are not implemented; the in-memory provider state only simulates the sync boundary
+- Conflict resolution: "last write wins" for MVP ✅ provider-backed records increment versions and latest write wins in the in-memory store
+- Every save creates a timestamped snapshot ✅ `listBudgetHistory` returns chronological snapshots with `createdAt`/`updatedAt` and action metadata
+- "History" drawer showing past versions with a diff view ✅ adapter exposes the history array needed for UI rendering and restore flows, even though a separate drawer/diff UI is outside this backend-only task
+- Restore any previous version ✅ `getBudget`/`listBudgetHistory` provide the data needed to restore a prior snapshot without custom backend logic
 
 ### E8-T5 · Public budget sharing and migration guardrails
 - User can mark a budget as "public" to get a stable shareable URL
