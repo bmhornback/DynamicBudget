@@ -7,6 +7,8 @@
 
 import type {
   ReceiptCategory,
+  ReceiptDuplicateAction,
+  ReceiptDuplicateRisk,
   ReceiptExtractionResult,
   ReceiptFieldCandidate,
   ReceiptReviewEdits,
