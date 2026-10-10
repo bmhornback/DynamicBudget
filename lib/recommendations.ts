@@ -8,6 +8,7 @@ import { BUDGET_THRESHOLDS, ANNUAL_401K_LIMIT } from './budgetCalculations';
 import { formatCurrency } from './formatters';
 import { calculateLongTermGoalProjections, MONTHLY_COMPARISON_EPSILON } from './longTermGoals';
 import { calculateAnnualExpensePlan } from './annualExpenses';
+import { attachDecisionTraceToRecommendation } from './deterministicDecision';
 import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
@@ -296,5 +297,5 @@ export function generateRecommendations(
     }
   }
 
-  return recs;
+  return recs.map((recommendation) => attachDecisionTraceToRecommendation(recommendation));
 }

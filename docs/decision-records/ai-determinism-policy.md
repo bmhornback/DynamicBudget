@@ -24,7 +24,7 @@ Each recommendation must include a trace with:
 
 ## MVP Outcomes
 - Scenario ranking with transparent weighted scoring
-- "Why this recommendation?" explanation panel
+- "Why this recommendation?" explanation panel that shows the deterministic trace, assumptions, and score breakdown
 - Audit-friendly output suitable for review and debugging
 
 ## Consequences

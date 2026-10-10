@@ -109,6 +109,7 @@ const COMPLETED_TASKS = {
   'E10-T5': 'MCP package publication metadata is prepared for npm, and distro docs cover install/configuration/troubleshooting for external users',
   'E11-T1': 'deterministic decision contract and versioned policy in lib/deterministicDecision.ts with normalized input signatures and stable tie-breakers',
   'E11-T2': 'JEV policy scoring layer with confidence bands, expected-value calculation, and decision trace output in lib/deterministicDecision.ts',
+  'E11-T3': 'Decision trace panel and explainability UI in RecommendationList + DecisionTracePanel with deterministic rule breakdowns',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',
