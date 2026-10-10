@@ -593,7 +593,7 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ### E8-T4 · Real-time sync and budget history ✅ Done
 - Optimistic updates on budget change ✅ adapter writes update the provider-local store immediately and return the next snapshot record
-- Debounced auto-save to provider backend (3s idle) ✅ modeled as a provider adapter contract ready for a throttled UI layer; the in-memory provider state simulates the sync boundary without a real remote transport
+- Debounced auto-save to provider backend (3s idle) ⏳ future work — the provider adapter contract exists, but the actual client-side debounce and remote transport are not implemented; the in-memory provider state only simulates the sync boundary
 - Conflict resolution: "last write wins" for MVP ✅ provider-backed records increment versions and latest write wins in the in-memory store
 - Every save creates a timestamped snapshot ✅ `listBudgetHistory` returns chronological snapshots with `createdAt`/`updatedAt` and action metadata
 - "History" drawer showing past versions with a diff view ✅ adapter exposes the history array needed for UI rendering and restore flows, even though a separate drawer/diff UI is outside this backend-only task

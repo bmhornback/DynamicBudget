@@ -47,6 +47,18 @@ describe('backendProviders', () => {
 
     const deleted = await configured.deleteBudget('demo-budget');
     expect(deleted).toBe(true);
+
+    const afterDelete = await configured.listBudgetHistory();
+    expect(afterDelete[0]).toMatchObject({ action: 'delete', version: 1 });
+    expect(afterDelete[0].previousVersion).toBeUndefined();
+
+    await configured.upsertBudget({ id: 'multi-version', name: 'Multi', annualSalary: 120000 });
+    await configured.upsertBudget({ id: 'multi-version', name: 'Multi revised', annualSalary: 130000 });
+    const deletedRevision = await configured.deleteBudget('multi-version');
+    expect(deletedRevision).toBe(true);
+
+    const historyWithPrevious = await configured.listBudgetHistory();
+    expect(historyWithPrevious[0]).toMatchObject({ action: 'delete', version: 2, previousVersion: 1 });
   });
 
   it('returns a human-readable scorecard summary', () => {

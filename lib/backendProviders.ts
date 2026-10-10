@@ -377,7 +377,7 @@ function deleteBudgetRecord(state: ReturnType<typeof createBudgetState>, id: str
       updatedAt: deletedAt,
       version: existing.version,
       action: 'delete',
-      previousVersion: Math.max(existing.version - 1, 0),
+      previousVersion: existing.version > 1 ? existing.version - 1 : undefined,
     });
   }
   return existed;
@@ -399,19 +399,11 @@ export function createBackendProviderAdapter(
     return [...state.store.values()].map((entry) => ({ ...entry }));
   };
 
-  const persistBudget = async (payload: Record<string, unknown>): Promise<Record<string, unknown>> => {
-    if (!configured) {
-      return { ...payload, id: normalizeBudgetId(payload), version: 0 };
-    }
-    const record = buildBudgetRecord(state, payload);
-    return { ...record };
-  };
-
   const upsertBudgetIfConfigured = async (payload: Record<string, unknown>): Promise<Record<string, unknown>> => {
     if (!configured) {
       throw new Error('This backend adapter is not configured. Enable the provider before saving budget records.');
     }
-    return persistBudget(payload);
+    return { ...buildBudgetRecord(state, payload) };
   };
 
   const localOnlyAdapter: BackendProviderAdapter = {
@@ -439,7 +431,7 @@ export function createBackendProviderAdapter(
       if (!configured) {
         return;
       }
-      await persistBudget(payload);
+      buildBudgetRecord(state, payload);
     },
     listBudgetHistory: async () => {
       if (!configured) {
@@ -455,9 +447,7 @@ export function createBackendProviderAdapter(
       const record = state.store.get(id);
       return record ? { ...record } : null;
     },
-    upsertBudget: async (payload: Record<string, unknown>) => {
-      return upsertBudgetIfConfigured(payload);
-    },
+    upsertBudget: upsertBudgetIfConfigured,
     deleteBudget: async (id: string) => {
       if (!configured || !id) {
         return false;
@@ -472,7 +462,6 @@ export function createBackendProviderAdapter(
 
   return {
     ...localOnlyAdapter,
-    isConfigured: () => configured,
     signInWithOAuth: async (provider: OAuthProviderId) => {
       if (!configured) {
         return {
@@ -495,35 +484,6 @@ export function createBackendProviderAdapter(
         status: 'success',
         userId: `provider-${provider}-session`,
       };
-    },
-    saveBudget: async (payload: Record<string, unknown>) => {
-      if (!configured) {
-        return;
-      }
-      await persistBudget(payload);
-    },
-    listBudgetHistory: async () => {
-      if (!configured) {
-        return [] as Record<string, unknown>[];
-      }
-      return [...state.history].map((entry) => ({ ...entry }));
-    },
-    listBudgets: listBudgetsFromStore,
-    getBudget: async (id: string) => {
-      if (!configured || !id) {
-        return null;
-      }
-      const record = state.store.get(id);
-      return record ? { ...record } : null;
-    },
-    upsertBudget: async (payload: Record<string, unknown>) => {
-      return upsertBudgetIfConfigured(payload);
-    },
-    deleteBudget: async (id: string) => {
-      if (!configured || !id) {
-        return false;
-      }
-      return deleteBudgetRecord(state, id);
     },
   };
 }
