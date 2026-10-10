@@ -9,7 +9,6 @@ import { buildAnnualProjection } from '@/lib/annualProjection';
 import {
   get401kLimit,
   getIRALimit,
-  ANNUAL_HSA_LIMIT_SELF,
   TRADITIONAL_IRA_PHASEOUT_SINGLE_START,
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
   TRADITIONAL_IRA_PHASEOUT_MFJ_START,

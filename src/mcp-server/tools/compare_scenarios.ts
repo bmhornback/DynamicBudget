@@ -153,7 +153,10 @@ export function compareScenarios(params: CompareScenariosParams): CompareScenari
     ? `${winnerSnap.name} has the best health score (${winnerSnap.health_score}) among the scenarios, though it is still over budget.`
     : `${winnerSnap.name} has the highest budget health score (${winnerSnap.health_score}: ${winnerSnap.health_label}) with a $${winnerSnap.remaining_monthly_buffer.toFixed(0)}/mo buffer.`;
 
+  // Strip internal-only `taxes_annual_state` field before returning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { taxes_annual_state: _b, ...baselineClean } = baseline;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const comparisonsClean = comparisons.map(({ taxes_annual_state: _c, ...rest }) => rest);
 
   return {
