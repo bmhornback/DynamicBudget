@@ -2,6 +2,7 @@ import {
   confirmReceiptReview,
   createReceiptReviewState,
   createReceiptSpendEntry,
+  evaluateReceiptDuplicateRisk,
   getReceiptCategoryHint,
   normalizeReceiptText,
   parseReceiptText,
@@ -199,5 +200,34 @@ describe('receiptOCR', () => {
     expect(utilityEntry.category).toBe('internet');
     expect(diningEntry.category).toBe('dining_out');
     expect(travelEntry.category).toBe('other');
+  });
+
+  it('detects likely duplicate receipts using merchant, date, and amount heuristics', () => {
+    const existing = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-duplicate-old', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+
+    const candidate = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-duplicate-new', ingestedAt: new Date('2026-09-23T12:00:05Z') });
+
+    const duplicate = evaluateReceiptDuplicateRisk(existing, candidate);
+
+    expect(duplicate.matches).toBe(3);
+    expect(duplicate.risk.isDuplicate).toBe(true);
+    expect(duplicate.risk.action).toBe('merge');
+    expect(duplicate.risk.score).toBeGreaterThanOrEqual(0.75);
   });
 });

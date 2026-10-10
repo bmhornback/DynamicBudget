@@ -101,11 +101,15 @@ export interface ReceiptReviewEdits {
   category?: ReceiptCategory;
 }
 
+export type ReceiptDuplicateAction = 'review' | 'merge' | 'ignore';
+
 export interface ReceiptDuplicateRisk {
   merchant: boolean;
   date: boolean;
   amount: boolean;
   score: number;
+  isDuplicate?: boolean;
+  action?: ReceiptDuplicateAction;
 }
 
 export interface ReceiptExtractionResult {
