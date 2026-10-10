@@ -581,10 +581,10 @@ States to add (in priority order based on population and no-income-tax interest)
   - Vendor lock-in and migration risk ✅ weighted criterion included
 - Deliverable: provider scorecard + recommendation for MVP, growth, and enterprise stages ✅ `rankBackendProviders`, `getDefaultProviderRecommendation`, and `buildProviderRecommendationSummary` provide the design output
 
-### E8-T2 · Authentication ✅ Done
-- Implement sign-in with GitHub OAuth and/or Google OAuth through the selected provider adapter ✅ `createBackendProviderAdapter` and `getStaticAuthFlow` model provider-aware OAuth while preserving local-only fallback
+### E8-T2 · Authentication ✅ Partial
+- Define the provider-aware auth flow contract for GitHub/Google OAuth and document the local-only fallback ✅ `createBackendProviderAdapter` and `getStaticAuthFlow` model the expected auth surface without implementing an actual redirect/token exchange
 - Unauthenticated users keep full local functionality (localStorage) ✅ `local_only` fallback remains the default safe state
-- "Sign in to sync" CTA in the header ✅ architecture supports it without forcing a custom app server
+- Actual OAuth sign-in UI/redirect and provider-backed session handling remain future work — no production sign-in CTA is implemented yet
 
 ### E8-T3 · Cloud budget storage
 - Use the selected provider adapter for CRUD (create, read, update, delete) on named budgets
