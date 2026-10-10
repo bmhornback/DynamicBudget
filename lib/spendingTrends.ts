@@ -21,6 +21,7 @@ export const CATEGORY_CONFIG: Record<
   gas_utility: { label: 'Gas (Utility)', budgetField: 'gas' },
   internet: { label: 'Internet', budgetField: 'internet' },
   phone: { label: 'Phone', budgetField: 'phone' },
+  other: { label: 'Other', budgetField: 'personalSpending' },
 };
 
 /**

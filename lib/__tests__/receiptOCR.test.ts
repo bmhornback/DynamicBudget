@@ -1,6 +1,7 @@
 import {
   confirmReceiptReview,
   createReceiptReviewState,
+  createReceiptSpendEntry,
   getReceiptCategoryHint,
   normalizeReceiptText,
   parseReceiptText,
@@ -97,5 +98,106 @@ describe('receiptOCR', () => {
 
     expect(review.tax).toBeNull();
     expect(review.changedFields).toEqual(['tax']);
+  });
+
+  it('maps confirmed receipts into trackable spending entries with source metadata', () => {
+    const extraction = parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+      'TAX 3.34',
+    ].join('\n'));
+
+    const review = confirmReceiptReview(createReceiptReviewState(extraction), {}, {
+      receiptId: 'receipt_123',
+      ingestedAt: new Date('2026-09-23T12:00:00Z'),
+    });
+
+    const { entry, history } = createReceiptSpendEntry(review, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+      note: 'Whole Foods Market',
+    });
+
+    expect(entry.category).toBe('groceries');
+    expect(entry.amount).toBe(45.84);
+    expect(entry.source).toBe('receipt');
+    expect(entry.receiptId).toBe('receipt_123');
+    expect(entry.ingestTimestamp).toBe('2026-09-23T12:00:00.000Z');
+    expect(history.entries).toHaveLength(1);
+    expect(history.entries[0].id).toBe(entry.id);
+  });
+
+  it('blocks creating spend entries from unconfirmed receipt reviews', () => {
+    const extraction = parseReceiptText([
+      'AMAZON ORDER',
+      'Sep 23, 2026',
+      'TOTAL 19.99',
+    ].join('\n'));
+
+    const review = createReceiptReviewState(extraction, {
+      merchant: 'Amazon',
+      total: 19.99,
+      category: 'other',
+    }, { confirmed: false });
+
+    expect(() => createReceiptSpendEntry(review)).toThrow('Receipt review must be confirmed');
+  });
+
+  it('maps receipt categories to trackable categories using merchant keywords and known fallbacks', () => {
+    const amazonExtraction = parseReceiptText('Amazon order\nSep 23, 2026\nTOTAL 19.99');
+    const amazonReview = confirmReceiptReview(createReceiptReviewState(amazonExtraction, {
+      merchant: 'Amazon',
+      total: 19.99,
+      category: 'other',
+    }), {}, { receiptId: 'amazon-1', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+    const amazonEntry = createReceiptSpendEntry(amazonReview, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+    }).entry;
+
+    const gasExtraction = parseReceiptText('Chevron\nSep 23, 2026\nTOTAL 52.10');
+    const gasReview = confirmReceiptReview(createReceiptReviewState(gasExtraction, {
+      merchant: 'Chevron',
+      total: 52.10,
+      category: 'transportation',
+    }), {}, { receiptId: 'gas-1', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+    const gasEntry = createReceiptSpendEntry(gasReview, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+    }).entry;
+
+    const utilityExtraction = parseReceiptText('Xfinity\nSep 23, 2026\nTOTAL 75.00');
+    const utilityReview = confirmReceiptReview(createReceiptReviewState(utilityExtraction, {
+      merchant: 'Xfinity',
+      total: 75.00,
+      category: 'utilities',
+    }), {}, { receiptId: 'utility-1', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+    const utilityEntry = createReceiptSpendEntry(utilityReview, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+    }).entry;
+
+    const diningExtraction = parseReceiptText('Starbucks\nSep 23, 2026\nTOTAL 8.50');
+    const diningReview = confirmReceiptReview(createReceiptReviewState(diningExtraction, {
+      merchant: 'Starbucks',
+      total: 8.50,
+      category: 'food',
+    }), {}, { receiptId: 'food-1', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+    const diningEntry = createReceiptSpendEntry(diningReview, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+    }).entry;
+
+    const travelExtraction = parseReceiptText('Travel Lodge\nSep 23, 2026\nTOTAL 140.00');
+    const travelReview = confirmReceiptReview(createReceiptReviewState(travelExtraction, {
+      merchant: 'Travel Lodge',
+      total: 140.00,
+      category: 'travel',
+    }), {}, { receiptId: 'travel-1', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+    const travelEntry = createReceiptSpendEntry(travelReview, {
+      history: { entries: [], lastUpdated: '2026-09-23T12:00:00.000Z', version: 1 },
+    }).entry;
+
+    expect(amazonEntry.category).toBe('online_shopping');
+    expect(gasEntry.category).toBe('gas_utility');
+    expect(utilityEntry.category).toBe('internet');
+    expect(diningEntry.category).toBe('dining_out');
+    expect(travelEntry.category).toBe('other');
   });
 });

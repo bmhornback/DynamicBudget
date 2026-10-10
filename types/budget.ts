@@ -125,6 +125,8 @@ export interface ReceiptReviewState extends ReceiptExtractionResult {
   confirmed: boolean;
   reviewedAt: string | null;
   changedFields: ReceiptReviewField[];
+  receiptId?: string;
+  ingestedAt?: string | null;
 }
 
 export interface DebtAccount {
@@ -590,7 +592,8 @@ export type TrackableCategory =
   | 'subscriptions'
   | 'gas_utility'
   | 'internet'
-  | 'phone';
+  | 'phone'
+  | 'other';
 
 export interface SpendingEntry {
   id: string;
@@ -599,6 +602,9 @@ export interface SpendingEntry {
   amount: number;
   note?: string;
   createdAt: string; // ISO timestamp
+  source?: 'manual' | 'receipt';
+  receiptId?: string;
+  ingestTimestamp?: string;
 }
 
 export interface CategoryMetrics {

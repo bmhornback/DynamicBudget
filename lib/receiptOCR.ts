@@ -12,6 +12,9 @@ import type {
   ReceiptReviewEdits,
   ReceiptReviewField,
   ReceiptReviewState,
+  SpendingEntry,
+  SpendingHistory,
+  TrackableCategory,
 } from '@/types/budget';
 
 const RECEIPT_CATEGORY_KEYWORDS: Array<{ category: ReceiptCategory; keywords: string[] }> = [
@@ -33,6 +36,18 @@ const MERCHANT_LENGTH_DIVISOR = 80;
 const DUPLICATE_RISK_STRENGTH = 0.8;
 const DUPLICATE_RISK_WEAK = 0.35;
 const MANUAL_REVIEW_DEFAULT_CONFIDENCE = 0.8;
+
+const TRACKABLE_CATEGORY_KEYWORDS: Array<{ category: TrackableCategory; keywords: string[] }> = [
+  { category: 'groceries', keywords: ['whole foods', 'trader joe', 'albertsons', 'safeway', 'kroger', 'food lion', 'market', 'grocery', 'supermarket'] },
+  { category: 'dining_out', keywords: ['starbucks', 'coffee', 'cafe', 'restaurant', 'pizza', 'burger', 'mcdonald', 'subway', 'dunkin', 'bistro', 'catering'] },
+  { category: 'gas_utility', keywords: ['shell', 'chevron', 'exxon', 'mobil', 'gas station', 'fuel', 'petroleum', 'diesel'] },
+  { category: 'electricity', keywords: ['electric', 'power', 'electricity', 'utility electric'] },
+  { category: 'water', keywords: ['water', 'water utility', 'municipal water'] },
+  { category: 'internet', keywords: ['xfinity', 'comcast', 'internet', 'fiber', 'broadband'] },
+  { category: 'phone', keywords: ['verizon', 'at&t', 'cellular', 'mobile', 'phone', 'wireless'] },
+  { category: 'subscriptions', keywords: ['spotify', 'netflix', 'hulu', 'youtube', 'prime', 'subscription', 'streaming'] },
+  { category: 'online_shopping', keywords: ['amazon', 'target', 'walmart', 'online', 'shop', 'ecommerce', 'marketplace'] },
+];
 
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
@@ -127,6 +142,73 @@ export function getReceiptCategoryHint(merchant: string): ReceiptCategory {
   }
 
   return DEFAULT_CATEGORY;
+}
+
+export function mapReceiptCategoryToTrackableCategory(category: ReceiptCategory, merchant?: string): TrackableCategory {
+  const normalizedCategory = (category ?? 'other').toLowerCase();
+  const normalizedMerchant = normalizeWhitespace(merchant ?? '').toLowerCase();
+
+  if (normalizedMerchant) {
+    for (const rule of TRACKABLE_CATEGORY_KEYWORDS) {
+      if (rule.keywords.some((keyword) => normalizedMerchant.includes(keyword.toLowerCase()))) {
+        return rule.category;
+      }
+    }
+  }
+
+  if (normalizedCategory === 'groceries') return 'groceries';
+  if (normalizedCategory === 'food') return 'dining_out';
+  if (normalizedCategory === 'transportation') return 'gas_utility';
+  if (normalizedCategory === 'utilities') return 'electricity';
+  if (normalizedCategory === 'subscriptions') return 'subscriptions';
+
+  return 'other';
+}
+
+export function createReceiptSpendEntry(
+  reviewState: ReceiptReviewState,
+  options?: { receiptId?: string; ingestTimestamp?: Date | string; note?: string; history?: SpendingHistory }
+): { entry: SpendingEntry; history: SpendingHistory } {
+  if (!reviewState.confirmed) {
+    throw new Error('Receipt review must be confirmed before creating a spending entry.');
+  }
+
+  const dateValue = reviewState.date?.value ?? new Date().toISOString().slice(0, 10);
+  const totalValue = reviewState.total?.value ?? 0;
+  const category = mapReceiptCategoryToTrackableCategory(reviewState.category.value, reviewState.merchant.value);
+  const note = options?.note ?? `Receipt ${reviewState.merchant.value}`;
+  const idSuffix = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const receiptId = options?.receiptId ?? reviewState.receiptId ?? `receipt_${idSuffix}`;
+  const ingestTimestamp = options?.ingestTimestamp ? new Date(options.ingestTimestamp).toISOString() : reviewState.ingestedAt ?? new Date().toISOString();
+  const creationTimestamp = new Date().toISOString();
+  const entryId = `${receiptId}_entry_${idSuffix}`;
+
+  const entry: SpendingEntry = {
+    id: entryId,
+    date: dateValue,
+    category,
+    amount: Number(totalValue.toFixed(2)),
+    note,
+    createdAt: creationTimestamp,
+    source: 'receipt',
+    receiptId,
+    ingestTimestamp,
+  };
+
+  const history = options?.history ?? {
+    entries: [],
+    lastUpdated: ingestTimestamp,
+    version: 1,
+  };
+
+  return {
+    entry,
+    history: {
+      ...history,
+      entries: [...history.entries, entry],
+      lastUpdated: creationTimestamp,
+    },
+  };
 }
 
 export function normalizeReceiptText(rawText: string): string {
@@ -247,7 +329,7 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
 export function createReceiptReviewState(
   extraction: ReceiptExtractionResult,
   edits: ReceiptReviewEdits = {},
-  options?: { confirmed?: boolean; reviewedAt?: Date | null; changedFields?: ReceiptReviewField[] }
+  options?: { confirmed?: boolean; reviewedAt?: Date | null; changedFields?: ReceiptReviewField[]; receiptId?: string; ingestedAt?: Date | null }
 ): ReceiptReviewState {
   const explicitFieldNames = Object.entries(edits).reduce((fields, [field, value]) => {
     if (value === undefined) return fields;
@@ -293,6 +375,8 @@ export function createReceiptReviewState(
     confirmed: explicitConfirmation,
     reviewedAt: options?.reviewedAt ? options.reviewedAt.toISOString() : null,
     changedFields: reviewedFields,
+    receiptId: options?.receiptId,
+    ingestedAt: options?.ingestedAt ? options.ingestedAt.toISOString() : null,
   };
 
   return reviewState;
@@ -300,9 +384,14 @@ export function createReceiptReviewState(
 
 export function confirmReceiptReview(
   reviewState: ReceiptReviewState,
-  overrides: ReceiptReviewEdits = {}
+  overrides: ReceiptReviewEdits = {},
+  options?: { receiptId?: string; ingestedAt?: Date | null }
 ): ReceiptReviewState {
-  return createReceiptReviewState({
+  const ingestedAt = options && 'ingestedAt' in options
+    ? (options.ingestedAt === null ? null : (options.ingestedAt ?? new Date(reviewState.ingestedAt ?? Date.now())))
+    : (reviewState.ingestedAt ? new Date(reviewState.ingestedAt) : new Date());
+
+  const confirmedReview = createReceiptReviewState({
     merchant: reviewState.merchant,
     date: reviewState.date,
     total: reviewState.total,
@@ -313,5 +402,13 @@ export function confirmReceiptReview(
     rawText: reviewState.rawText,
     normalizedText: reviewState.normalizedText,
     source: 'ocr',
-  }, overrides, { confirmed: true, reviewedAt: new Date(), changedFields: reviewState.changedFields });
+  }, overrides, {
+    confirmed: true,
+    reviewedAt: new Date(),
+    changedFields: reviewState.changedFields,
+    receiptId: options?.receiptId ?? reviewState.receiptId,
+    ingestedAt,
+  });
+
+  return confirmedReview;
 }
