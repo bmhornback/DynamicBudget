@@ -751,10 +751,10 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Introduce AI-assisted, rule-bound decision support with deterministic outputs and auditable rationale.
 
-### E11-T1 · Deterministic decision contract
-- Define deterministic mode where identical inputs always produce identical recommendations
-- Freeze calculation assumptions and deterministic tie-breaking rules per release
-- Version recommendation policies and scoring logic
+### E11-T1 · Deterministic decision contract ✅ Done
+- Define deterministic mode where identical inputs always produce identical recommendations ✅ `lib/deterministicDecision.ts` implements normalized input signatures and stable sorting/tie-breaker contract
+- Freeze calculation assumptions and deterministic tie-breaking rules per release ✅ policy version and deterministic ranking are encoded in the contract
+- Version recommendation policies and scoring logic ✅ `DECISION_POLICY_VERSION` and `profile` metadata in the decision policy contract
 
 ### E11-T2 · JEV (judgment + expected value) scoring layer
 - Add expected-value style scoring for major tradeoffs:

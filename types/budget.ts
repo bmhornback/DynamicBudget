@@ -433,6 +433,7 @@ export interface BudgetBreakdown {
 }
 
 export type RecommendationSeverity = 'warning' | 'info' | 'success';
+export type DecisionPolicyProfile = 'conservative' | 'balanced' | 'aggressive';
 
 export interface Recommendation {
   id: string;
