@@ -15,9 +15,10 @@ const DECISION_SEVERITY_WEIGHT: Record<Recommendation['severity'], number> = {
   success: 1,
 };
 
+const FNV1A_OFFSET_BASIS = 2166136261;
+const FNV1A_PRIME = 16777619;
 const JEV_JUDGMENT_WEIGHT = 0.6;
 const JEV_EXPECTED_VALUE_WEIGHT = 0.4;
-const EXPECTED_VALUE_CONFIDENCE_BASE = 0.5;
 const SEVERITY_SCORE_SCALE = 10;
 const POLICY_DIMENSION_KEYS = ['housing', 'emergencyFund', 'debt', 'retirement', 'flexibility'] as const;
 const TRACE_ID_SALT = 'deterministic-decision-trace';
@@ -146,12 +147,12 @@ export function getDecisionInputSignature(
 }
 
 function hashDecisionTraceValue(value: string): string {
-  let hash = 2166136261;
+  let hash = FNV1A_OFFSET_BASIS;
 
   for (let index = 0; index < value.length; index += 1) {
     const code = value.charCodeAt(index);
+    hash = Math.imul(hash, FNV1A_PRIME);
     hash ^= code;
-    hash = Math.imul(hash, 16777619);
   }
 
   return (hash >>> 0).toString(36).padStart(8, '0');
@@ -187,6 +188,13 @@ export function scoreDecisionItem(
   profile: DecisionPolicyProfile = 'balanced'
 ): number {
   const policy = getDeterministicDecisionPolicy(profile);
+  return scoreDecisionItemWithPolicy(item, policy);
+}
+
+function scoreDecisionItemWithPolicy(
+  item: { id: string; severity?: Recommendation['severity']; score?: number; weight?: number },
+  policy: ReturnType<typeof getDeterministicDecisionPolicy>
+): number {
   const severityWeight = DECISION_SEVERITY_WEIGHT[item.severity ?? 'info'];
   const baseValue = Number.isFinite(item.score) ? Number(item.score) : 0;
   const weight = Number.isFinite(item.weight) ? Number(item.weight) : 1;
@@ -238,22 +246,23 @@ function sortDecisionItems<T extends { id: string; severity?: Recommendation['se
 
 export function createDecisionTrace<T extends { id: string; severity?: Recommendation['severity']; score?: number }>(
   items: T[],
-  profile: DecisionPolicyProfile = 'balanced',
-  inputSnapshot: unknown = items
+  policy: ReturnType<typeof getDeterministicDecisionPolicy> = getDeterministicDecisionPolicy('balanced'),
+  inputSnapshot: unknown = { profile: policy.profile, scoreWeights: policy.scoreWeights, items: sortDecisionItems(items) }
 ): DecisionTrace {
-  const policy = getDeterministicDecisionPolicy(profile);
   const orderedItems = sortDecisionItems(items);
 
   const scoreBreakdown = orderedItems.map((item) => ({
     id: item.id,
-    score: scoreDecisionItem(item, profile),
+    score: scoreDecisionItemWithPolicy(item, policy),
   }));
 
   const totalScore = scoreBreakdown.reduce((sum, value) => sum + value.score, 0);
   const judgmentScore = averageScoreBreakdown(scoreBreakdown);
   const confidenceCenter = (policy.confidenceRange[0] + policy.confidenceRange[1]) / 2;
-  const expectedValue = Number((judgmentScore * confidenceCenter + judgmentScore * EXPECTED_VALUE_CONFIDENCE_BASE).toFixed(4));
-  const finalJev = calculateJevScore(judgmentScore, expectedValue, confidenceCenter, profile);
+  // A confidence-weighted expected value keeps EV in the same score unit as the
+  // judgment average while remaining a distinct, auditable quantity from the raw mean.
+  const expectedValue = Number((judgmentScore * (0.5 + confidenceCenter / 2)).toFixed(4));
+  const finalJev = calculateJevScore(judgmentScore, expectedValue, confidenceCenter, policy.profile);
   const normalizedInputs = normalizeDecisionInputs(inputSnapshot);
 
   return {
@@ -282,7 +291,7 @@ export function createDeterministicDecisionContract<T extends { id: string; seve
 
   const signature = getDecisionInputSignature(snapshot, profile);
 
-  const trace = createDecisionTrace(orderedItems, profile, snapshot);
+  const trace = createDecisionTrace(orderedItems, policy, snapshot);
 
   return { policy, items: orderedItems, signature, trace };
 }
