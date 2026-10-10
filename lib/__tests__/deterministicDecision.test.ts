@@ -84,4 +84,56 @@ describe('deterministicDecision', () => {
 
     expect(contract.items.map((item) => item.id)).toEqual(['goal-1', 'goal-2', 'goal-3']);
   });
+
+  it('exposes explicit policy confidence bands and JEV score traces', () => {
+    const items = [
+      { id: 'debt', severity: 'warning' as const, score: 14, message: 'pay down debt' },
+      { id: 'retirement', severity: 'success' as const, score: 8, message: 'increase retirement' },
+    ];
+
+    const contract = createDeterministicDecisionContract(items, 'balanced');
+
+    expect(contract.policy.confidenceRange).toEqual([0.59, 0.75]);
+    expect(contract.trace.confidenceRange).toEqual([0.59, 0.75]);
+    expect(contract.trace.assumptions).toEqual(contract.policy.assumptions);
+    expect(contract.trace.judgmentScore).toBeGreaterThan(0);
+    expect(contract.trace.totalScore).toBeGreaterThan(0);
+    expect(contract.trace.jevScore).toBeGreaterThan(0);
+    expect(contract.trace.expectedValue).toBeGreaterThan(0);
+    expect(contract.trace.expectedValue).not.toBeCloseTo(contract.trace.judgmentScore, 4);
+    expect(contract.trace.jevScore).toBeCloseTo(19.6745, 3);
+    expect(contract.trace.rationale).toContain('JEV score');
+  });
+
+  it('preserves duplicate recommendation IDs without overwriting score entries', () => {
+    const items = [
+      { id: 'goal', severity: 'warning' as const, score: 12, message: 'first' },
+      { id: 'goal', severity: 'info' as const, score: 7, message: 'second' },
+      { id: 'other', severity: 'success' as const, score: 5, message: 'third' },
+    ];
+
+    const trace = createDeterministicDecisionContract(items, 'balanced').trace;
+
+    expect(trace.scoreBreakdown).toHaveLength(3);
+    expect(trace.scoreBreakdown.map((entry) => entry.id)).toEqual(['goal', 'goal', 'other']);
+    expect(trace.scoreBreakdown[0].score).toBeGreaterThan(trace.scoreBreakdown[1].score);
+    expect(trace.totalScore).toBeGreaterThan(0);
+  });
+
+  it('keeps JEV scoring deterministic across equivalent input orderings', () => {
+    const first = [
+      { id: 'move', severity: 'warning' as const, score: 18, message: 'move to lower cost state' },
+      { id: 'invest', severity: 'info' as const, score: 11, message: 'invest in taxable account' },
+    ];
+    const second = [
+      { id: 'invest', severity: 'info' as const, score: 11, message: 'invest in taxable account' },
+      { id: 'move', severity: 'warning' as const, score: 18, message: 'move to lower cost state' },
+    ];
+
+    const contractA = createDeterministicDecisionContract(first, 'aggressive');
+    const contractB = createDeterministicDecisionContract(second, 'aggressive');
+
+    expect(contractA.signature).toBe(contractB.signature);
+    expect(contractA.trace.totalScore).toBe(contractB.trace.totalScore);
+  });
 });

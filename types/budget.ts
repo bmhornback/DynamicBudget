@@ -442,6 +442,21 @@ export interface Recommendation {
   detail?: string;
 }
 
+export interface DecisionTrace {
+  id?: string;
+  profile: DecisionPolicyProfile;
+  version: string;
+  normalizedInputs: unknown;
+  assumptions: readonly string[];
+  confidenceRange: readonly [number, number];
+  judgmentScore: number;
+  expectedValue: number;
+  jevScore: number;
+  scoreBreakdown: Array<{ id: string; score: number }>;
+  totalScore: number;
+  rationale: string;
+}
+
 export type HealthScoreLabel = 'Excellent' | 'Strong' | 'Workable' | 'Tight' | 'Risky';
 
 export interface BudgetHealthScore {

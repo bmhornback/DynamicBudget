@@ -756,13 +756,14 @@ States to add (in priority order based on population and no-income-tax interest)
 - Freeze calculation assumptions and deterministic tie-breaking rules per release ✅ policy version and deterministic ranking are encoded in the contract
 - Version recommendation policies and scoring logic ✅ `DECISION_POLICY_VERSION` and `profile` metadata in the decision policy contract
 
-### E11-T2 · JEV (judgment + expected value) scoring layer
+### E11-T2 · JEV (judgment + expected value) scoring layer ✅ Done
 - Add expected-value style scoring for major tradeoffs:
   - debt payoff vs investing
   - relocation and state-move decisions
   - emergency-fund timing vs goal acceleration
 - Define policy profiles: conservative, balanced, aggressive
 - Require explicit assumptions and confidence ranges per profile
+- Implemented in `lib/deterministicDecision.ts` with normalized input signatures, stable ordering, policy confidence bands, and decision trace/JEV scoring
 
 ### E11-T3 · Decision trace and explainability UI
 - Store decision traces including:
