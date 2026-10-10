@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "MCP server exposing DynamicBudget calculation tools to AI assistants (Claude, ChatGPT, etc.)",
   "private": false,
-  "type": "module",
   "main": "./dist/src/mcp-server/index.js",
   "bin": {
     "dynamicbudget-mcp": "./dist/src/mcp-server/index.js"

@@ -4,8 +4,8 @@
  * tax implications, and a projected balance at retirement.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
-import { buildAnnualProjection } from '../../../lib/annualProjection';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
+import { buildAnnualProjection } from '../../../lib/annualProjection.js';
 import {
   get401kLimit,
   getIRALimit,
@@ -13,9 +13,9 @@ import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
   TRADITIONAL_IRA_PHASEOUT_MFJ_START,
   TRADITIONAL_IRA_PHASEOUT_MFJ_END,
-} from '../../../lib/taxCalculations';
-import { buildBudgetInputs, round2 } from '../adapters';
-import type { StateOfResidence } from '../../../types/budget';
+} from '../../../lib/taxCalculations.js';
+import { buildBudgetInputs, round2 } from '../adapters.js';
+import type { StateOfResidence } from '../../../types/budget.js';
 
 export interface RetirementSavingsParams {
   salary: number;
@@ -154,7 +154,7 @@ export function calculateRetirementSavings(params: RetirementSavingsParams): Ret
     traditional_ira_phase_out_warning: traditionalIraPhaseOutWarning,
     hsa_eligible: (params.hsa_contribution ?? 0) > 0,
     projected_balance_at_retirement: Math.round(projectedBalance),
-    projection_by_year: projectionPoints.map((p) => ({
+    projection_by_year: projectionPoints.map((p: { year: number; label: string; retirement401k: number; ira: number; total: number }) => ({
       year: p.year,
       label: p.label,
       retirement_401k: Math.round(p.retirement401k),

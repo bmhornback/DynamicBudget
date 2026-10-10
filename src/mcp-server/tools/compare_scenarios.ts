@@ -5,9 +5,9 @@
  * totals, savings rates, and surplus/deficit for each.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
-import { calculateBudgetHealthScore } from '../../../lib/budgetHealthScore';
-import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
+import { calculateBudgetHealthScore } from '../../../lib/budgetHealthScore.js';
+import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters.js';
 
 export interface ScenarioInput extends McpCoreBudgetParams {
   name: string;

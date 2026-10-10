@@ -5,9 +5,9 @@
  * retirement contributions, debt burden, and spending balance.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
-import { generateRecommendations } from '../../../lib/recommendations';
-import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
+import { generateRecommendations } from '../../../lib/recommendations.js';
+import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters.js';
 
 export interface RecommendationItem {
   id: string;
@@ -33,7 +33,7 @@ export function getRecommendations(params: McpCoreBudgetParams): GetRecommendati
   const bd = calculateBudgetBreakdown(inputs);
   const recs = generateRecommendations(inputs, bd);
 
-  const mappedRecs: RecommendationItem[] = recs.map((r) => ({
+  const mappedRecs: RecommendationItem[] = recs.map((r: { id: string; severity: string; message: string; detail?: string }) => ({
     id: r.id,
     severity: r.severity as RecommendationItem['severity'],
     message: r.message,

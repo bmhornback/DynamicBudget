@@ -5,10 +5,10 @@
  * equivalent salary, and actionable recommendations.
  */
 
-import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
-import { getColiIndex, getColiTierLabel, calculatePurchasingPower } from '../../../lib/coliData';
-import type { StateOfResidence } from '../../../types/budget';
-import { buildBudgetInputs, round2 } from '../adapters';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations.js';
+import { getColiIndex, getColiTierLabel, calculatePurchasingPower } from '../../../lib/coliData.js';
+import type { StateOfResidence } from '../../../types/budget.js';
+import { buildBudgetInputs, round2 } from '../adapters.js';
 
 export interface StateMoveParams {
   current_state: string;
