@@ -27,6 +27,10 @@
     "../../app/**",
     "../../components/**",
     "../../lib/__tests__/**",
-    "**/__tests__/**"
+    "../../lib/analytics.ts",
+    "../../lib/storage.ts",
+    "../../lib/useCountUp.ts",
+    "**/__tests__/**",
+    "./dist/**"
   ]
 }

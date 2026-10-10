@@ -12,8 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // MCP server compiled output (CommonJS, uses require()):
-    "dist/**",
+    // Generated build output can appear in nested folders (e.g. src/mcp-server/dist).
+    "**/dist/**",
   ]),
 ]);
 
