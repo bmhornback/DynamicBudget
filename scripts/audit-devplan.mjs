@@ -111,6 +111,7 @@ const COMPLETED_TASKS = {
   'E11-T2': 'JEV policy scoring layer with confidence bands, expected-value calculation, and decision trace output in lib/deterministicDecision.ts',
   'E11-T3': 'Decision trace panel and explainability UI in RecommendationList + DecisionTracePanel with deterministic rule breakdowns',
   'E11-T4': 'Deterministic scenario ranking contract with weighted dimensions, stable ordering, and traceable outputs in lib/deterministicDecision.ts',
+  'E12-T1': 'Receipt OCR parsing helpers in lib/receiptOCR.ts with merchant/date/total/tax/category extraction and low-confidence review flags',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',
