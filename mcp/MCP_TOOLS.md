@@ -158,21 +158,24 @@ Default: `"traditional"`
 | `state` | StateOfResidence | `"no_state_tax"` | State (used for net income context) |
 | `contribution_percent` | number | `6` | 401(k) contribution % of gross salary |
 | `max_out_401k` | boolean | `false` | Automatically contribute the IRS annual max |
-| `is_401k_roth` | boolean | `false` | Treat 401(k) as Roth (after-tax) |
 | `employer_match_percent` | number | `0` | Employer match % of gross salary |
-| `employer_match_cap_percent` | number | `100` | Cap on employer match % |
 | `ira_contribution` | number | `0` | Annual IRA contribution in USD |
 | `ira_type` | IRAType | `"traditional"` | IRA type |
-| `assumed_annual_return` | number | `0.07` | Assumed average annual return (0–0.30) |
-| `existing_retirement_balance` | number | `0` | Current retirement account balance |
+| `hsa_contribution` | number | `0` | Annual HSA contribution in USD |
+| `expected_annual_return` | number | `0.07` | Expected average annual return (0–1.00) |
 
 #### Key output fields
 | Field | Type | Description |
 |-------|------|-------------|
-| `contributions` | object | Monthly/annual 401k, IRA, employer match, totals, catch-up eligibility |
-| `tax_implications` | object | Pre-tax deduction amount, federal tax savings, IRA deductibility status |
-| `projection` | object | Projected balance at retirement, monthly income (4% rule), assumptions |
-| `recommendations` | array | Retirement-specific financial advice |
+| `monthly_401k_employee` | number | Monthly employee 401(k) contribution |
+| `monthly_401k_employer` | number | Monthly employer match contribution |
+| `monthly_ira` | number | Monthly IRA contribution |
+| `monthly_hsa` | number | Monthly HSA contribution |
+| `total_monthly_retirement_savings` | number | Combined monthly retirement contributions |
+| `projected_balance_at_retirement` | number | Estimated retirement balance at target year |
+| `projection_by_year` | array | Year-by-year balance history for the retirement horizon |
+| `growth_rate_used` | number | Expected annual return used in the projection |
+| `years_to_retirement` | integer | Years used to produce the projection |
 
 **2026 IRS limits used by the calculation engine:**
 - 401(k): $24,500 ($32,000 with catch-up age 50+)
@@ -269,8 +272,8 @@ These rules apply to all tools. The MCP server **must** validate inputs against 
 - The server will clamp to the IRS annual limit automatically (does not error — instead warns in recommendations)
 
 ### Annual Return (calculate_retirement_savings)
-- Range: `0 ≤ assumed_annual_return ≤ 0.30`
-- Values above 0.30 (30%) are rejected as unrealistic
+- Range: `0 ≤ expected_annual_return ≤ 1`
+- Values above 1.00 (100%) are rejected as unrealistic
 
 ### Years to Retirement
 - Integer: `1 ≤ years_to_retirement ≤ 50`
@@ -335,7 +338,7 @@ Tools with many optional fields are designed to be **tolerant of sparse inputs**
 
 Certain inputs are silently **clamped** rather than rejected to provide better AI assistant UX:
 - IRA contribution exceeding the IRS annual limit → clamped to the limit; a `recommendations` entry notes the cap
-- `employer_match_cap_percent` > 100 → clamped to 100
+- `employer_match_percent` > 100 → clamped to 100
 
 All clamping is noted in the `recommendations` array of the response.
 

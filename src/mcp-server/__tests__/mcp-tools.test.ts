@@ -128,7 +128,9 @@ describe('analyze_state_move', () => {
 
   it('references the target state in the lower-cost recommendation text', () => {
     const result = analyzeStateMove({ current_state: 'CA', target_state: 'TX', salary: 150_000 });
-    const message = result.recommendations.find((r) => r.severity === 'success')?.message ?? '';
+    const message = result.recommendations.find(
+      (r) => r.severity === 'success' && r.message.includes('Cost of living')
+    )?.message ?? '';
     expect(message).toContain('TX');
     expect(message).not.toContain('CA');
   });
