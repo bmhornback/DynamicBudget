@@ -107,6 +107,8 @@ const COMPLETED_TASKS = {
   'E10-T2': '5 MCP tool schemas in mcp/ with zod shapes, input/output contracts, and MCP_TOOLS.md reference',
   'E10-T3': 'Node.js MCP server with 5 tools (calculate_monthly_budget, analyze_state_move, calculate_retirement_savings, get_recommendations, compare_scenarios); 31 integration tests; build:mcp + mcp:start scripts',
   'E10-T5': 'MCP package publication metadata is prepared for npm, and distro docs cover install/configuration/troubleshooting for external users',
+  'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts; Epic 8 roadmap marked complete',
+  'E8-T2': 'provider-aware auth adapter flow for GitHub/Google with local-only fallback; static-first auth model documented in code and DEV_PLAN',
 };
 
 // ─── Parse DEV_PLAN.md ────────────────────────────────────────────────────────
