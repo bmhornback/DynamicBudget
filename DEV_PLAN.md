@@ -789,10 +789,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Extract merchant, date, total, tax, and candidate categories ✅ `lib/receiptOCR.ts` parses receipt text into deterministic merchant/date/total/tax/category candidates
 - Flag low-confidence fields for manual review ✅ `needsReview` flag and confidence scoring are returned for validation before commit
 
-### E12-T2 · Confirmation and correction flow
-- Add pre-commit review UI for extracted fields
-- Allow manual correction of all OCR outputs before save
-- Require explicit user confirmation before writing spending data
+### E12-T2 · Confirmation and correction flow ✅ Done
+- Add pre-commit review UI for extracted fields ✅ `createReceiptReviewState` + `confirmReceiptReview` provide a review-edit contract for OCR outputs before saving
+- Allow manual correction of all OCR outputs before save ✅ review state accepts merchant/date/total/tax/category overrides and tracks changed fields
+- Require explicit user confirmation before writing spending data ✅ confirmation is explicit through `confirmed` status and review gating in the review contract
 
 ### E12-T3 · Category mapping and spending updates
 - Auto-map receipt line items/total to DynamicBudget spending categories

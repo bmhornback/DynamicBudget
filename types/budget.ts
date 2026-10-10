@@ -91,6 +91,16 @@ export interface ReceiptFieldCandidate<T = string | number> {
   source: string;
 }
 
+export type ReceiptReviewField = 'merchant' | 'date' | 'total' | 'tax' | 'category';
+
+export interface ReceiptReviewEdits {
+  merchant?: string;
+  date?: string | null;
+  total?: number | null;
+  tax?: number | null;
+  category?: ReceiptCategory;
+}
+
 export interface ReceiptDuplicateRisk {
   merchant: boolean;
   date: boolean;
@@ -109,6 +119,12 @@ export interface ReceiptExtractionResult {
   rawText: string;
   normalizedText: string;
   source: 'ocr';
+}
+
+export interface ReceiptReviewState extends ReceiptExtractionResult {
+  confirmed: boolean;
+  reviewedAt: string | null;
+  changedFields: ReceiptReviewField[];
 }
 
 export interface DebtAccount {
