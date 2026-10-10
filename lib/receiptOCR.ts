@@ -189,7 +189,7 @@ export function evaluateReceiptDuplicateRisk(
   ].reduce((total, value) => total + value, 0);
 
   const isDuplicate = positiveMatches >= DUPLICATE_MIN_MATCHES && score >= DUPLICATE_REVIEW_THRESHOLD;
-  const action = isDuplicate ? 'merge' : positiveMatches >= 2 ? 'review' : 'ignore';
+  const action = isDuplicate ? 'merge' : positiveMatches >= DUPLICATE_MIN_MATCHES ? 'review' : 'ignore';
 
   return {
     risk: {
@@ -348,11 +348,10 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
     amount: totalCandidate !== null && totalCandidate.confidence >= 0.5,
     score: totalCandidate && dateCandidate ? DUPLICATE_RISK_STRENGTH : DUPLICATE_RISK_WEAK,
     isDuplicate: false,
-    action: 'review' as const,
+    action: 'ignore' as const,
   };
 
-  const needsReview = !merchantValue || !dateCandidate || !totalCandidate || totalCandidate.confidence < 0.75 || merchantCandidate.confidence < 0.5
-    || duplicateRisk.score >= DUPLICATE_REVIEW_THRESHOLD;
+  const needsReview = !merchantValue || !dateCandidate || !totalCandidate || totalCandidate.confidence < 0.75 || merchantCandidate.confidence < 0.5;
 
   return {
     merchant: merchantCandidate,
