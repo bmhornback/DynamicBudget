@@ -592,7 +592,8 @@ export type TrackableCategory =
   | 'subscriptions'
   | 'gas_utility'
   | 'internet'
-  | 'phone';
+  | 'phone'
+  | 'other';
 
 export interface SpendingEntry {
   id: string;
