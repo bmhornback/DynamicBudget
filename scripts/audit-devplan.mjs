@@ -109,6 +109,8 @@ const COMPLETED_TASKS = {
   'E10-T5': 'MCP package publication metadata is prepared for npm, and distro docs cover install/configuration/troubleshooting for external users',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
+  'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',
+  'E8-T4': 'provider-local sync snapshot store with versioned history and restore-oriented history entries; client-side debounce/diff UI remain future work',
 };
 
 // ─── Parse DEV_PLAN.md ────────────────────────────────────────────────────────

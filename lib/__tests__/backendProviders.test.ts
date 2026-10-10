@@ -31,6 +31,22 @@ describe('backendProviders', () => {
 
     await expect(unconfigured.saveBudget({ id: 'demo' })).resolves.toBeUndefined();
     await expect(unconfigured.listBudgetHistory()).resolves.toEqual([]);
+
+    const created = await configured.upsertBudget({ id: 'demo-budget', name: 'Demo', annualSalary: 120000 });
+    expect(created).toMatchObject({ id: 'demo-budget', name: 'Demo', version: 1 });
+
+    const history = await configured.listBudgetHistory();
+    expect(history.length).toBeGreaterThan(0);
+    expect(history[0]).toMatchObject({ action: 'create', version: 1 });
+
+    const budgets = await configured.listBudgets();
+    expect(budgets).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'demo-budget' })]));
+
+    const actual = await configured.getBudget('demo-budget');
+    expect(actual).toMatchObject({ id: 'demo-budget', name: 'Demo' });
+
+    const deleted = await configured.deleteBudget('demo-budget');
+    expect(deleted).toBe(true);
   });
 
   it('returns a human-readable scorecard summary', () => {
