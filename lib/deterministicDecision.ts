@@ -372,7 +372,7 @@ export function rankScenarioOptions<T extends { id: string }>(
         const dimensionValue = Number(dimensions[key as keyof typeof dimensions] ?? 0);
         const weight = Number(policy.scoreWeights[key] ?? 1);
         return sum + dimensionValue * weight;
-      }, 0) + (Number(breakdown.total ?? 0) || 0);
+      }, 0);
 
       return {
         id: item.id,

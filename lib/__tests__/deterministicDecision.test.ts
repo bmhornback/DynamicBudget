@@ -158,6 +158,8 @@ describe('deterministicDecision', () => {
     expect(ranked[0].rank).toBe(1);
     expect(ranked[0].weightedTotal).toBeGreaterThan(ranked[1].weightedTotal);
     expect(ranked[0].dimensionBreakdown.housing).toBeGreaterThan(ranked[1].dimensionBreakdown.housing);
+    expect(ranked[0].weightedTotal).toBe(106.5);
+    expect(ranked[1].weightedTotal).toBe(36);
   });
 
   it('creates a deterministic scenario ranking contract with a stable signature', () => {
