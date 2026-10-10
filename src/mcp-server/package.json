@@ -2,7 +2,19 @@
   "name": "@dynamicbudget/mcp-server",
   "version": "1.0.0",
   "description": "MCP server exposing DynamicBudget calculation tools to AI assistants (Claude, ChatGPT, etc.)",
-  "private": true,
+  "private": false,
+  "main": "./dist/mcp-server/src/mcp-server/index.js",
+  "bin": {
+    "dynamicbudget-mcp": "./dist/mcp-server/src/mcp-server/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "start": "node ../../dist/mcp-server/src/mcp-server/index.js",
@@ -10,5 +22,13 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "keywords": [
+    "dynamicbudget",
+    "budget",
+    "mcp",
+    "model-context-protocol",
+    "finance",
+    "ai"
+  ]
 }

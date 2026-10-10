@@ -40,6 +40,7 @@ const COMPLETED_TASKS = {
   'E1-T5':  'recommendations.test.ts — all recommendation IDs tested',
   'E1-T6':  'app/__tests__/page.smoke.test.tsx — page-level integration smoke test',
   'E1-T7':  '.github/workflows/ci.yml — install/lint/build/test',
+  'E1-T7b': 'GitHub Pages deployment workflow in .github/workflows/deploy-pages.yml',
   'E1-T8':  'ESLint flat config (eslint.config.mjs), strict TS in tsconfig.json',
   'E1-T9':  'components/ErrorBoundary.tsx used in app/page.tsx',
   'E1-T10': 'TAX_YEAR comments + update reminders in lib/taxCalculations.ts',
@@ -105,6 +106,7 @@ const COMPLETED_TASKS = {
   'E10-T1': 'all 12 core calc modules verified React/browser-free; JSDoc added to annualExpenses.ts; budgetHealthScore.test.ts + 33 new tests; 95%+ coverage',
   'E10-T2': '5 MCP tool schemas in mcp/ with zod shapes, input/output contracts, and MCP_TOOLS.md reference',
   'E10-T3': 'Node.js MCP server with 5 tools (calculate_monthly_budget, analyze_state_move, calculate_retirement_savings, get_recommendations, compare_scenarios); 31 integration tests; build:mcp + mcp:start scripts',
+  'E10-T5': 'MCP package publication metadata is prepared for npm, and distro docs cover install/configuration/troubleshooting for external users',
 };
 
 // ─── Parse DEV_PLAN.md ────────────────────────────────────────────────────────

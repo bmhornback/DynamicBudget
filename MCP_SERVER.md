@@ -1,6 +1,6 @@
 # DynamicBudget MCP Server
 
-> **Status:** E10-T3 complete — MCP server built, tested, and ready for Claude Desktop integration (E10-T4).
+> **Status:** E10-T3 complete; E10-T5 package/docs preparation complete. Remaining repo-side work: real AI-client validation (E10-T4) and a live npm publish step if the maintainer chooses to publish externally.
 
 The DynamicBudget MCP server exposes five personal-finance calculation tools to AI assistants (Claude, ChatGPT, etc.) via the [Model Context Protocol](https://modelcontextprotocol.io). The same calculation engine that powers the DynamicBudget web app is now available for natural-language queries.
 
@@ -124,4 +124,4 @@ There is no session state, no database, and no network calls. The entire calcula
 ## Remaining Steps
 
 - **E10-T4:** Test with Claude Desktop and ChatGPT — verify each tool with real AI prompts, collect feedback, and fix any integration issues
-- **E10-T5:** Document and publish — package the MCP server or calc engine for external use, then finalize npm/install and example-user docs
+- **E10-T5:** Final maintainer-side publish action — run the npm publish step once registry access is available; the repo-side docs and package metadata are ready
