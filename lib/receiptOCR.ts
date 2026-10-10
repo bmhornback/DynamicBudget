@@ -9,6 +9,9 @@ import type {
   ReceiptCategory,
   ReceiptExtractionResult,
   ReceiptFieldCandidate,
+  ReceiptReviewEdits,
+  ReceiptReviewField,
+  ReceiptReviewState,
 } from '@/types/budget';
 
 const RECEIPT_CATEGORY_KEYWORDS: Array<{ category: ReceiptCategory; keywords: string[] }> = [
@@ -238,4 +241,65 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
     normalizedText,
     source: 'ocr',
   };
+}
+
+export function createReceiptReviewState(
+  extraction: ReceiptExtractionResult,
+  edits: ReceiptReviewEdits = {},
+  options?: { confirmed?: boolean; reviewedAt?: Date | null }
+): ReceiptReviewState {
+  const normalizedEdits = Object.entries(edits).filter(([, value]) => value !== undefined) as Array<[
+    ReceiptReviewField,
+    string | number | null
+  ]>;
+
+  const reviewedFields = normalizedEdits.map(([field]) => field);
+  const merchantValue = (edits.merchant ?? extraction.merchant.value).toString().trim() || 'Unknown merchant';
+  const dateValue = edits.date ?? extraction.date?.value ?? null;
+  const totalValue = edits.total ?? extraction.total?.value ?? null;
+  const taxValue = edits.tax ?? extraction.tax?.value ?? null;
+  const categoryValue = (edits.category ?? extraction.category.value) as ReceiptCategory;
+
+  const finalMerchant = buildFieldCandidate(merchantValue, extraction.merchant.confidence, 'manual_review');
+  const finalDate = dateValue ? buildFieldCandidate(dateValue, extraction.date?.confidence ?? 0.8, 'manual_review') : null;
+  const finalTotal = totalValue !== null ? buildFieldCandidate(totalValue, extraction.total?.confidence ?? 0.8, 'manual_review') : null;
+  const finalTax = taxValue !== null ? buildFieldCandidate(taxValue, extraction.tax?.confidence ?? 0.8, 'manual_review') : null;
+  const finalCategory = buildFieldCandidate(categoryValue, extraction.category.confidence, 'manual_review');
+
+  const explicitConfirmation = options?.confirmed ?? false;
+  const reviewState: ReceiptReviewState = {
+    merchant: finalMerchant,
+    date: finalDate,
+    total: finalTotal,
+    tax: finalTax,
+    category: finalCategory,
+    duplicateRisk: extraction.duplicateRisk,
+    needsReview: explicitConfirmation ? false : finalMerchant.value === 'Unknown merchant' || !finalDate || !finalTotal,
+    rawText: extraction.rawText,
+    normalizedText: extraction.normalizedText,
+    source: 'ocr',
+    confirmed: explicitConfirmation,
+    reviewedAt: options?.reviewedAt ? options.reviewedAt.toISOString() : null,
+    changedFields: [...new Set(reviewedFields)],
+  };
+
+  return reviewState;
+}
+
+export function confirmReceiptReview(
+  reviewState: ReceiptReviewState,
+  overrides: ReceiptReviewEdits = {}
+): ReceiptReviewState {
+  return createReceiptReviewState({
+    merchant: reviewState.merchant,
+    date: reviewState.date,
+    total: reviewState.total,
+    tax: reviewState.tax,
+    category: reviewState.category,
+    duplicateRisk: reviewState.duplicateRisk,
+    needsReview: reviewState.needsReview,
+    rawText: reviewState.rawText,
+    normalizedText: reviewState.normalizedText,
+    source: 'ocr',
+  }, overrides, { confirmed: true, reviewedAt: new Date() });
 }

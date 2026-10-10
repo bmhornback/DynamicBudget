@@ -1,4 +1,10 @@
-import { getReceiptCategoryHint, normalizeReceiptText, parseReceiptText } from '../receiptOCR';
+import {
+  confirmReceiptReview,
+  createReceiptReviewState,
+  getReceiptCategoryHint,
+  normalizeReceiptText,
+  parseReceiptText,
+} from '../receiptOCR';
 
 describe('receiptOCR', () => {
   it('extracts merchant, date, total, tax, and category hints from OCR text', () => {
@@ -42,5 +48,36 @@ describe('receiptOCR', () => {
     expect(getReceiptCategoryHint('CVS Pharmacy')).toBe('health');
     expect(getReceiptCategoryHint('Xfinity')).toBe('utilities');
     expect(getReceiptCategoryHint('Petco')).toBe('pets');
+  });
+
+  it('supports editable review state with explicit confirmation gating', () => {
+    const extraction = parseReceiptText([
+      'GROCERY STORE',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+    ].join('\n'));
+
+    const review = createReceiptReviewState(extraction, {
+      merchant: 'Whole Foods Market',
+      total: 48.50,
+      category: 'groceries',
+    }, { confirmed: false, reviewedAt: new Date('2026-09-23T12:00:00Z') });
+
+    expect(review.merchant.value).toBe('Whole Foods Market');
+    expect(review.total?.value).toBe(48.5);
+    expect(review.category.value).toBe('groceries');
+    expect(review.changedFields).toContain('merchant');
+    expect(review.changedFields).toContain('total');
+    expect(review.confirmed).toBe(false);
+    expect(review.needsReview).toBe(false);
+
+    const confirmed = confirmReceiptReview(review, {
+      total: 48.50,
+      date: '2026-09-23',
+    });
+
+    expect(confirmed.confirmed).toBe(true);
+    expect(confirmed.needsReview).toBe(false);
+    expect(confirmed.reviewedAt).not.toBeNull();
   });
 });
