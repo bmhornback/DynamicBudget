@@ -568,23 +568,23 @@ States to add (in priority order based on population and no-income-tax interest)
 >
 > **Note:** This epic is Phase 2 and should not be started until v1.0 core features are solid.
 
-### E8-T1 · Backend provider abstraction and scorecard
-- Define a provider adapter contract for auth, storage, and sync operations
+### E8-T1 · Backend provider abstraction and scorecard ✅ Done
+- Define a provider adapter contract for auth, storage, and sync operations ✅ `lib/backendProviders.ts` defines a static-safe provider catalog, scorecard algorithm, and adapter contract
 - Evaluate managed and self-hosted tracks:
-  - Managed: Supabase, Firebase, AWS Amplify/AppSync/Cognito, Azure Static Web Apps + managed data
-  - Open-source/self-hosted: Appwrite, PocketBase, Postgres+Auth stack
+  - Managed: Supabase, Firebase, AWS Amplify/AppSync/Cognito, Azure Static Web Apps + managed data ✅ scored in catalog with recommendation tiers
+  - Open-source/self-hosted: Appwrite, PocketBase, Postgres+Auth stack ✅ scored in catalog with recommendation tiers
 - Score each provider using:
-  - Cost at scale (storage, egress, auth MAU, realtime usage)
-  - Data model fit (relational vs document)
-  - Security/compliance (RLS, audit logs, key management)
-  - Operational complexity (self-hosted vs managed)
-  - Vendor lock-in and migration risk
-- Deliverable: provider scorecard + recommendation for MVP, growth, and enterprise stages
+  - Cost at scale (storage, egress, auth MAU, realtime usage) ✅ weighted scorecard included in `lib/backendProviders.ts`
+  - Data model fit (relational vs document) ✅ weighted criterion included
+  - Security/compliance (RLS, audit logs, key management) ✅ weighted criterion included
+  - Operational complexity (self-hosted vs managed) ✅ weighted criterion included
+  - Vendor lock-in and migration risk ✅ weighted criterion included
+- Deliverable: provider scorecard + recommendation for MVP, growth, and enterprise stages ✅ `rankBackendProviders`, `getDefaultProviderRecommendation`, and `buildProviderRecommendationSummary` provide the design output
 
-### E8-T2 · Authentication
-- Implement sign-in with GitHub OAuth and/or Google OAuth through the selected provider adapter
-- Unauthenticated users keep full local functionality (localStorage)
-- "Sign in to sync" CTA in the header
+### E8-T2 · Authentication ✅ Partial
+- Define the provider-aware auth flow contract for GitHub/Google OAuth and document the local-only fallback ✅ `createBackendProviderAdapter` and `getStaticAuthFlow` model the expected auth surface without implementing an actual redirect/token exchange
+- Unauthenticated users keep full local functionality (localStorage) ✅ `local_only` fallback remains the default safe state
+- Actual OAuth sign-in UI/redirect and provider-backed session handling remain future work — no production sign-in CTA is implemented yet
 
 ### E8-T3 · Cloud budget storage
 - Use the selected provider adapter for CRUD (create, read, update, delete) on named budgets
