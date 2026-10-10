@@ -4,8 +4,8 @@
  * tax implications, and a projected balance at retirement.
  */
 
-import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
-import { buildAnnualProjection } from '@/lib/annualProjection';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
+import { buildAnnualProjection } from '../../../lib/annualProjection';
 import {
   get401kLimit,
   getIRALimit,
@@ -13,9 +13,9 @@ import {
   TRADITIONAL_IRA_PHASEOUT_SINGLE_END,
   TRADITIONAL_IRA_PHASEOUT_MFJ_START,
   TRADITIONAL_IRA_PHASEOUT_MFJ_END,
-} from '@/lib/taxCalculations';
+} from '../../../lib/taxCalculations';
 import { buildBudgetInputs, round2 } from '../adapters';
-import type { StateOfResidence } from '@/types/budget';
+import type { StateOfResidence } from '../../../types/budget';
 
 export interface RetirementSavingsParams {
   salary: number;
@@ -110,8 +110,11 @@ export function calculateRetirementSavings(params: RetirementSavingsParams): Ret
     const r = growthRate / 12;
     const n = extraYears * 12;
     const fvBase = base10 * Math.pow(1 + growthRate, extraYears);
-    const fvNew = (monthly401k + monthlyIra) > 0
-      ? (monthly401k + monthlyIra) * ((Math.pow(1 + r, n) - 1) / r)
+    const monthlyContribution = monthly401k + monthlyIra;
+    const fvNew = monthlyContribution > 0
+      ? (growthRate === 0
+        ? monthlyContribution * n
+        : monthlyContribution * ((Math.pow(1 + r, n) - 1) / r))
       : 0;
     projectedBalance = fvBase + fvNew;
   }
