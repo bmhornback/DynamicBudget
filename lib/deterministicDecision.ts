@@ -8,6 +8,12 @@ type DecisionPolicyDefinition = {
   tieBreakers: readonly string[];
 };
 
+const DECISION_SEVERITY_WEIGHT: Record<Recommendation['severity'], number> = {
+  warning: 3,
+  info: 2,
+  success: 1,
+};
+
 const DECISION_POLICY_DEFINITIONS: Record<DecisionPolicyProfile, DecisionPolicyDefinition> = {
   conservative: {
     assumptions: [
@@ -84,6 +90,13 @@ function compareStrings(left: string, right: string): number {
   return 0;
 }
 
+/**
+ * Normalizes a decision input tree into a deterministic value ordering.
+ *
+ * Non-finite numeric values are treated as zero so they remain JSON-serializable
+ * and do not produce unstable signatures across runs. This intentionally keeps
+ * invalid numeric inputs from breaking the signature generation path.
+ */
 export function normalizeDecisionInputs<T>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((item) => normalizeDecisionInputs(item)) as T;
@@ -91,7 +104,7 @@ export function normalizeDecisionInputs<T>(value: T): T {
 
   if (isPlainObject(value)) {
     return Object.keys(value)
-      .sort((left, right) => compareStrings(left, right))
+      .sort(compareStrings)
       .reduce((acc, key) => {
         const item = value[key];
         acc[key] = normalizeDecisionInputs(item);
@@ -106,20 +119,25 @@ export function normalizeDecisionInputs<T>(value: T): T {
   return value;
 }
 
-export function getDecisionInputSignature(inputs: unknown): string {
-  return `${DECISION_POLICY_VERSION}:${JSON.stringify(normalizeDecisionInputs(inputs))}`;
+export function getDecisionInputSignature(
+  inputs: unknown,
+  profile: DecisionPolicyProfile = 'balanced'
+): string {
+  const policy = getDeterministicDecisionPolicy(profile);
+
+  return `${policy.version}:${JSON.stringify(
+    normalizeDecisionInputs({
+      profile: policy.profile,
+      scoreWeights: policy.scoreWeights,
+      inputs,
+    })
+  )}`;
 }
 
 export function sortRecommendationsDeterministically(recommendations: Recommendation[]): Recommendation[] {
-  const severityWeight: Record<Recommendation['severity'], number> = {
-    warning: 3,
-    info: 2,
-    success: 1,
-  };
-
   return [...recommendations].sort((left, right) => {
-    const leftPriority = severityWeight[left.severity] ?? 0;
-    const rightPriority = severityWeight[right.severity] ?? 0;
+    const leftPriority = DECISION_SEVERITY_WEIGHT[left.severity ?? 'info'];
+    const rightPriority = DECISION_SEVERITY_WEIGHT[right.severity ?? 'info'];
 
     if (leftPriority !== rightPriority) {
       return rightPriority - leftPriority;
@@ -135,29 +153,21 @@ export function createDeterministicDecisionContract<T extends { id: string }>(
 ): { policy: ReturnType<typeof getDeterministicDecisionPolicy>; items: T[]; signature: string } {
   const policy = getDeterministicDecisionPolicy(profile);
   const orderedItems = [...items].sort((left, right) => {
-    const leftPriority = (left as { severity?: Recommendation['severity'] }).severity
-      ? (left as { severity: Recommendation['severity'] }).severity
-      : 'info';
-    const rightPriority = (right as { severity?: Recommendation['severity'] }).severity
-      ? (right as { severity: Recommendation['severity'] }).severity
-      : 'info';
+    const leftPriority = DECISION_SEVERITY_WEIGHT[(left as { severity?: Recommendation['severity'] }).severity ?? 'info'];
+    const rightPriority = DECISION_SEVERITY_WEIGHT[(right as { severity?: Recommendation['severity'] }).severity ?? 'info'];
 
-    const severityWeight: Record<Recommendation['severity'], number> = {
-      warning: 3,
-      info: 2,
-      success: 1,
-    };
-
-    if (severityWeight[leftPriority] !== severityWeight[rightPriority]) {
-      return severityWeight[rightPriority] - severityWeight[leftPriority];
+    if (leftPriority !== rightPriority) {
+      return rightPriority - leftPriority;
     }
 
     return compareStrings(left.id, right.id);
   });
 
-  const signature = `${policy.version}:${policy.profile}:${JSON.stringify(
-    orderedItems.map((item) => ({ id: item.id }))
-  )}`;
+  const signature = getDecisionInputSignature({
+    profile: policy.profile,
+    scoreWeights: policy.scoreWeights,
+    items: orderedItems,
+  }, profile);
 
   return { policy, items: orderedItems, signature };
 }

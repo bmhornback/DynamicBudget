@@ -8,10 +8,16 @@ import {
 describe('deterministicDecision', () => {
   it('uses a versioned policy contract with stable tie-breakers', () => {
     const policy = getDeterministicDecisionPolicy('balanced');
+    const conservative = getDeterministicDecisionPolicy('conservative');
+    const aggressive = getDeterministicDecisionPolicy('aggressive');
 
     expect(policy.version).toBe('2026.10.1');
     expect(policy.profile).toBe('balanced');
     expect(policy.tieBreakers).toEqual(['severity', 'id']);
+    expect(conservative.profile).toBe('conservative');
+    expect(aggressive.profile).toBe('aggressive');
+    expect(conservative.scoreWeights.housing).toBeGreaterThan(0);
+    expect(aggressive.scoreWeights.retirement).toBeGreaterThan(policy.scoreWeights.retirement);
   });
 
   it('normalizes equivalent inputs to the same deterministic signature', () => {
@@ -28,7 +34,8 @@ describe('deterministicDecision', () => {
       annualSalary: 200000,
     };
 
-    expect(getDecisionInputSignature(first)).toBe(getDecisionInputSignature(second));
+    expect(getDecisionInputSignature(first, 'balanced')).toBe(getDecisionInputSignature(second, 'balanced'));
+    expect(getDecisionInputSignature(first, 'balanced')).not.toBe(getDecisionInputSignature(first, 'aggressive'));
   });
 
   it('orders recommendations deterministically by severity then id', () => {
@@ -64,5 +71,17 @@ describe('deterministicDecision', () => {
 
     expect(contractA.items.map((item) => item.id)).toEqual(['goal-2', 'goal-3', 'goal-1']);
     expect(contractA.signature).toBe(contractB.signature);
+  });
+
+  it('defaults missing recommendation severities to info while preserving deterministic ordering', () => {
+    const items = [
+      { id: 'goal-2', message: 'goal 2' },
+      { id: 'goal-1', severity: 'warning' as const, message: 'goal 1' },
+      { id: 'goal-3', message: 'goal 3' },
+    ];
+
+    const contract = createDeterministicDecisionContract(items, 'balanced');
+
+    expect(contract.items.map((item) => item.id)).toEqual(['goal-1', 'goal-2', 'goal-3']);
   });
 });
