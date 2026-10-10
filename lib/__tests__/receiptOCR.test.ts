@@ -202,6 +202,29 @@ describe('receiptOCR', () => {
     expect(travelEntry.category).toBe('other');
   });
 
+  it('ignores null dates instead of dereferencing them during duplicate checks', () => {
+    const existing = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-null-date-old', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+
+    const candidate = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), { date: null }, { receiptId: 'receipt-null-date-new', ingestedAt: new Date('2026-09-23T12:00:05Z') });
+
+    expect(() => evaluateReceiptDuplicateRisk(existing, candidate)).not.toThrow();
+    expect(evaluateReceiptDuplicateRisk(existing, candidate).matches).toBe(2);
+  });
+
   it('detects likely duplicate receipts using merchant, date, and amount heuristics', () => {
     const existing = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
       'WHOLE FOODS MARKET',

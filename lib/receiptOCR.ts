@@ -174,10 +174,10 @@ export function evaluateReceiptDuplicateRisk(
   const normalizeMerchant = (value: string) => normalizeWhitespace(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ');
   const merchantMatch = normalizeMerchant(comparison.merchant.value).length > 0
     && normalizeMerchant(comparison.merchant.value) === normalizeMerchant(candidate.merchant.value);
-  const dateMatch = comparison.date?.value !== null && candidate.date?.value !== null
+  const dateMatch = comparison.date !== null && candidate.date !== null
     ? comparison.date.value === candidate.date.value
     : false;
-  const amountDelta = comparison.total && candidate.total
+  const amountDelta = comparison.total !== null && candidate.total !== null
     ? Math.abs(comparison.total.value - candidate.total.value)
     : null;
   const amountMatch = amountDelta !== null ? amountDelta <= 0.01 : false;
