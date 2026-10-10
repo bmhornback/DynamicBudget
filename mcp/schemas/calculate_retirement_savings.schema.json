@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://dynamicbudget.app/mcp/schemas/calculate_retirement_savings",
   "title": "calculate_retirement_savings",
-  "description": "Calculates retirement savings contributions, catch-up eligibility, and a projected balance at retirement. Returns monthly 401(k) and IRA contributions, employer match totals, tax implications (pre-tax vs Roth), and a year-by-year projection with compound growth.",
+  "description": "Calculates retirement savings contributions, catch-up eligibility, and a projected balance at retirement. Returns monthly 401(k) and IRA contributions, employer match totals, tax implications, and a year-by-year projection with compound growth.",
   "type": "object",
   "required": ["salary", "age", "years_to_retirement"],
   "additionalProperties": false,
@@ -60,24 +60,12 @@
       "description": "When true, contributes the IRS annual maximum to the 401(k) regardless of contribution_percent.",
       "default": false
     },
-    "is_401k_roth": {
-      "type": "boolean",
-      "description": "When true, treats the 401(k) as a Roth 401(k) (after-tax; no reduction to taxable income).",
-      "default": false
-    },
     "employer_match_percent": {
       "type": "number",
       "description": "Employer 401(k) match as a percentage of gross salary (e.g., 3 for a 3% match).",
       "minimum": 0,
       "maximum": 100,
       "default": 0
-    },
-    "employer_match_cap_percent": {
-      "type": "number",
-      "description": "Cap on employer match as a percentage of gross salary. Employer will not match beyond this cap.",
-      "minimum": 0,
-      "maximum": 100,
-      "default": 100
     },
     "ira_contribution": {
       "type": "number",
@@ -91,69 +79,54 @@
       "enum": ["traditional", "roth"],
       "default": "traditional"
     },
-    "assumed_annual_return": {
+    "hsa_contribution": {
       "type": "number",
-      "description": "Assumed average annual investment return as a decimal (e.g., 0.07 for 7%). Used for balance projection only.",
-      "minimum": 0,
-      "maximum": 0.3,
-      "default": 0.07
-    },
-    "existing_retirement_balance": {
-      "type": "number",
-      "description": "Current total retirement account balance in USD. Used as starting balance for projection.",
+      "description": "Annual HSA contribution in USD.",
       "minimum": 0,
       "default": 0
+    },
+    "expected_annual_return": {
+      "type": "number",
+      "description": "Expected average annual investment return as a decimal (e.g., 0.07 for 7%). Used for balance projection only.",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.07
     }
   },
   "x-response-schema": {
     "type": "object",
     "description": "Retirement savings analysis result.",
     "properties": {
-      "contributions": {
-        "type": "object",
-        "properties": {
-          "monthly_401k": { "type": "number", "description": "Monthly 401(k) employee contribution." },
-          "annual_401k": { "type": "number" },
-          "is_maxing_401k": { "type": "boolean" },
-          "catch_up_eligible": { "type": "boolean", "description": "True if age ≥ 50 and eligible for catch-up contributions." },
-          "annual_catch_up_401k": { "type": "number", "description": "Additional annual catch-up contribution amount (0 if not eligible)." },
-          "monthly_employer_match": { "type": "number" },
-          "annual_employer_match": { "type": "number" },
-          "monthly_ira": { "type": "number" },
-          "annual_ira": { "type": "number" },
-          "ira_at_limit": { "type": "boolean" },
-          "total_monthly_retirement": { "type": "number", "description": "Sum of employee 401(k), IRA, and employer match per month." },
-          "total_annual_retirement": { "type": "number" }
-        }
-      },
-      "tax_implications": {
-        "type": "object",
-        "properties": {
-          "annual_pretax_deduction": { "type": "number", "description": "Total annual pre-tax deduction reducing taxable income (traditional 401k + traditional IRA + HSA)." },
-          "federal_tax_savings_annual": { "type": "number", "description": "Estimated annual federal tax savings from pre-tax contributions." },
-          "traditional_ira_deductible": { "type": "boolean", "description": "Whether the traditional IRA contribution is tax-deductible given income and filing status." },
-          "ira_phase_out_warning": { "type": ["string", "null"], "description": "Warning message if income is within or above the traditional IRA deductibility phase-out range, otherwise null." }
-        }
-      },
-      "projection": {
-        "type": "object",
-        "properties": {
-          "projected_balance_at_retirement": { "type": "number", "description": "Estimated total retirement balance at retirement, including compound growth." },
-          "projected_monthly_income_at_retirement": { "type": "number", "description": "Estimated monthly income from retirement savings using the 4% safe withdrawal rule." },
-          "years_to_retirement": { "type": "integer" },
-          "assumed_annual_return": { "type": "number" }
-        }
-      },
-      "recommendations": {
+      "monthly_401k_employee": { "type": "number", "description": "Monthly employee 401(k) contribution." },
+      "monthly_401k_employer": { "type": "number", "description": "Monthly employer match contribution." },
+      "monthly_ira": { "type": "number", "description": "Monthly IRA contribution." },
+      "monthly_hsa": { "type": "number", "description": "Monthly HSA contribution." },
+      "total_monthly_retirement_savings": { "type": "number", "description": "Combined monthly retirement contributions." },
+      "annual_401k_limit": { "type": "number", "description": "Annual IRS 401(k) limit for the user's age." },
+      "annual_ira_limit": { "type": "number", "description": "Annual IRS IRA limit for the user's age." },
+      "is_maxing_401k": { "type": "boolean", "description": "Whether the user is maxing out the 401(k)." },
+      "is_catch_up_eligible": { "type": "boolean", "description": "Whether the user is eligible for catch-up contributions (age ≥ 50)." },
+      "catch_up_401k_extra_monthly": { "type": "number", "description": "Additional monthly catch-up contribution amount." },
+      "ira_type": { "type": "string", "enum": ["traditional", "roth"] },
+      "traditional_ira_deductible": { "type": "boolean", "description": "Whether the traditional IRA contribution is tax-deductible." },
+      "traditional_ira_phase_out_warning": { "type": "boolean", "description": "Whether the user's income is within the traditional IRA phase-out range." },
+      "hsa_eligible": { "type": "boolean", "description": "Whether HSA contributions are eligible in this profile." },
+      "projected_balance_at_retirement": { "type": "number", "description": "Estimated total retirement balance at retirement, including compound growth." },
+      "projection_by_year": {
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
-            "severity": { "type": "string", "enum": ["warning", "info", "success"] },
-            "message": { "type": "string" }
+            "year": { "type": "integer" },
+            "label": { "type": "string" },
+            "retirement_401k": { "type": "number" },
+            "ira": { "type": "number" },
+            "total": { "type": "number" }
           }
         }
-      }
+      },
+      "growth_rate_used": { "type": "number", "description": "Expected annual return used in the projection." },
+      "years_to_retirement": { "type": "integer", "description": "Years used to produce the projection." }
     }
   }
 }

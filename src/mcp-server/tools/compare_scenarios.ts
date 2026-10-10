@@ -5,8 +5,8 @@
  * totals, savings rates, and surplus/deficit for each.
  */
 
-import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
-import { calculateBudgetHealthScore } from '@/lib/budgetHealthScore';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
+import { calculateBudgetHealthScore } from '../../../lib/budgetHealthScore';
 import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters';
 
 export interface ScenarioInput extends McpCoreBudgetParams {

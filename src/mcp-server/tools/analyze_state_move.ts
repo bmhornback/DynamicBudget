@@ -5,9 +5,9 @@
  * equivalent salary, and actionable recommendations.
  */
 
-import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
-import { getColiIndex, getColiTierLabel, calculatePurchasingPower } from '@/lib/coliData';
-import type { StateOfResidence } from '@/types/budget';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
+import { getColiIndex, getColiTierLabel, calculatePurchasingPower } from '../../../lib/coliData';
+import type { StateOfResidence } from '../../../types/budget';
 import { buildBudgetInputs, round2 } from '../adapters';
 
 export interface StateMoveParams {
@@ -129,7 +129,7 @@ export function analyzeStateMove(params: StateMoveParams): StateMoveResult {
   } else if (percentChange < -10) {
     recommendations.push({
       severity: 'success',
-      message: `Cost of living is ${Math.abs(percentChange).toFixed(1)}% lower in ${params.target_state}. Your $${params.salary.toLocaleString('en-US', { maximumFractionDigits: 0 })} salary goes further — equivalent to $${purchasingPower.toLocaleString('en-US', { maximumFractionDigits: 0 })} in ${params.current_state}.`,
+      message: `Cost of living is ${Math.abs(percentChange).toFixed(1)}% lower in ${params.target_state}. Your $${params.salary.toLocaleString('en-US', { maximumFractionDigits: 0 })} salary goes further — equivalent to $${purchasingPower.toLocaleString('en-US', { maximumFractionDigits: 0 })} in ${params.target_state}.`,
     });
   } else {
     recommendations.push({

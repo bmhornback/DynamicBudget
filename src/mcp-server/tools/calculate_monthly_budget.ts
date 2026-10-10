@@ -4,7 +4,7 @@
  * expenses, and savings configuration.
  */
 
-import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
+import { calculateBudgetBreakdown } from '../../../lib/budgetCalculations';
 import { buildBudgetInputs, round2, type McpCoreBudgetParams } from '../adapters';
 
 export interface MonthlyBudgetResult {

@@ -126,6 +126,15 @@ describe('analyze_state_move', () => {
     expect(result.coli_impact.purchasing_power_equivalent_salary).toBeGreaterThan(0);
   });
 
+  it('references the target state in the lower-cost recommendation text', () => {
+    const result = analyzeStateMove({ current_state: 'CA', target_state: 'TX', salary: 150_000 });
+    const message = result.recommendations.find(
+      (r) => r.severity === 'success' && r.message.includes('Cost of living')
+    )?.message ?? '';
+    expect(message).toContain('TX');
+    expect(message).not.toContain('CA');
+  });
+
   it('includes a summary string', () => {
     const result = analyzeStateMove({ current_state: 'NY', target_state: 'FL', salary: 100_000 });
     expect(typeof result.summary).toBe('string');
@@ -197,6 +206,18 @@ describe('calculate_retirement_savings', () => {
       expect(typeof pt.year).toBe('number');
       expect(typeof pt.total).toBe('number');
     });
+  });
+
+  it('handles a zero expected return without producing NaN', () => {
+    const result = calculateRetirementSavings({
+      salary: 100_000,
+      age: 35,
+      years_to_retirement: 30,
+      expected_annual_return: 0,
+    });
+    expect(Number.isFinite(result.projected_balance_at_retirement)).toBe(true);
+    expect(result.projected_balance_at_retirement).toBeGreaterThan(0);
+    expect(result.growth_rate_used).toBe(0);
   });
 
   it('flags traditional IRA phase-out warning near the threshold', () => {
