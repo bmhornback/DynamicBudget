@@ -167,17 +167,28 @@ export function mapReceiptCategoryToTrackableCategory(category: ReceiptCategory,
   return 'other';
 }
 
+type ReceiptDuplicateAssessmentRisk = Omit<ReceiptDuplicateRisk, 'isDuplicate' | 'action'> & {
+  isDuplicate: boolean;
+  action: ReceiptDuplicateAction;
+};
+
 export function evaluateReceiptDuplicateRisk(
   comparison: Pick<ReceiptReviewState, 'merchant' | 'date' | 'total' | 'category'>,
   candidate: Pick<ReceiptReviewState, 'merchant' | 'date' | 'total' | 'category'>
-): { risk: { merchant: boolean; date: boolean; amount: boolean; score: number; isDuplicate: boolean; action: 'review' | 'merge' | 'ignore' }; matches: number } {
+): { risk: ReceiptDuplicateAssessmentRisk; matches: number } {
   const normalizeMerchant = (value: string) => normalizeWhitespace(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ');
-  const merchantMatch = normalizeMerchant(comparison.merchant.value).length > 0
-    && normalizeMerchant(comparison.merchant.value) === normalizeMerchant(candidate.merchant.value);
-  const dateMatch = comparison.date !== null && candidate.date !== null
+  const normalizedComparisonMerchant = comparison.merchant !== null && comparison.merchant !== undefined
+    ? normalizeMerchant(comparison.merchant.value)
+    : '';
+  const merchantMatch = candidate.merchant !== null && candidate.merchant !== undefined
+    && normalizedComparisonMerchant.length > 0
+    && normalizedComparisonMerchant === normalizeMerchant(candidate.merchant.value);
+  const dateMatch = comparison.date !== null && comparison.date !== undefined
+    && candidate.date !== null && candidate.date !== undefined
     ? comparison.date.value === candidate.date.value
     : false;
-  const amountDelta = comparison.total !== null && candidate.total !== null
+  const amountDelta = comparison.total !== null && comparison.total !== undefined
+    && candidate.total !== null && candidate.total !== undefined
     ? Math.abs(comparison.total.value - candidate.total.value)
     : null;
   const amountMatch = amountDelta !== null ? amountDelta <= 0.01 : false;
@@ -188,7 +199,8 @@ export function evaluateReceiptDuplicateRisk(
     amountMatch ? 0.15 : 0,
   ].reduce((total, value) => total + value, 0);
 
-  const isDuplicate = positiveMatches >= DUPLICATE_MIN_MATCHES && score >= DUPLICATE_REVIEW_THRESHOLD;
+  const allFieldsMatch = merchantMatch && dateMatch && amountMatch;
+  const isDuplicate = allFieldsMatch && score >= DUPLICATE_REVIEW_THRESHOLD;
   const action = isDuplicate ? 'merge' : positiveMatches >= DUPLICATE_MIN_MATCHES ? 'review' : 'ignore';
 
   return {
