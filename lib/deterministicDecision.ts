@@ -17,7 +17,7 @@ const DECISION_SEVERITY_WEIGHT: Record<Recommendation['severity'], number> = {
 
 const JEV_JUDGMENT_WEIGHT = 0.6;
 const JEV_EXPECTED_VALUE_WEIGHT = 0.4;
-const JEV_EXPECTED_VALUE_FACTOR = 0.75;
+const EXPECTED_VALUE_CONFIDENCE_BASE = 0.5;
 const SEVERITY_SCORE_SCALE = 10;
 const POLICY_DIMENSION_KEYS = ['housing', 'emergencyFund', 'debt', 'retirement', 'flexibility'] as const;
 
@@ -166,6 +166,11 @@ export function scoreDecisionItem(
   const severityWeight = DECISION_SEVERITY_WEIGHT[item.severity ?? 'info'];
   const baseValue = Number.isFinite(item.score) ? Number(item.score) : 0;
   const weight = Number.isFinite(item.weight) ? Number(item.weight) : 1;
+
+  // The JEV model intentionally averages the policy's core decision dimensions so
+  // each scoring pass reflects the active risk posture without over-weighting a
+  // single factor. Extra policy keys remain available for future use but do not
+  // alter this base scoring function unless the dimension set is expanded.
   const dimensionWeight = POLICY_DIMENSION_KEYS.reduce((sum, key) => {
     const candidate = Number(policy.scoreWeights[key] ?? 1);
     return sum + candidate;
@@ -214,8 +219,8 @@ export function createDecisionTrace<T extends { id: string; severity?: Recommend
 
   const totalScore = Object.values(scoreBreakdown).reduce((sum, value) => sum + value, 0);
   const judgmentScore = Number((totalScore / Math.max(orderedItems.length, 1)).toFixed(4));
-  const expectedValue = Number((totalScore * JEV_EXPECTED_VALUE_FACTOR).toFixed(4));
   const confidenceCenter = (policy.confidenceRange[0] + policy.confidenceRange[1]) / 2;
+  const expectedValue = Number((judgmentScore * confidenceCenter + totalScore * EXPECTED_VALUE_CONFIDENCE_BASE).toFixed(4));
   const finalJev = calculateJevScore(judgmentScore, expectedValue, confidenceCenter, profile);
   const normalizedInputs = normalizeDecisionInputs(inputSnapshot);
 

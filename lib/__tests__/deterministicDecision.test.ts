@@ -98,7 +98,8 @@ describe('deterministicDecision', () => {
     expect(contract.trace.assumptions).toEqual(contract.policy.assumptions);
     expect(contract.trace.judgmentScore).toBeGreaterThan(0);
     expect(contract.trace.totalScore).toBeGreaterThan(0);
-    expect(contract.trace.expectedValue).toBeGreaterThan(contract.trace.totalScore * 0.5);
+    expect(contract.trace.jevScore).toBeGreaterThan(0);
+    expect(contract.trace.jevScore).toBeCloseTo(26.7102, 3);
     expect(contract.trace.rationale).toContain('JEV score');
   });
 
