@@ -71,7 +71,7 @@ function isLikelyStoreLine(line: string): boolean {
 }
 
 function parseDateCandidate(value: string, now = new Date()): string | null {
-  const match = value.match(/(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}|\d{1,2}-\d{1,2}-\d{2,4}|[A-Za-z]+\s+\d{1,2},?\s+\d{4}|[A-Za-z]+\s+\d{1,2}\s+\d{4})/i);
+  const match = value.match(/(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}|\d{1,2}-\d{1,2}-\d{2,4}|[A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/i);
   if (!match) return null;
 
   const candidate = match[1].trim();
@@ -85,7 +85,10 @@ function parseDateCandidate(value: string, now = new Date()): string | null {
     const [left, mid, yearPart] = candidate.split(/[\/\-]/);
     const month = Number(left);
     const day = Number(mid);
-    const year = Number(yearPart.length === 2 ? `20${yearPart}` : yearPart);
+    // Default two-digit years to the 2000s and only fall back to 1900s when the
+    // interpreted year is clearly in the distant future relative to the current date.
+    const rawYear = Number(yearPart.length === 2 ? `20${yearPart}` : yearPart);
+    const year = yearPart.length === 2 && rawYear > now.getFullYear() + 5 ? Number(`19${yearPart}`) : rawYear;
     if (Number.isFinite(month) && Number.isFinite(day) && Number.isFinite(year)) {
       return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
@@ -171,8 +174,11 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
   const totalCandidates: Array<{ value: number; source: string; score: number }> = [];
   for (const line of lines) {
     const keywordMatch = line.match(/(?:^|[^A-Za-z])(?:total|amount due|balance|payment|grand total|order total)(?:\s*[:=]|\s+)\s*[$]?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+\.[0-9]{1,2})/i);
-    const amountMatch = line.match(/[$]?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+\.[0-9]{1,2})/g);
-    const candidateValue = keywordMatch ? keywordMatch[1] : amountMatch ? amountMatch[amountMatch.length - 1] : null;
+    const amountMatches = [...line.matchAll(/[$]?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+\.[0-9]{1,2})/g)];
+    const candidateValue = keywordMatch ? keywordMatch[1] : amountMatches
+      .map((match) => match[1])
+      .filter((match): match is string => Boolean(match))
+      .sort((left, right) => Number(toCurrencyNumber(right) ?? 0) - Number(toCurrencyNumber(left) ?? 0))[0] ?? null;
     if (!candidateValue) continue;
     const numeric = toCurrencyNumber(candidateValue);
     if (numeric === null) continue;
@@ -181,7 +187,7 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
   }
 
   const rankedTotalCandidates = [...totalCandidates].sort((left, right) => right.score - left.score);
-  const finalTotalCandidate = rankedTotalCandidates.find((candidate) => !/subtotal/i.test(candidate.source)) ?? rankedTotalCandidates[0] ?? null;
+  const finalTotalCandidate = rankedTotalCandidates.find((candidate) => !/^(?:.*\s)?subtotal\s*[:=]?\s*[$]?[0-9]/i.test(candidate.source)) ?? rankedTotalCandidates[0] ?? null;
   const totalValue = finalTotalCandidate?.value ?? null;
   const totalConfidence = finalTotalCandidate?.score ?? 0.4;
 
@@ -198,7 +204,7 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
     ? [...taxCandidates].sort((left, right) => right.score - left.score)[0].value
     : null;
 
-  const category = getReceiptCategoryHint(merchantValue || options?.merchantHint || '');
+  const category = getReceiptCategoryHint(merchantValue || '');
 
   const merchantCandidate = buildFieldCandidate(
     merchantValue || 'Unknown merchant',
@@ -213,7 +219,7 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
 
   const duplicateRisk = {
     merchant: Boolean(merchantValue) && merchantCandidate.confidence >= 0.5,
-    date: Boolean(dateCandidate) && dateCandidate.confidence >= 0.5,
+    date: dateCandidate !== null && dateCandidate.confidence >= 0.5,
     amount: totalCandidate !== null && totalCandidate.confidence >= 0.5,
     score: totalCandidate && dateCandidate ? DUPLICATE_RISK_STRENGTH : DUPLICATE_RISK_WEAK,
   };

@@ -34,6 +34,7 @@ describe('receiptOCR', () => {
     expect(parseReceiptText('11/12/2025').date?.value).toBe('2025-11-12');
     expect(parseReceiptText('09-24-26').date?.value).toBe('2026-09-24');
     expect(parseReceiptText('Oct 4 2026').date?.value).toBe('2026-10-04');
+    expect(parseReceiptText('Oct 4', { now: new Date('2026-03-15') }).date?.value).toBe('2026-10-04');
   });
 
   it('classifies merchant strings consistently', () => {
