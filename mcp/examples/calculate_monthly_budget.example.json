@@ -1,0 +1,71 @@
+{
+  "request": {
+    "tool": "calculate_monthly_budget",
+    "description": "Single professional in Austin, TX earning $95k — standard expenses and moderate savings",
+    "params": {
+      "salary": 95000,
+      "state": "TX",
+      "filing_status": "single",
+      "age": 32,
+      "housing_mode": "renter",
+      "expenses": {
+        "rent": 1650,
+        "electric": 90,
+        "gas": 30,
+        "water": 40,
+        "internet": 65,
+        "phone": 80,
+        "groceries": 350,
+        "dining_out": 200,
+        "fuel": 120,
+        "car_insurance": 110,
+        "car_payment": 400,
+        "health_insurance": 150,
+        "gym_fitness": 40,
+        "streaming_subscriptions": 30,
+        "fun_entertainment": 150,
+        "clothes": 80,
+        "misc_buffer": 100
+      },
+      "savings": {
+        "retirement_contribution_percent": 6,
+        "employer_match_percent": 3,
+        "ira_contribution": 3000,
+        "ira_type": "roth",
+        "emergency_fund_months": 3,
+        "monthly_taxable_investments": 200
+      }
+    }
+  },
+  "expected_response": {
+    "gross_monthly": 7916.67,
+    "net_monthly_income": 5820,
+    "taxes": {
+      "federal_monthly": 1105,
+      "state_monthly": 0,
+      "fica_monthly": 520,
+      "effective_federal_rate": 0.167,
+      "effective_total_rate": 0.214
+    },
+    "expense_totals": {
+      "housing": 1650,
+      "utilities": 305,
+      "transportation": 630,
+      "groceries_food": 550,
+      "health": 190,
+      "lifestyle": 360,
+      "savings": 725,
+      "investments": 450,
+      "debt_payoff": 0
+    },
+    "total_allocated": 4860,
+    "remaining_monthly_buffer": 960,
+    "is_over_budget": false,
+    "surplus": 960,
+    "deficit": 0,
+    "savings_rate_gross": 0.142,
+    "savings_rate_net": 0.193,
+    "housing_percent_gross": 0.209,
+    "emergency_fund_target": 16770
+  }
+}

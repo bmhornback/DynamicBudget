@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["ES2022"],
+    "outDir": "../../dist/mcp-server",
+    "rootDir": "../../",
+    "baseUrl": "../../",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": false,
+    "declaration": false
+  },
+  "include": [
+    "../../lib/**/*.ts",
+    "../../types/**/*.ts",
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "../../app/**",
+    "../../components/**",
+    "../../lib/__tests__/**",
+    "**/__tests__/**"
+  ]
+}

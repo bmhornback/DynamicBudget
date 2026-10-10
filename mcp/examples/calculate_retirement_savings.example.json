@@ -1,0 +1,68 @@
+{
+  "request": {
+    "tool": "calculate_retirement_savings",
+    "description": "35-year-old earning $95k in TX, contributing 10% to 401(k), wondering about catch-up eligibility and projected balance at 65",
+    "params": {
+      "salary": 95000,
+      "age": 35,
+      "years_to_retirement": 30,
+      "filing_status": "single",
+      "state": "TX",
+      "contribution_percent": 10,
+      "max_out_401k": false,
+      "is_401k_roth": false,
+      "employer_match_percent": 3,
+      "employer_match_cap_percent": 3,
+      "ira_contribution": 7000,
+      "ira_type": "roth",
+      "assumed_annual_return": 0.07,
+      "existing_retirement_balance": 45000
+    }
+  },
+  "expected_response": {
+    "contributions": {
+      "monthly_401k": 791.67,
+      "annual_401k": 9500,
+      "is_maxing_401k": false,
+      "catch_up_eligible": false,
+      "annual_catch_up_401k": 0,
+      "monthly_employer_match": 237.50,
+      "annual_employer_match": 2850,
+      "monthly_ira": 583.33,
+      "annual_ira": 7000,
+      "ira_at_limit": true,
+      "total_monthly_retirement": 1612.50,
+      "total_annual_retirement": 19350
+    },
+    "tax_implications": {
+      "annual_pretax_deduction": 9500,
+      "federal_tax_savings_annual": 2090,
+      "traditional_ira_deductible": false,
+      "ira_phase_out_warning": "Roth IRA — no deductibility phase-out applies. Roth contributions are always after-tax."
+    },
+    "projection": {
+      "projected_balance_at_retirement": 2143880,
+      "projected_monthly_income_at_retirement": 7146,
+      "years_to_retirement": 30,
+      "assumed_annual_return": 0.07
+    },
+    "recommendations": [
+      {
+        "severity": "success",
+        "message": "You're contributing 10% to your 401(k) — above the minimum recommended 6% to capture your full employer match."
+      },
+      {
+        "severity": "info",
+        "message": "You're maxing out your Roth IRA ($7,000/year). Great choice given your income level — Roth grows tax-free."
+      },
+      {
+        "severity": "info",
+        "message": "At your current rate, you're projected to have ~$2.1M at retirement, generating ~$7,100/month using the 4% withdrawal rule."
+      },
+      {
+        "severity": "info",
+        "message": "Catch-up contributions ($7,500 extra 401k + $1,000 extra IRA) become available at age 50. You have 15 years to consider increasing contributions before then."
+      }
+    ]
+  }
+}

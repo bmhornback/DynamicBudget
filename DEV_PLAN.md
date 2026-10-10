@@ -647,39 +647,43 @@ States to add (in priority order based on population and no-income-tax interest)
 - Add JSDoc comments to all public functions explaining parameters, return values, and edge cases ✅ JSDoc added to `annualExpenses.ts` and all public functions across calc engine
 - Add unit test coverage for all exported functions (target: 95%+ for public API) ✅ New test file `budgetHealthScore.test.ts`; `recommendations.test.ts` and `annualExpenses.test.ts` significantly extended; 326 tests pass
 
-### E10-T2 · Define MCP tool schemas
+### E10-T2 · Define MCP tool schemas ✅ Done
 
 **Goal:** Specify which budget queries should be available via MCP and their input/output contracts.
 
-**Example tools:**
-- `calculate_monthly_budget(salary, location, expenses, savings)` → Returns: net income, taxes, surplus/deficit
-- `analyze_state_move(current_state, target_state, salary)` → Returns: tax impact, cost of living change, recommendations
-- `calculate_retirement_savings(salary, age, contribution_percent, years)` → Returns: projected balance, catch-up eligibility, tax implications
-- `get_recommendations(budget)` → Returns: list of prioritized financial advice
-- `compare_scenarios(scenario_list)` → Returns: side-by-side comparison with insights
+**Tools defined:**
+- `calculate_monthly_budget(salary, location, expenses, savings)` → Returns: net income, taxes, surplus/deficit ✅
+- `analyze_state_move(current_state, target_state, salary)` → Returns: tax impact, cost of living change, recommendations ✅
+- `calculate_retirement_savings(salary, age, contribution_percent, years)` → Returns: projected balance, catch-up eligibility, tax implications ✅
+- `get_recommendations(budget)` → Returns: list of prioritized financial advice ✅
+- `compare_scenarios(scenario_list)` → Returns: side-by-side comparison with insights ✅
 
 **Deliverables:**
-- JSON Schema definitions for each tool
-- Clear validation rules for inputs
-- Example queries and responses
-- Error handling strategy (e.g., invalid income, unsupported states)
+- JSON Schema definitions for each tool ✅ `mcp/schemas/*.schema.json`
+- Clear validation rules for inputs ✅ `mcp/MCP_TOOLS.md` — Validation Rules section
+- Example queries and responses ✅ `mcp/examples/*.example.json`
+- Error handling strategy ✅ `mcp/MCP_TOOLS.md` — Error Handling Strategy section
 
-### E10-T3 · Build MCP server implementation
+### E10-T3 · Build MCP server implementation ✅ Done
 
 **Goal:** Create a Node.js MCP server that exposes budget tools to AI assistants.
 
 **Tasks:**
-- Choose MCP framework (e.g., [anthropic/mcp-sdk-js](https://github.com/anthropic/mcp-sdk-js))
-- Implement server skeleton with tool registration
-- Connect each tool to the calculation engine (using E10-T1 refactoring)
-- Add error handling and input validation
-- Handle context management (e.g., persist user budget across multiple queries)
-- Create a demo/test client to verify tools work end-to-end
+- Choose MCP framework (`@modelcontextprotocol/sdk@1.30.1`) ✅
+- Implement server skeleton with tool registration (`src/mcp-server/index.ts`) ✅
+- Connect each tool to the calculation engine (using E10-T1 refactoring) ✅
+- Add error handling and input validation (zod schemas + try/catch per tool) ✅
+- MCP tools are stateless by design — each call is fully self-contained ✅
+- Create integration tests to verify tools work end-to-end ✅
 
 **Deliverables:**
-- A runnable MCP server (`src/mcp-server/index.ts`)
-- Dependency list and installation instructions
-- Integration tests (Jest)
+- Runnable MCP server: `src/mcp-server/index.ts` ✅
+- Adapter layer: `src/mcp-server/adapters.ts` ✅
+- Five tool implementations: `src/mcp-server/tools/*.ts` ✅
+- 31 integration tests: `src/mcp-server/__tests__/mcp-tools.test.ts` ✅
+- Build: `npm run build:mcp` → `dist/mcp-server/` ✅
+- Start: `npm run mcp:start` ✅
+- Deps added to root `package.json`: `@modelcontextprotocol/sdk`, `zod` ✅
 
 ### E10-T4 · Test with Claude/ChatGPT integrations
 

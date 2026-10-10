@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dynamicbudget.app/mcp/schemas/calculate_monthly_budget",
+  "title": "calculate_monthly_budget",
+  "description": "Calculates a complete monthly budget breakdown for a given salary, location, expenses, and savings configuration. Returns net income, taxes, all expense totals, savings rates, and surplus/deficit.",
+  "type": "object",
+  "required": ["salary", "state"],
+  "additionalProperties": false,
+  "properties": {
+    "salary": {
+      "type": "number",
+      "description": "Annual gross salary in USD.",
+      "minimum": 1,
+      "maximum": 10000000,
+      "examples": [95000, 150000]
+    },
+    "state": {
+      "type": "string",
+      "description": "Two-letter US state abbreviation or 'no_state_tax' for states with no income tax.",
+      "enum": [
+        "AL","AK","AZ","AR","CA","CO","CT","DE","DC",
+        "FL","GA","HI","ID","IL","IN","IA","KS","KY",
+        "LA","ME","MD","MA","MI","MN","MS","MO","MT",
+        "NE","NV","NH","NJ","NM","NY","NC","ND","OH",
+        "OK","OR","PA","RI","SC","SD","TN","TX","UT",
+        "VT","VA","WA","WV","WI","WY","no_state_tax"
+      ],
+      "examples": ["TX", "CA", "NY"]
+    },
+    "filing_status": {
+      "type": "string",
+      "description": "Federal filing status.",
+      "enum": ["single", "married_jointly", "head_of_household"],
+      "default": "single"
+    },
+    "age": {
+      "type": "integer",
+      "description": "User age in years. Used to determine 401(k) and IRA catch-up contribution eligibility (age 50+).",
+      "minimum": 18,
+      "maximum": 99,
+      "default": 30
+    },
+    "housing_mode": {
+      "type": "string",
+      "description": "Whether the user rents or owns their home.",
+      "enum": ["renter", "homeowner"],
+      "default": "renter"
+    },
+    "expenses": {
+      "type": "object",
+      "description": "Monthly expense amounts in USD. All fields are optional; omitted fields default to 0.",
+      "additionalProperties": false,
+      "properties": {
+        "rent": { "type": "number", "minimum": 0, "description": "Monthly rent (renter only)." },
+        "mortgage": { "type": "number", "minimum": 0, "description": "Monthly mortgage payment (homeowner only)." },
+        "property_tax": { "type": "number", "minimum": 0, "description": "Monthly property tax reserve (homeowner only)." },
+        "home_insurance": { "type": "number", "minimum": 0, "description": "Monthly homeowners insurance (homeowner only)." },
+        "home_maintenance_reserve": { "type": "number", "minimum": 0, "description": "Monthly home maintenance reserve (homeowner only)." },
+        "electric": { "type": "number", "minimum": 0 },
+        "gas": { "type": "number", "minimum": 0 },
+        "water": { "type": "number", "minimum": 0 },
+        "trash": { "type": "number", "minimum": 0 },
+        "internet": { "type": "number", "minimum": 0 },
+        "phone": { "type": "number", "minimum": 0 },
+        "groceries": { "type": "number", "minimum": 0 },
+        "dining_out": { "type": "number", "minimum": 0 },
+        "fuel": { "type": "number", "minimum": 0 },
+        "car_insurance": { "type": "number", "minimum": 0 },
+        "car_payment": { "type": "number", "minimum": 0 },
+        "car_maintenance": { "type": "number", "minimum": 0 },
+        "health_insurance": { "type": "number", "minimum": 0 },
+        "prescriptions": { "type": "number", "minimum": 0 },
+        "gym_fitness": { "type": "number", "minimum": 0 },
+        "streaming_subscriptions": { "type": "number", "minimum": 0 },
+        "fun_entertainment": { "type": "number", "minimum": 0 },
+        "clothes": { "type": "number", "minimum": 0 },
+        "misc_buffer": { "type": "number", "minimum": 0 }
+      }
+    },
+    "savings": {
+      "type": "object",
+      "description": "Savings and investment configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "retirement_contribution_percent": {
+          "type": "number",
+          "description": "401(k) contribution as a percentage of gross salary (0–100).",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 6
+        },
+        "max_out_401k": {
+          "type": "boolean",
+          "description": "Whether to automatically max out the 401(k) to the IRS annual limit.",
+          "default": false
+        },
+        "employer_match_percent": {
+          "type": "number",
+          "description": "Employer 401(k) match as a percentage of gross salary.",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 3
+        },
+        "ira_contribution": {
+          "type": "number",
+          "description": "Annual IRA contribution in USD.",
+          "minimum": 0,
+          "default": 0
+        },
+        "ira_type": {
+          "type": "string",
+          "description": "IRA account type. Traditional reduces taxable income; Roth does not.",
+          "enum": ["traditional", "roth"],
+          "default": "traditional"
+        },
+        "hsa_contribution": {
+          "type": "number",
+          "description": "Annual HSA contribution in USD. HSA is pre-tax and reduces taxable income.",
+          "minimum": 0,
+          "default": 0
+        },
+        "emergency_fund_months": {
+          "type": "number",
+          "description": "Target number of months of essential expenses to keep in emergency fund.",
+          "minimum": 0,
+          "maximum": 24,
+          "default": 3
+        },
+        "house_down_payment_target": {
+          "type": "number",
+          "description": "House down payment savings target in USD.",
+          "minimum": 0,
+          "default": 0
+        },
+        "monthly_house_fund_contribution": {
+          "type": "number",
+          "description": "Monthly amount contributed toward house down payment fund.",
+          "minimum": 0,
+          "default": 0
+        },
+        "monthly_taxable_investments": {
+          "type": "number",
+          "description": "Monthly amount invested in taxable brokerage accounts.",
+          "minimum": 0,
+          "default": 0
+        }
+      }
+    }
+  },
+  "x-response-schema": {
+    "type": "object",
+    "description": "Budget breakdown result.",
+    "properties": {
+      "gross_monthly": { "type": "number", "description": "Gross monthly income (salary / 12 + bonuses/other)." },
+      "net_monthly_income": { "type": "number", "description": "Estimated monthly take-home after all taxes and pre-tax deductions." },
+      "taxes": {
+        "type": "object",
+        "properties": {
+          "federal_monthly": { "type": "number" },
+          "state_monthly": { "type": "number" },
+          "fica_monthly": { "type": "number" },
+          "effective_federal_rate": { "type": "number", "description": "Effective federal tax rate (0–1)." },
+          "effective_total_rate": { "type": "number", "description": "Effective total tax rate including state and FICA (0–1)." }
+        }
+      },
+      "expense_totals": {
+        "type": "object",
+        "properties": {
+          "housing": { "type": "number" },
+          "utilities": { "type": "number" },
+          "transportation": { "type": "number" },
+          "groceries_food": { "type": "number" },
+          "health": { "type": "number" },
+          "lifestyle": { "type": "number" },
+          "savings": { "type": "number" },
+          "investments": { "type": "number" },
+          "debt_payoff": { "type": "number" }
+        }
+      },
+      "total_allocated": { "type": "number", "description": "Total monthly dollars accounted for." },
+      "remaining_monthly_buffer": { "type": "number", "description": "Unallocated dollars remaining (positive = surplus, negative = deficit)." },
+      "is_over_budget": { "type": "boolean" },
+      "surplus": { "type": "number" },
+      "deficit": { "type": "number" },
+      "savings_rate_gross": { "type": "number", "description": "Savings rate as a fraction of gross income (0–1)." },
+      "savings_rate_net": { "type": "number", "description": "Savings rate as a fraction of net take-home income (0–1)." },
+      "housing_percent_gross": { "type": "number", "description": "Housing payment as a fraction of gross income (0–1)." },
+      "emergency_fund_target": { "type": "number", "description": "Recommended emergency fund balance in USD." }
+    }
+  }
+}
