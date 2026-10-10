@@ -154,7 +154,7 @@ export function calculateRetirementSavings(params: RetirementSavingsParams): Ret
     traditional_ira_phase_out_warning: traditionalIraPhaseOutWarning,
     hsa_eligible: (params.hsa_contribution ?? 0) > 0,
     projected_balance_at_retirement: Math.round(projectedBalance),
-    projection_by_year: projectionPoints.map((p) => ({
+    projection_by_year: projectionPoints.map((p: { year: number; label: string; retirement401k: number; ira: number; total: number }) => ({
       year: p.year,
       label: p.label,
       retirement_401k: Math.round(p.retirement401k),

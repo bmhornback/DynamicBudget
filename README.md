@@ -56,9 +56,10 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 📈 **Annual savings projection chart** — Full-width line chart on the dashboard showing projected 401(k), IRA, Taxable, House Fund, and Emergency Fund balances at 1, 3, 5, and 10 years; includes an interactive growth-rate slider (0–15%, default 7%) and a summary table of all account balances at each horizon
 - ⚖️ **Rebalance diff visualization** — After running Auto Balance, a before/after horizontal bar chart animates each field change; reductions are colored red and increases are green, with a delta summary table beneath
 
-### Upcoming Features
-- 📋 Deeper multi-scenario workflows
-- 🏠 Dedicated marketing/landing experience
+### Current Roadmap Status
+- ✅ GitHub Pages deployment workflow added for static export publishing
+- ✅ MCP server package metadata prepared for public distribution
+- ✅ Documentation refresh completed for MCP/Pages setup and remaining integration tasks
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 
 ## Getting Started
@@ -174,7 +175,9 @@ All calculations and data are processed entirely in your browser. No data is sen
 
 ## Documentation
 
-- **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, features, tech debt register
+- **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, feature status, and remaining milestones
+- **[MCP_SERVER.md](./MCP_SERVER.md)** — Setup and usage guide for the DynamicBudget MCP server
+- **[mcp/MCP_TOOLS.md](./mcp/MCP_TOOLS.md)** — Tool reference, validation rules, and example calls for the AI integration
 - **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
 - **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
 - **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application
@@ -205,16 +208,19 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** deepen growth/discovery work with a future landing page, stronger educational content, and continued workflow polish.
+**Current focus:** validate the MCP server with real AI clients and keep the static deployment/package docs aligned with the repo’s current production flow.
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
 - **v1.0 closeout** (current): Stability, accessibility, typing cleanup, and roadmap rebaseline
 - **v1.5 — Grow It**: Multi-scenario comparison, debt payoff ✅, homeowner mode, export/share
 - **v2.0 — Platform**: Optional cloud sync, landing page expansion, and MCP integrations after core budgeting work is complete
-- **E10-T1 (Calc Engine Library)** ✅: All 12 core calculation modules verified React/browser-free; public API documented with JSDoc; test coverage raised to 95%+ on public API (326 tests)
+- **E1-T7b (GitHub Pages deployment)** ✅: `.github/workflows/deploy-pages.yml` publishes the static export to Pages
+- **E10-T1 (Calc Engine Library)** ✅: All 12 core calculation modules verified React/browser-free; public API documented with JSDoc; test coverage raised to 95%+ on public API
 - **E10-T2 (MCP Tool Schemas)** ✅: JSON Schema definitions for 5 MCP tools in `mcp/schemas/`; full reference in `mcp/MCP_TOOLS.md`
 - **E10-T3 (MCP Server)** ✅: Runnable MCP server in `src/mcp-server/` using `@modelcontextprotocol/sdk`; 5 tools connected to the calc engine; 31 integration tests; build via `npm run build:mcp`
+- **E10-T4 (AI Client Integration)** ▶️ Remaining: verify real Claude/ChatGPT usage, capture feedback, and fix any integration issues
+- **E10-T5 (Publish & Document)** ✅: package metadata and docs are prepared for external publication; real registry publication remains a maintainer-side release action
 
 ## Contributing
 

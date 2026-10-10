@@ -1,6 +1,6 @@
 # DynamicBudget MCP Server
 
-> **Status:** E10-T3 complete — MCP server built, tested, and ready for Claude Desktop integration (E10-T4).
+> **Status:** E10-T3 complete; E10-T5 package/docs preparation complete. Remaining repo-side work: real AI-client validation (E10-T4) and a live npm publish step if the maintainer chooses to publish externally.
 
 The DynamicBudget MCP server exposes five personal-finance calculation tools to AI assistants (Claude, ChatGPT, etc.) via the [Model Context Protocol](https://modelcontextprotocol.io). The same calculation engine that powers the DynamicBudget web app is now available for natural-language queries.
 
@@ -22,7 +22,7 @@ This compiles the TypeScript source in `src/mcp-server/` to `dist/mcp-server/` u
 npm run mcp:start
 ```
 
-The server listens on stdin/stdout (MCP stdio transport). It will appear idle until an AI client sends a request.
+The server listens on stdin/stdout (MCP stdio transport). It will appear idle until an AI client sends a request. After build, the compiled entrypoint is located at `src/mcp-server/dist/src/mcp-server/index.js`.
 
 ### 3. Register with Claude Desktop
 
@@ -33,7 +33,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "dynamicbudget": {
       "command": "node",
-      "args": ["/absolute/path/to/DynamicBudget/dist/mcp-server/src/mcp-server/index.js"]
+      "args": ["/absolute/path/to/DynamicBudget/src/mcp-server/dist/src/mcp-server/index.js"]
     }
   }
 }
@@ -121,7 +121,7 @@ There is no session state, no database, and no network calls. The entire calcula
 
 ---
 
-## Next Steps
+## Remaining Steps
 
-- **E10-T4:** Test with Claude Desktop and ChatGPT — verify each tool with real AI prompts, collect feedback, fix any edge cases
-- **E10-T5:** Document and publish — npm package (`@dynamicbudget/mcp-server`), user guide, examples
+- **E10-T4:** Test with Claude Desktop and ChatGPT — verify each tool with real AI prompts, collect feedback, and fix any integration issues
+- **E10-T5:** Final maintainer-side publish action — run the npm publish step once registry access is available; the repo-side docs and package metadata are ready

@@ -1,6 +1,6 @@
 # DynamicBudget MCP Tool Reference
 
-> **Status:** E10-T3 complete — MCP server built and tested. Ready for E10-T4 (Claude Desktop integration).
+> **Status:** E10-T3 complete; E10-T5 package/docs work is prepared. Remaining repo-side work is real AI-client validation (E10-T4) and the actual registry publication step when a maintainer decides to ship the package publicly.
 
 This document is the authoritative reference for the five MCP tools exposed by DynamicBudget. It covers tool purposes, input/output contracts, validation rules, example prompts, and the error handling strategy.
 

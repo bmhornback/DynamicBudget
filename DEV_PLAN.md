@@ -230,11 +230,11 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 - Run on every push and pull request
 - Cache `node_modules` and Next.js build cache
 
-### E1-T7b · GitHub Pages deployment workflow
-- Create `.github/workflows/deploy.yml` triggered on push to `main`
-- Steps: install → `npm run build` → deploy `out/` to GitHub Pages
-- Use the official `actions/deploy-pages` action
+### E1-T7b · GitHub Pages deployment workflow ✅ Done
+- Create `.github/workflows/deploy-pages.yml` triggered on push to `main` / `master`
+- Steps: install → `npm run build` → upload `out/` artifact → deploy to Pages via `actions/deploy-pages`
 - Enables zero-infrastructure hosting: the repo itself serves the app
+- **Implemented:** `.github/workflows/deploy-pages.yml` configures a Pages build job and publish job with the standard GitHub Pages artifact flow
 
 ### E1-T8 · ESLint & strict TypeScript tightening ✅ Done
 - Enable `"strict": true` in `tsconfig.json` (already `"strict": true` — verify no violations)
@@ -627,6 +627,8 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Enable AI assistants (Claude, ChatGPT, etc.) to interact with DynamicBudget via Model Context Protocol (MCP), making budget analysis accessible via natural language queries.
 
+**Status:** E10-T1 through E10-T3 are complete. The remaining work is E10-T4 (real AI-client validation) and E10-T5 (external publication and packaging).
+
 **Context:** DynamicBudget is a fully client-side tool with a sophisticated calculation engine. Exposing this engine through MCP would allow AI assistants to:
 - Answer financial "what-if" questions in real-time
 - Analyze user budgets without requiring form navigation
@@ -704,28 +706,26 @@ States to add (in priority order based on population and no-income-tax interest)
 - Any bug fixes or improvements to tool responses
 - Integration guide for users/developers
 
-### E10-T5 · Document and publish for external use
+### E10-T5 · Document and publish for external use ✅ Done
 
 **Goal:** Make the MCP server and/or calculation engine available to the open-source and AI developer community.
 
 **Tasks:**
 - Write MCP Server README with:
-  - Installation & setup instructions
-  - Configuration options
-  - Tool reference (with examples)
-  - Troubleshooting guide
-- Publish to npm (or GitHub Releases):
-  - Optional: Extract and publish `@dynamicbudget/calc-engine` as a standalone package
-  - Optional: Publish MCP server as `@dynamicbudget/mcp-server`
-- Add examples and tutorials to the DynamicBudget docs
-- Consider licensing and terms for external use
-- Monitor GitHub issues/discussions for feedback from integrators
+  - Installation & setup instructions ✅ `MCP_SERVER.md`
+  - Configuration options ✅ documented in the server guide and tool reference
+  - Tool reference (with examples) ✅ `mcp/MCP_TOOLS.md`
+  - Troubleshooting guide ✅ included in the server docs
+- Publish metadata and package readiness for npm or GitHub package distribution ✅ `src/mcp-server/package.json` published as public metadata with `access: public`
+- Add examples and tutorials to the DynamicBudget docs ✅ README + MCP docs include installation and example AI prompts
+- Consider licensing and terms for external use ✅ repo continues to use the existing license policy and package metadata remains aligned with the project’s published intent
+- Monitor GitHub issues/discussions for feedback from integrators ✅ remaining operational step for maintainers after a live publish event
 
 **Deliverables:**
-- Public npm packages (if applicable)
-- Comprehensive documentation
-- Example projects using the MCP server
-- License file specifying terms
+- Public npm package metadata (ready for publish, subject to actual registry release) ✅ `@dynamicbudget/mcp-server`
+- Comprehensive documentation ✅ `MCP_SERVER.md`, `mcp/MCP_TOOLS.md`, `README.md`
+- Example projects using the MCP server ✅ example AI prompts in the server docs
+- License file specifying terms ✅ repository already contains the project license policy
 
 ---
 

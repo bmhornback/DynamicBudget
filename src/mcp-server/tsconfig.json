@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
-    "outDir": "../../dist/mcp-server",
+    "types": ["node"],
+    "outDir": "./dist",
+    // Keep rootDir at the repo root so shared lib/types files compile alongside
+    // src/mcp-server sources. The emitted entrypoint is therefore
+    // ./dist/src/mcp-server/index.js.
     "rootDir": "../../",
-    "baseUrl": "../../",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["../../*"]
     },
     "strict": true,
     "esModuleInterop": true,
@@ -27,6 +30,10 @@
     "../../app/**",
     "../../components/**",
     "../../lib/__tests__/**",
-    "**/__tests__/**"
+    "../../lib/analytics.ts",
+    "../../lib/storage.ts",
+    "../../lib/useCountUp.ts",
+    "**/__tests__/**",
+    "./dist/**"
   ]
 }

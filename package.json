@@ -16,7 +16,7 @@
     "test:watch": "jest --watch",
     "audit:devplan": "node scripts/audit-devplan.mjs",
     "build:mcp": "tsc --project src/mcp-server/tsconfig.json",
-    "mcp:start": "node dist/mcp-server/src/mcp-server/index.js"
+    "mcp:start": "node src/mcp-server/dist/src/mcp-server/index.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.1",
