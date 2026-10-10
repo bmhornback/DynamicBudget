@@ -1,4 +1,4 @@
-import type { DecisionPolicyProfile, Recommendation } from '@/types/budget';
+import type { DecisionPolicyProfile, DecisionTrace, Recommendation } from '@/types/budget';
 
 export const DECISION_POLICY_VERSION = '2026.10.1';
 
@@ -6,6 +6,7 @@ type DecisionPolicyDefinition = {
   assumptions: readonly string[];
   scoreWeights: Record<string, number>;
   tieBreakers: readonly string[];
+  confidenceRange: readonly [number, number];
 };
 
 const DECISION_SEVERITY_WEIGHT: Record<Recommendation['severity'], number> = {
@@ -13,6 +14,12 @@ const DECISION_SEVERITY_WEIGHT: Record<Recommendation['severity'], number> = {
   info: 2,
   success: 1,
 };
+
+const JEV_JUDGMENT_WEIGHT = 0.6;
+const JEV_EXPECTED_VALUE_WEIGHT = 0.4;
+const JEV_EXPECTED_VALUE_FACTOR = 0.75;
+const SEVERITY_SCORE_SCALE = 10;
+const POLICY_DIMENSION_KEYS = ['housing', 'emergencyFund', 'debt', 'retirement', 'flexibility'] as const;
 
 const DECISION_POLICY_DEFINITIONS: Record<DecisionPolicyProfile, DecisionPolicyDefinition> = {
   conservative: {
@@ -29,6 +36,7 @@ const DECISION_POLICY_DEFINITIONS: Record<DecisionPolicyProfile, DecisionPolicyD
       flexibility: 0.9,
     },
     tieBreakers: ['severity', 'id'],
+    confidenceRange: [0.68, 0.84],
   },
   balanced: {
     assumptions: [
@@ -44,6 +52,7 @@ const DECISION_POLICY_DEFINITIONS: Record<DecisionPolicyProfile, DecisionPolicyD
       flexibility: 1.0,
     },
     tieBreakers: ['severity', 'id'],
+    confidenceRange: [0.59, 0.75],
   },
   aggressive: {
     assumptions: [
@@ -59,6 +68,7 @@ const DECISION_POLICY_DEFINITIONS: Record<DecisionPolicyProfile, DecisionPolicyD
       flexibility: 1.2,
     },
     tieBreakers: ['severity', 'id'],
+    confidenceRange: [0.47, 0.66],
   },
 };
 
@@ -71,6 +81,7 @@ export function getDeterministicDecisionPolicy(profile: DecisionPolicyProfile = 
     assumptions: [...definition.assumptions],
     scoreWeights: { ...definition.scoreWeights },
     tieBreakers: [...definition.tieBreakers],
+    confidenceRange: [...definition.confidenceRange] as [number, number],
   };
 }
 
@@ -147,12 +158,36 @@ export function sortRecommendationsDeterministically(recommendations: Recommenda
   });
 }
 
-export function createDeterministicDecisionContract<T extends { id: string }>(
-  items: T[],
+export function scoreDecisionItem(
+  item: { id: string; severity?: Recommendation['severity']; score?: number; weight?: number },
   profile: DecisionPolicyProfile = 'balanced'
-): { policy: ReturnType<typeof getDeterministicDecisionPolicy>; items: T[]; signature: string } {
+): number {
   const policy = getDeterministicDecisionPolicy(profile);
-  const orderedItems = [...items].sort((left, right) => {
+  const severityWeight = DECISION_SEVERITY_WEIGHT[item.severity ?? 'info'];
+  const baseValue = Number.isFinite(item.score) ? Number(item.score) : 0;
+  const weight = Number.isFinite(item.weight) ? Number(item.weight) : 1;
+  const dimensionWeight = POLICY_DIMENSION_KEYS.reduce((sum, key) => {
+    const candidate = Number(policy.scoreWeights[key] ?? 1);
+    return sum + candidate;
+  }, 0) / POLICY_DIMENSION_KEYS.length;
+
+  return Number((baseValue * dimensionWeight * weight + severityWeight * SEVERITY_SCORE_SCALE).toFixed(4));
+}
+
+export function calculateJevScore(
+  judgmentScore: number,
+  expectedValue: number,
+  confidence: number,
+  profile: DecisionPolicyProfile = 'balanced'
+): number {
+  const policy = getDeterministicDecisionPolicy(profile);
+  const normalizedConfidence = Math.min(Math.max(confidence, policy.confidenceRange[0]), policy.confidenceRange[1]);
+
+  return Number(((judgmentScore * JEV_JUDGMENT_WEIGHT + expectedValue * JEV_EXPECTED_VALUE_WEIGHT) * normalizedConfidence).toFixed(4));
+}
+
+function sortDecisionItems<T extends { id: string; severity?: Recommendation['severity'] }>(items: T[]): T[] {
+  return [...items].sort((left, right) => {
     const leftPriority = DECISION_SEVERITY_WEIGHT[(left as { severity?: Recommendation['severity'] }).severity ?? 'info'];
     const rightPriority = DECISION_SEVERITY_WEIGHT[(right as { severity?: Recommendation['severity'] }).severity ?? 'info'];
 
@@ -162,12 +197,62 @@ export function createDeterministicDecisionContract<T extends { id: string }>(
 
     return compareStrings(left.id, right.id);
   });
+}
 
-  const signature = getDecisionInputSignature({
+export function createDecisionTrace<T extends { id: string; severity?: Recommendation['severity']; score?: number }>(
+  items: T[],
+  profile: DecisionPolicyProfile = 'balanced',
+  inputSnapshot: unknown = items
+): DecisionTrace {
+  const policy = getDeterministicDecisionPolicy(profile);
+  const orderedItems = sortDecisionItems(items);
+
+  const scoreBreakdown = orderedItems.reduce<Record<string, number>>((acc, item) => {
+    acc[item.id] = scoreDecisionItem(item, profile);
+    return acc;
+  }, {});
+
+  const totalScore = Object.values(scoreBreakdown).reduce((sum, value) => sum + value, 0);
+  const judgmentScore = Number((totalScore / Math.max(orderedItems.length, 1)).toFixed(4));
+  const expectedValue = Number((totalScore * JEV_EXPECTED_VALUE_FACTOR).toFixed(4));
+  const confidenceCenter = (policy.confidenceRange[0] + policy.confidenceRange[1]) / 2;
+  const finalJev = calculateJevScore(judgmentScore, expectedValue, confidenceCenter, profile);
+  const normalizedInputs = normalizeDecisionInputs(inputSnapshot);
+
+  return {
+    id: `trace:${policy.profile}:${signatureForTrace(normalizedInputs, orderedItems)}`,
     profile: policy.profile,
-    scoreWeights: policy.scoreWeights,
-    items: orderedItems,
-  }, profile);
+    version: policy.version,
+    normalizedInputs,
+    assumptions: policy.assumptions,
+    confidenceRange: policy.confidenceRange,
+    judgmentScore,
+    expectedValue,
+    jevScore: finalJev,
+    scoreBreakdown,
+    totalScore: Number(totalScore.toFixed(4)),
+    rationale: `Ranked by ${policy.tieBreakers.join(' → ')} using ${policy.profile} policy assumptions, yielding a JEV score of ${finalJev} within a ${policy.confidenceRange[0]}-${policy.confidenceRange[1]} confidence band.`,
+  };
+}
 
-  return { policy, items: orderedItems, signature };
+function signatureForTrace(normalizedInput: unknown, orderedItems: Array<{ id: string }>): string {
+  const ids = orderedItems.map((item) => item.id).join('|');
+  const serialized = JSON.stringify(normalizeDecisionInputs(normalizedInput));
+
+  return `${serialized}:${ids}`;
+}
+
+export function createDeterministicDecisionContract<T extends { id: string; severity?: Recommendation['severity']; score?: number }>(
+  items: T[],
+  profile: DecisionPolicyProfile = 'balanced'
+): { policy: ReturnType<typeof getDeterministicDecisionPolicy>; items: T[]; signature: string; trace: DecisionTrace } {
+  const policy = getDeterministicDecisionPolicy(profile);
+  const orderedItems = sortDecisionItems(items);
+  const snapshot = { profile: policy.profile, scoreWeights: policy.scoreWeights, items: orderedItems };
+
+  const signature = getDecisionInputSignature(snapshot, profile);
+
+  const trace = createDecisionTrace(orderedItems, profile, snapshot);
+
+  return { policy, items: orderedItems, signature, trace };
 }

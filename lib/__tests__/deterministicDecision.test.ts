@@ -84,4 +84,38 @@ describe('deterministicDecision', () => {
 
     expect(contract.items.map((item) => item.id)).toEqual(['goal-1', 'goal-2', 'goal-3']);
   });
+
+  it('exposes explicit policy confidence bands and JEV score traces', () => {
+    const items = [
+      { id: 'debt', severity: 'warning' as const, score: 14, message: 'pay down debt' },
+      { id: 'retirement', severity: 'success' as const, score: 8, message: 'increase retirement' },
+    ];
+
+    const contract = createDeterministicDecisionContract(items, 'balanced');
+
+    expect(contract.policy.confidenceRange).toEqual([0.59, 0.75]);
+    expect(contract.trace.confidenceRange).toEqual([0.59, 0.75]);
+    expect(contract.trace.assumptions).toEqual(contract.policy.assumptions);
+    expect(contract.trace.judgmentScore).toBeGreaterThan(0);
+    expect(contract.trace.totalScore).toBeGreaterThan(0);
+    expect(contract.trace.expectedValue).toBeGreaterThan(contract.trace.totalScore * 0.5);
+    expect(contract.trace.rationale).toContain('JEV score');
+  });
+
+  it('keeps JEV scoring deterministic across equivalent input orderings', () => {
+    const first = [
+      { id: 'move', severity: 'warning' as const, score: 18, message: 'move to lower cost state' },
+      { id: 'invest', severity: 'info' as const, score: 11, message: 'invest in taxable account' },
+    ];
+    const second = [
+      { id: 'invest', severity: 'info' as const, score: 11, message: 'invest in taxable account' },
+      { id: 'move', severity: 'warning' as const, score: 18, message: 'move to lower cost state' },
+    ];
+
+    const contractA = createDeterministicDecisionContract(first, 'aggressive');
+    const contractB = createDeterministicDecisionContract(second, 'aggressive');
+
+    expect(contractA.signature).toBe(contractB.signature);
+    expect(contractA.trace.totalScore).toBe(contractB.trace.totalScore);
+  });
 });
