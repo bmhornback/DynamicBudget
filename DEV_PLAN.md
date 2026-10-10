@@ -20,12 +20,15 @@
 9. [Epic 5 — Advanced Budget Features](#epic-5--advanced-budget-features)
 10. [Epic 6 — UX Polish & Accessibility](#epic-6--ux-polish--accessibility)
 11. [Epic 7 — Export & Sharing](#epic-7--export--sharing)
-12. [Epic 8 — Backend & Cloud Sync (Phase 2)](#epic-8--backend--cloud-sync-phase-2)
+12. [Epic 8 — Backend & Cloud Sync (Provider abstraction, optional)](#epic-8--backend--cloud-sync-provider-abstraction-optional)
 13. [Epic 9 — Growth & Discovery](#epic-9--growth--discovery)
 14. [Epic 10 — AI Integration & MCP](#epic-10--ai-integration--mcp)
-15. [Release Milestones](#release-milestones)
-16. [Tech Debt Register](#tech-debt-register)
-17. [Definition of Done](#definition-of-done)
+15. [Epic 11 — Decision Intelligence & Deterministic AI](#epic-11--decision-intelligence--deterministic-ai)
+16. [Epic 12 — Receipt Ingestion & OCR](#epic-12--receipt-ingestion--ocr)
+17. [Epic 13 — Financial Integrations & Accounting Ecosystem](#epic-13--financial-integrations--accounting-ecosystem)
+18. [Release Milestones](#release-milestones)
+19. [Tech Debt Register](#tech-debt-register)
+20. [Definition of Done](#definition-of-done)
 
 ---
 
@@ -113,7 +116,7 @@
 
 **Medium-term (v1.5 — "Grow It"):** Expand the budgeting workflow with multi-scenario comparison, debt/homeowner planning, and stronger export/share capabilities.
 
-**Long-term (v2.0 — "Platform"):** Optional BaaS-powered cloud sync (Supabase/Firebase), a public landing page, analytics, and MCP/platform work after the core budgeting product is fully polished. Because the app is fully static, any cloud features must use third-party BaaS — there is no custom backend server.
+**Long-term (v2.0 — "Platform"):** Optional cloud sync through a backend provider abstraction (managed or self-hosted), deterministic AI-assisted decision support, receipt ingestion, and accounting ecosystem integrations. Because the app is fully static, cloud features must use provider SDKs/client APIs — there is no custom backend server in the app runtime.
 
 ---
 
@@ -178,9 +181,12 @@ This matches the self-hosted browser pattern used by [FirstTimeFitness](https://
 | 5 | Advanced Budget Features | 🟡 Medium | v1.5 |
 | 6 | UX Polish & Accessibility | 🟡 Partial | v1.0 closeout → v1.5 |
 | 7 | Export & Sharing | 🟡 Medium | v1.5 |
-| 8 | Backend & Cloud Sync (BaaS, optional) | 🟢 Low | v2.0 (deferred) |
+| 8 | Backend & Cloud Sync (Provider abstraction, optional) | 🟢 Low | v2.0 (deferred) |
 | 9 | Growth & Discovery | 🟢 Low | v2.0 (deferred) |
 | 10 | AI Integration & MCP | 🟢 Low | v2.0 (deferred) |
+| 11 | Decision Intelligence & Deterministic AI | 🟢 Low | v2.0 (deferred) |
+| 12 | Receipt Ingestion & OCR | 🟢 Low | v2.0 (deferred) |
+| 13 | Financial Integrations & Accounting Ecosystem | 🟢 Low | v2.0 (deferred) |
 
 ---
 
@@ -554,38 +560,50 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ---
 
-## Epic 8 — Backend & Cloud Sync (BaaS, optional)
+## Epic 8 — Backend & Cloud Sync (Provider abstraction, optional)
 
-**Goal:** Optional cross-device sync and budget history via a third-party BaaS — no custom server.
+**Goal:** Optional cross-device sync and budget history via a provider-agnostic backend model — no custom app server.
 
 > **Static-first constraint:** The app is a fully static web app (see Architecture section). There are no Next.js API routes and no custom backend server. Any cloud features in this epic must be implemented using a client-side BaaS SDK (Supabase JS client, Firebase SDK, etc.) that the static bundle calls directly.
 >
 > **Note:** This epic is Phase 2 and should not be started until v1.0 core features are solid.
 
-### E8-T1 · Authentication
-- Implement sign-in with GitHub OAuth and/or Google OAuth via Supabase Auth or Firebase Auth
+### E8-T1 · Backend provider abstraction and scorecard
+- Define a provider adapter contract for auth, storage, and sync operations
+- Evaluate managed and self-hosted tracks:
+  - Managed: Supabase, Firebase, AWS Amplify/AppSync/Cognito, Azure Static Web Apps + managed data
+  - Open-source/self-hosted: Appwrite, PocketBase, Postgres+Auth stack
+- Score each provider using:
+  - Cost at scale (storage, egress, auth MAU, realtime usage)
+  - Data model fit (relational vs document)
+  - Security/compliance (RLS, audit logs, key management)
+  - Operational complexity (self-hosted vs managed)
+  - Vendor lock-in and migration risk
+- Deliverable: provider scorecard + recommendation for MVP, growth, and enterprise stages
+
+### E8-T2 · Authentication
+- Implement sign-in with GitHub OAuth and/or Google OAuth through the selected provider adapter
 - Unauthenticated users keep full local functionality (localStorage)
 - "Sign in to sync" CTA in the header
 
-### E8-T2 · Cloud budget storage
-- Use Supabase (Postgres + Row Level Security) or Firestore as the client-side data store
-- CRUD: create, read, update, delete named budgets
-- User's budgets are private by default (enforced by BaaS RLS rules)
+### E8-T3 · Cloud budget storage
+- Use the selected provider adapter for CRUD (create, read, update, delete) on named budgets
+- Ensure private-by-default budgets (RLS/ACL policy)
+- Add provider-agnostic storage tests around adapter contract behavior
 
-### E8-T3 · Real-time sync
+### E8-T4 · Real-time sync and budget history
 - Optimistic updates on budget change
-- Debounced auto-save to BaaS (3s idle)
+- Debounced auto-save to provider backend (3s idle)
 - Conflict resolution: "last write wins" for MVP
-
-### E8-T4 · Budget history / versions
 - Every save creates a timestamped snapshot
 - "History" drawer showing past versions with a diff view
 - Restore any previous version
 
-### E8-T5 · Public budget sharing
+### E8-T5 · Public budget sharing and migration guardrails
 - User can mark a budget as "public" to get a stable shareable URL
 - Read-only view for non-owners
 - Social preview meta tags (Open Graph)
+- Document migration and rollback strategy between provider choices
 
 ---
 
@@ -729,6 +747,104 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ---
 
+## Epic 11 — Decision Intelligence & Deterministic AI
+
+**Goal:** Introduce AI-assisted, rule-bound decision support with deterministic outputs and auditable rationale.
+
+### E11-T1 · Deterministic decision contract
+- Define deterministic mode where identical inputs always produce identical recommendations
+- Freeze calculation assumptions and deterministic tie-breaking rules per release
+- Version recommendation policies and scoring logic
+
+### E11-T2 · JEV (judgment + expected value) scoring layer
+- Add expected-value style scoring for major tradeoffs:
+  - debt payoff vs investing
+  - relocation and state-move decisions
+  - emergency-fund timing vs goal acceleration
+- Define policy profiles: conservative, balanced, aggressive
+- Require explicit assumptions and confidence ranges per profile
+
+### E11-T3 · Decision trace and explainability UI
+- Store decision traces including:
+  - normalized inputs
+  - assumptions used
+  - rule weights/scores
+  - final ranking rationale
+- Add a "Why this recommendation?" panel with auditable breakdowns
+
+### E11-T4 · Scenario ranking workflow
+- Rank scenarios using deterministic scoring outputs
+- Show transparent scoring dimensions and weighted totals
+- Support side-by-side comparison between top recommendations
+
+---
+
+## Epic 12 — Receipt Ingestion & OCR
+
+**Goal:** Add optional receipt-to-budget ingestion with verification controls and privacy-safe image handling.
+
+### E12-T1 · Receipt capture and OCR extraction
+- Allow upload or camera capture of receipt images
+- Extract merchant, date, total, tax, and candidate categories
+- Flag low-confidence fields for manual review
+
+### E12-T2 · Confirmation and correction flow
+- Add pre-commit review UI for extracted fields
+- Allow manual correction of all OCR outputs before save
+- Require explicit user confirmation before writing spending data
+
+### E12-T3 · Category mapping and spending updates
+- Auto-map receipt line items/total to DynamicBudget spending categories
+- Post confirmed entries into monthly actuals for spending trends
+- Track source metadata for traceability (receipt ID, ingest timestamp)
+
+### E12-T4 · Quality controls and duplicate handling
+- Add confidence thresholds and review rules
+- Detect potential duplicate receipts (merchant/date/amount heuristic)
+- Provide merge/ignore choices for duplicate candidates
+
+### E12-T5 · Receipt data policy
+- Document storage modes:
+  - local-only image/data mode
+  - encrypted cloud receipt storage mode (if cloud sync enabled)
+- Define retention, deletion, and export behavior for receipt assets
+
+---
+
+## Epic 13 — Financial Integrations & Accounting Ecosystem
+
+**Goal:** Provide an integration framework for accounting systems and accountant-ready exports.
+
+### E13-T1 · Integration connector framework
+- Define connector contract (auth, sync trigger, mapping, status, error surface)
+- Build provider-agnostic integration registry and capability flags
+- Add connector-level observability for sync attempts and failures
+
+### E13-T2 · QuickBooks read-only integration (MVP)
+- Import accounts, expenses, categories, and transactions
+- Add mapping layer between DynamicBudget categories and QuickBooks chart of accounts
+- Provide manual sync trigger, last-sync timestamp, and sync status/errors
+
+### E13-T3 · QuickBooks phase 2 write-back and reconciliation
+- Add optional write-back for approved categorized transactions
+- Produce reconciliation reports with mismatch resolution workflows
+- Add exception handling for permission and schema drift issues
+
+### E13-T4 · Additional accounting and finance connectors
+- Prioritize Xero, Wave, CSV import/export, and Plaid transaction feeds
+- Reuse common connector framework instead of bespoke one-off integrations
+- Define phased rollout by connector readiness and user demand
+
+### E13-T5 · Accountant-facing outputs
+- Add "accountant package" export including:
+  - period summary
+  - categorized expenses
+  - supporting receipt references
+  - adjustment log
+- Add year-end readiness checklist and tax-document reminder workflow
+
+---
+
 ## Release Milestones
 
 ### v1.0 closeout — "Finish the Base"
@@ -752,9 +868,19 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ### v2.0 — "Platform"
 - Epic 5 complete
-- Epic 8 complete (auth, cloud sync, history)
+- Epic 8 complete (provider abstraction, auth, cloud sync, history)
 - Epic 9 complete (landing page, SEO, analytics)
 - Epic 10-T1, T2, T3, T4 (calculation engine refactoring, MCP tools, server implementation, AI assistant integration)
+- Epic 11 complete (deterministic AI decision engine + JEV scoring + decision traces)
+- Epic 12 complete (receipt OCR ingestion + confirmation + quality controls)
+- Epic 13-T1 through T3 complete (connector framework + QuickBooks read-only and reconciliation foundations)
+
+### Recommended execution order (next major phase)
+1. E8-T1 backend provider evaluation + architecture decision
+2. E11-T1 through E11-T2 deterministic decision engine and JEV scoring design
+3. E12-T1 through E12-T3 receipt ingestion MVP
+4. E13-T2 QuickBooks read-only integration MVP
+5. E13-T4 through E13-T5 broader accounting connector expansion + accountant outputs
 
 ---
 
