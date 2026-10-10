@@ -73,6 +73,44 @@ export type AnnualExpenseCategory =
   | 'taxes_fees'
   | 'custom';
 
+export type ReceiptCategory =
+  | 'groceries'
+  | 'food'
+  | 'transportation'
+  | 'health'
+  | 'utilities'
+  | 'pets'
+  | 'travel'
+  | 'subscriptions'
+  | 'home'
+  | 'other';
+
+export interface ReceiptFieldCandidate<T = string | number> {
+  value: T;
+  confidence: number;
+  source: string;
+}
+
+export interface ReceiptDuplicateRisk {
+  merchant: boolean;
+  date: boolean;
+  amount: boolean;
+  score: number;
+}
+
+export interface ReceiptExtractionResult {
+  merchant: ReceiptFieldCandidate<string>;
+  date: ReceiptFieldCandidate<string> | null;
+  total: ReceiptFieldCandidate<number> | null;
+  tax: ReceiptFieldCandidate<number> | null;
+  category: ReceiptFieldCandidate<ReceiptCategory>;
+  duplicateRisk: ReceiptDuplicateRisk;
+  needsReview: boolean;
+  rawText: string;
+  normalizedText: string;
+  source: 'ocr';
+}
+
 export interface DebtAccount {
   id: string;
   name: string;
