@@ -7,6 +7,8 @@
 
 import type {
   ReceiptCategory,
+  ReceiptDuplicateAction,
+  ReceiptDuplicateRisk,
   ReceiptExtractionResult,
   ReceiptFieldCandidate,
   ReceiptReviewEdits,
@@ -36,6 +38,8 @@ const MERCHANT_LENGTH_DIVISOR = 80;
 const DUPLICATE_RISK_STRENGTH = 0.8;
 const DUPLICATE_RISK_WEAK = 0.35;
 const MANUAL_REVIEW_DEFAULT_CONFIDENCE = 0.8;
+const DUPLICATE_REVIEW_THRESHOLD = 0.75;
+const DUPLICATE_MIN_MATCHES = 2;
 
 const TRACKABLE_CATEGORY_KEYWORDS: Array<{ category: TrackableCategory; keywords: string[] }> = [
   { category: 'groceries', keywords: ['whole foods', 'trader joe', 'albertsons', 'safeway', 'kroger', 'food lion', 'market', 'grocery', 'supermarket'] },
@@ -163,6 +167,55 @@ export function mapReceiptCategoryToTrackableCategory(category: ReceiptCategory,
   if (normalizedCategory === 'subscriptions') return 'subscriptions';
 
   return 'other';
+}
+
+type ReceiptDuplicateAssessmentRisk = Omit<ReceiptDuplicateRisk, 'isDuplicate' | 'action'> & {
+  isDuplicate: boolean;
+  action: ReceiptDuplicateAction;
+};
+
+export function evaluateReceiptDuplicateRisk(
+  comparison: Pick<ReceiptReviewState, 'merchant' | 'date' | 'total' | 'category'>,
+  candidate: Pick<ReceiptReviewState, 'merchant' | 'date' | 'total' | 'category'>
+): { risk: ReceiptDuplicateAssessmentRisk; matches: number } {
+  const normalizeMerchant = (value: string) => normalizeWhitespace(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+  const normalizedComparisonMerchant = comparison.merchant !== null && comparison.merchant !== undefined
+    ? normalizeMerchant(comparison.merchant.value)
+    : '';
+  const merchantMatch = candidate.merchant !== null && candidate.merchant !== undefined
+    && normalizedComparisonMerchant.length > 0
+    && normalizedComparisonMerchant === normalizeMerchant(candidate.merchant.value);
+  const dateMatch = comparison.date !== null && comparison.date !== undefined
+    && candidate.date !== null && candidate.date !== undefined
+    ? comparison.date.value === candidate.date.value
+    : false;
+  const amountDelta = comparison.total !== null && comparison.total !== undefined
+    && candidate.total !== null && candidate.total !== undefined
+    ? Math.abs(comparison.total.value - candidate.total.value)
+    : null;
+  const amountMatch = amountDelta !== null ? amountDelta <= 0.01 : false;
+  const positiveMatches = [merchantMatch, dateMatch, amountMatch].filter(Boolean).length;
+  const score = [
+    merchantMatch ? 0.45 : 0,
+    dateMatch ? 0.4 : 0,
+    amountMatch ? 0.15 : 0,
+  ].reduce((total, value) => total + value, 0);
+
+  const allFieldsMatch = merchantMatch && dateMatch && amountMatch;
+  const isDuplicate = allFieldsMatch && score >= DUPLICATE_REVIEW_THRESHOLD;
+  const action = isDuplicate ? 'merge' : positiveMatches >= DUPLICATE_MIN_MATCHES ? 'review' : 'ignore';
+
+  return {
+    risk: {
+      merchant: merchantMatch,
+      date: dateMatch,
+      amount: amountMatch,
+      score,
+      isDuplicate,
+      action,
+    },
+    matches: positiveMatches,
+  };
 }
 
 export function createReceiptSpendEntry(
@@ -308,6 +361,8 @@ export function parseReceiptText(rawText: string, options?: { now?: Date; mercha
     date: dateCandidate !== null && dateCandidate.confidence >= 0.5,
     amount: totalCandidate !== null && totalCandidate.confidence >= 0.5,
     score: totalCandidate && dateCandidate ? DUPLICATE_RISK_STRENGTH : DUPLICATE_RISK_WEAK,
+    isDuplicate: false,
+    action: 'ignore' as const,
   };
 
   const needsReview = !merchantValue || !dateCandidate || !totalCandidate || totalCandidate.confidence < 0.75 || merchantCandidate.confidence < 0.5;

@@ -2,6 +2,7 @@ import {
   confirmReceiptReview,
   createReceiptReviewState,
   createReceiptSpendEntry,
+  evaluateReceiptDuplicateRisk,
   getReceiptCategoryHint,
   normalizeReceiptText,
   parseReceiptText,
@@ -199,5 +200,100 @@ describe('receiptOCR', () => {
     expect(utilityEntry.category).toBe('internet');
     expect(diningEntry.category).toBe('dining_out');
     expect(travelEntry.category).toBe('other');
+  });
+
+  it('ignores null dates instead of dereferencing them during duplicate checks', () => {
+    const existing = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-null-date-old', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+
+    const candidate = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), { date: null }, { receiptId: 'receipt-null-date-new', ingestedAt: new Date('2026-09-23T12:00:05Z') });
+
+    expect(() => evaluateReceiptDuplicateRisk(existing, candidate)).not.toThrow();
+    expect(evaluateReceiptDuplicateRisk(existing, candidate).matches).toBe(2);
+  });
+
+  it('detects likely duplicate receipts using merchant, date, and amount heuristics', () => {
+    const existing = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-duplicate-old', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+
+    const candidate = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-duplicate-new', ingestedAt: new Date('2026-09-23T12:00:05Z') });
+
+    const duplicate = evaluateReceiptDuplicateRisk(existing, candidate);
+
+    expect(duplicate.matches).toBe(3);
+    expect(duplicate.risk.isDuplicate).toBe(true);
+    expect(duplicate.risk.action).toBe('merge');
+    expect(duplicate.risk.score).toBeGreaterThanOrEqual(0.75);
+  });
+
+  it('surfaces review actions for partial matches and no-risk comparisons', () => {
+    const existing = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 23, 2026',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-partial-old', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+
+    const partial = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'WHOLE FOODS MARKET',
+      'Sep 24, 2026',
+      'TOTAL 45.84',
+    ].join('\n')), {
+      merchant: 'Whole Foods Market',
+      total: 45.84,
+      category: 'groceries',
+    }), {}, { receiptId: 'receipt-partial-new', ingestedAt: new Date('2026-09-24T12:00:00Z') });
+
+    const partialCheck = evaluateReceiptDuplicateRisk(existing, partial);
+    expect(partialCheck.matches).toBe(2);
+    expect(partialCheck.risk.score).toBeLessThan(0.75);
+    expect(partialCheck.risk.isDuplicate).toBe(false);
+    expect(partialCheck.risk.action).toBe('review');
+
+    const different = confirmReceiptReview(createReceiptReviewState(parseReceiptText([
+      'CVS PHARMACY',
+      'Sep 23, 2026',
+      'TOTAL 12.99',
+    ].join('\n')), {
+      merchant: 'CVS',
+      total: 12.99,
+      category: 'health',
+    }), {}, { receiptId: 'receipt-different', ingestedAt: new Date('2026-09-23T12:00:00Z') });
+
+    const ignored = evaluateReceiptDuplicateRisk(existing, different);
+    expect(ignored.matches).toBe(1);
+    expect(ignored.risk.isDuplicate).toBe(false);
+    expect(ignored.risk.action).toBe('ignore');
   });
 });

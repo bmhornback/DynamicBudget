@@ -114,6 +114,7 @@ const COMPLETED_TASKS = {
   'E12-T1': 'Receipt OCR parsing helpers in lib/receiptOCR.ts with merchant/date/total/tax/category extraction and low-confidence review flags',
   'E12-T2': 'Receipt review contract with user-editable OCR fields, confirmed review state, and explicit confirmation gating',
   'E12-T3': 'Receipt-to-budget category mapping and confirmed spending-entry insertion with source metadata and receipt traceability',
+  'E12-T4': 'Receipt quality controls: confidence thresholds, duplicate detection heuristics, and merge/review/ignore decision flow',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',

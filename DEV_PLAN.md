@@ -799,10 +799,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Post confirmed entries into monthly actuals for spending trends ✅ `createReceiptSpendEntry` appends entries to `SpendingHistory` with source metadata and receipt traceability
 - Track source metadata for traceability (receipt ID, ingest timestamp) ✅ `ReceiptReviewState` and `SpendingEntry` now carry `receiptId` / `ingestTimestamp` and `source: 'receipt'`
 
-### E12-T4 · Quality controls and duplicate handling
-- Add confidence thresholds and review rules
-- Detect potential duplicate receipts (merchant/date/amount heuristic)
-- Provide merge/ignore choices for duplicate candidates
+### E12-T4 · Quality controls and duplicate handling ✅ Done
+- Add confidence thresholds and review rules ✅ duplicate-risk and receipt review confidence gating are enforced in `lib/receiptOCR.ts`
+- Detect potential duplicate receipts (merchant/date/amount heuristic) ✅ `evaluateReceiptDuplicateRisk` flags likely duplicates and returns `merge`/`review`/`ignore` actions
+- Provide merge/ignore choices for duplicate candidates ✅ the duplicate decision contract exposes deterministic `action` and `isDuplicate` metadata for UI handling
 
 ### E12-T5 · Receipt data policy
 - Document storage modes:
