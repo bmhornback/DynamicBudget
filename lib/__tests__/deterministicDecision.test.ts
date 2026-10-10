@@ -59,8 +59,8 @@ describe('deterministicDecision', () => {
       { id: 'goal-2', severity: 'warning' as const, message: 'goal 2' },
     ];
 
-    const contractA = createDeterministicDecisionContract('balanced', itemsA);
-    const contractB = createDeterministicDecisionContract('balanced', itemsB);
+    const contractA = createDeterministicDecisionContract(itemsA, 'balanced');
+    const contractB = createDeterministicDecisionContract(itemsB, 'balanced');
 
     expect(contractA.items.map((item) => item.id)).toEqual(['goal-2', 'goal-3', 'goal-1']);
     expect(contractA.signature).toBe(contractB.signature);

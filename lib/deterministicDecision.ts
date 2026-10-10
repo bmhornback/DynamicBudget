@@ -72,6 +72,18 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function compareStrings(left: string, right: string): number {
+  if (left < right) {
+    return -1;
+  }
+
+  if (left > right) {
+    return 1;
+  }
+
+  return 0;
+}
+
 export function normalizeDecisionInputs<T>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((item) => normalizeDecisionInputs(item)) as T;
@@ -79,7 +91,7 @@ export function normalizeDecisionInputs<T>(value: T): T {
 
   if (isPlainObject(value)) {
     return Object.keys(value)
-      .sort((left, right) => left.localeCompare(right))
+      .sort((left, right) => compareStrings(left, right))
       .reduce((acc, key) => {
         const item = value[key];
         acc[key] = normalizeDecisionInputs(item);
@@ -113,13 +125,13 @@ export function sortRecommendationsDeterministically(recommendations: Recommenda
       return rightPriority - leftPriority;
     }
 
-    return (left.id ?? '').localeCompare(right.id ?? '');
+    return compareStrings(left.id ?? '', right.id ?? '');
   });
 }
 
 export function createDeterministicDecisionContract<T extends { id: string }>(
-  profile: DecisionPolicyProfile = 'balanced',
-  items: T[]
+  items: T[],
+  profile: DecisionPolicyProfile = 'balanced'
 ): { policy: ReturnType<typeof getDeterministicDecisionPolicy>; items: T[]; signature: string } {
   const policy = getDeterministicDecisionPolicy(profile);
   const orderedItems = [...items].sort((left, right) => {
@@ -140,7 +152,7 @@ export function createDeterministicDecisionContract<T extends { id: string }>(
       return severityWeight[rightPriority] - severityWeight[leftPriority];
     }
 
-    return left.id.localeCompare(right.id);
+    return compareStrings(left.id, right.id);
   });
 
   const signature = `${policy.version}:${policy.profile}:${JSON.stringify(
