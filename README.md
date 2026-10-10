@@ -174,7 +174,9 @@ All calculations and data are processed entirely in your browser. No data is sen
 
 ## Documentation
 
-- **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, features, tech debt register
+- **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, feature status, and remaining milestones
+- **[MCP_SERVER.md](./MCP_SERVER.md)** — Setup and usage guide for the DynamicBudget MCP server
+- **[mcp/MCP_TOOLS.md](./mcp/MCP_TOOLS.md)** — Tool reference, validation rules, and example calls for the AI integration
 - **[SPENDING_TRENDS.md](./SPENDING_TRENDS.md)** — Detailed guide for the spending trends tracking feature
 - **[SAVINGS_PERCENTAGE.md](./SAVINGS_PERCENTAGE.md)** — Guide for percentage-based savings goals
 - **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application
@@ -205,7 +207,7 @@ npm run lint             # ESLint check
 
 ## Roadmap
 
-**Current focus:** deepen growth/discovery work with a future landing page, stronger educational content, and continued workflow polish.
+**Current focus:** validate the MCP server with real AI clients and complete the external packaging/docs pass for E10-T4 and E10-T5.
 
 See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by epic:
 
@@ -215,6 +217,8 @@ See [DEV_PLAN.md](./DEV_PLAN.md) for a detailed development roadmap organized by
 - **E10-T1 (Calc Engine Library)** ✅: All 12 core calculation modules verified React/browser-free; public API documented with JSDoc; test coverage raised to 95%+ on public API (326 tests)
 - **E10-T2 (MCP Tool Schemas)** ✅: JSON Schema definitions for 5 MCP tools in `mcp/schemas/`; full reference in `mcp/MCP_TOOLS.md`
 - **E10-T3 (MCP Server)** ✅: Runnable MCP server in `src/mcp-server/` using `@modelcontextprotocol/sdk`; 5 tools connected to the calc engine; 31 integration tests; build via `npm run build:mcp`
+- **E10-T4 (AI Client Integration)** ▶️ Remaining: verify real Claude/ChatGPT usage, capture feedback, and fix any integration issues
+- **E10-T5 (Publish & Document)** ▶️ Remaining: package/publish the MCP server or calc engine and finalize external-user documentation
 
 ## Contributing
 

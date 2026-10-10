@@ -627,6 +627,8 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Enable AI assistants (Claude, ChatGPT, etc.) to interact with DynamicBudget via Model Context Protocol (MCP), making budget analysis accessible via natural language queries.
 
+**Status:** E10-T1 through E10-T3 are complete. The remaining work is E10-T4 (real AI-client validation) and E10-T5 (external publication and packaging).
+
 **Context:** DynamicBudget is a fully client-side tool with a sophisticated calculation engine. Exposing this engine through MCP would allow AI assistants to:
 - Answer financial "what-if" questions in real-time
 - Analyze user budgets without requiring form navigation

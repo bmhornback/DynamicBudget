@@ -121,7 +121,7 @@ There is no session state, no database, and no network calls. The entire calcula
 
 ---
 
-## Next Steps
+## Remaining Steps
 
-- **E10-T4:** Test with Claude Desktop and ChatGPT — verify each tool with real AI prompts, collect feedback, fix any edge cases
-- **E10-T5:** Document and publish — npm package (`@dynamicbudget/mcp-server`), user guide, examples
+- **E10-T4:** Test with Claude Desktop and ChatGPT — verify each tool with real AI prompts, collect feedback, and fix any integration issues
+- **E10-T5:** Document and publish — package the MCP server or calc engine for external use, then finalize npm/install and example-user docs
