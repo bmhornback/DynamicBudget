@@ -17,7 +17,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 👆 **Mobile workspace gestures** — Swipe between the editor and dashboard panels on small screens without losing vertical scroll
 - 🎯 **Long-term goal planner** — Track house, vacation, retirement, kids, and custom major-purchase targets
 - 🧾 **Business expense guide** — Categorize, track, and estimate potential business tax write-offs with recordkeeping prompts
-- 🎨 **Scenario presets** — Pre-built scenarios (San Diego, Atlanta, living with parents, etc.)
+- 🎨 **Scenario presets** — Pre-built starting profiles (Saver Mode and Parents Mode) plus unlimited custom presets
 - 🆚 **Scenario comparison** — Compare your live budget side-by-side with up to 2 preset or saved-budget scenarios
 - 🏠 **Homeowner mode** — Switch between renter and homeowner budgets with mortgage/property-tax aware housing totals
 - 💳 **Debt payoff timeline** — Track debt accounts with avalanche/snowball strategy selector, per-debt amortization breakdown, balance-over-time chart, and interest cost per debt

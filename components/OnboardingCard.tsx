@@ -52,7 +52,7 @@ export default function OnboardingCard() {
           <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300">
             <li className="flex items-start gap-2">
               <span className="text-blue-500 shrink-0 mt-0.5">📋</span>
-              <span><strong>Presets</strong> — Load a sample scenario (San Diego, Atlanta, etc.) to see a realistic starting budget.</span>
+              <span><strong>Presets</strong> — Start from Saver Mode or Parents Mode, then customize for your exact location and goals.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-blue-500 shrink-0 mt-0.5">⚡</span>
@@ -75,6 +75,14 @@ export default function OnboardingCard() {
               <span><strong>Undo major actions</strong> — Reset, imports, and scenario loads now show an undo option so you can recover quickly.</span>
             </li>
           </ul>
+          <div className="rounded-lg border border-blue-200 dark:border-blue-700 bg-white/80 dark:bg-gray-900/40 p-2.5">
+            <p className="text-xs font-semibold text-blue-800 dark:text-blue-200">Glossary (Income Terms)</p>
+            <ul className="mt-1 space-y-1 text-[11px] text-gray-700 dark:text-gray-300">
+              <li><strong>ESPP:</strong> Employee Stock Purchase Plan income from discounted stock purchases.</li>
+              <li><strong>RSU vesting:</strong> Stock compensation that becomes yours and taxable when it vests.</li>
+              <li><strong>Bonus income:</strong> Cash compensation paid on top of base salary.</li>
+            </ul>
+          </div>
           <button
             type="button"
             onClick={dismiss}

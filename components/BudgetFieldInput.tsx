@@ -17,6 +17,9 @@ interface BudgetFieldInputProps {
   disabled?: boolean;
   /** Optional validation: returns a warning message or null */
   validate?: (value: number) => string | null;
+  baseCadence?: 'monthly' | 'annual' | 'daily';
+  displayCadence?: 'monthly' | 'annual' | 'daily';
+  termDefinition?: string;
 }
 
 export default function BudgetFieldInput({
@@ -33,6 +36,9 @@ export default function BudgetFieldInput({
   description,
   disabled = false,
   validate,
+  baseCadence = 'monthly',
+  displayCadence = 'monthly',
+  termDefinition,
 }: BudgetFieldInputProps) {
   const [raw, setRaw] = React.useState(value.toString());
   const [focused, setFocused] = React.useState(false);
@@ -74,6 +80,7 @@ export default function BudgetFieldInput({
   const describedBy = [descriptionId, validationMessage ? validationId : undefined]
     .filter(Boolean)
     .join(' ') || undefined;
+  const cadenceHint = getCadenceHint(value, baseCadence, displayCadence);
 
   return (
     <div className={`flex flex-col rounded-lg transition-colors ${
@@ -104,13 +111,31 @@ export default function BudgetFieldInput({
           className={`flex-1 text-sm ${isLocked ? 'text-slate-600 dark:text-slate-400 font-medium' : 'text-gray-700 dark:text-gray-300'} cursor-pointer min-w-0`}
           title={description}
         >
-          {label}
+          <span className="inline-flex items-center gap-1">
+            {label}
+            {termDefinition && (
+              <span
+                tabIndex={0}
+                role="note"
+                aria-label={`${label} definition: ${termDefinition}`}
+                title={termDefinition}
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300"
+              >
+                ?
+              </span>
+            )}
+          </span>
           {description && (
             <span
               id={descriptionId}
               className="block text-xs text-gray-400 dark:text-gray-500 truncate"
             >
               {description}
+            </span>
+          )}
+          {cadenceHint && (
+            <span className="block text-xs text-blue-600 dark:text-blue-300">
+              {cadenceHint}
             </span>
           )}
         </label>
@@ -162,4 +187,16 @@ export default function BudgetFieldInput({
 
 function validationMessageId(id: string) {
   return `${id}-validation`;
+}
+
+function getCadenceHint(
+  value: number,
+  baseCadence: 'monthly' | 'annual' | 'daily',
+  displayCadence: 'monthly' | 'annual' | 'daily'
+) {
+  if (!Number.isFinite(value) || baseCadence === displayCadence) return null;
+  const annual = baseCadence === 'annual' ? value : baseCadence === 'monthly' ? value * 12 : value * 365;
+  const converted = displayCadence === 'annual' ? annual : displayCadence === 'monthly' ? annual / 12 : annual / 365;
+  const cadenceLabel = displayCadence === 'annual' ? 'year' : displayCadence === 'monthly' ? 'month' : 'day';
+  return `≈ ${converted.toLocaleString('en-US', { maximumFractionDigits: 2 })} per ${cadenceLabel}`;
 }

@@ -25,6 +25,10 @@ export interface ScenarioComparisonItem {
   healthScore: BudgetHealthScore;
 }
 
+interface BuildScenarioComparisonOptions {
+  normalizeAnnualSalary?: boolean;
+}
+
 type ComparisonSource =
   | { kind: 'preset'; id: string }
   | { kind: 'saved'; id: string };
@@ -81,7 +85,8 @@ export function buildScenarioComparisonItems(
   currentInputs: BudgetInputs,
   comparisonIds: string[],
   activePreset?: string,
-  savedBudgets: NamedBudget[] = []
+  savedBudgets: NamedBudget[] = [],
+  options: BuildScenarioComparisonOptions = {}
 ): ScenarioComparisonItem[] {
   const normalizedComparisonIds = normalizeComparisonPresetIds(comparisonIds, activePreset, savedBudgets);
   const activePresetConfig = activePreset
@@ -134,12 +139,16 @@ export function buildScenarioComparisonItems(
       if (parsed.kind === 'preset') {
         const preset = SCENARIO_PRESETS.find((item) => item.id === parsed.id);
         if (!preset) return null;
+        const presetInputs = applyScenarioPreset(preset.inputs);
+        const normalizedInputs = options.normalizeAnnualSalary
+          ? { ...presetInputs, annualSalary: currentInputs.annualSalary }
+          : presetInputs;
 
         return buildItem(
           comparisonId,
           preset.name,
           preset.description,
-          applyScenarioPreset(preset.inputs),
+          normalizedInputs,
           false,
           'Preset'
         );
@@ -148,11 +157,15 @@ export function buildScenarioComparisonItems(
       const savedBudget = savedBudgets.find((budget) => budget.id === parsed.id);
       if (!savedBudget) return null;
 
+      const savedInputs = options.normalizeAnnualSalary
+        ? { ...savedBudget.inputs, annualSalary: currentInputs.annualSalary }
+        : savedBudget.inputs;
+
       return buildItem(
         comparisonId,
         savedBudget.name,
         savedBudget.note?.trim() ? 'Saved budget snapshot with your planning note.' : 'Saved budget snapshot.',
-        savedBudget.inputs,
+        savedInputs,
         false,
         'Saved budget',
         savedBudget.note

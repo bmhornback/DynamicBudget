@@ -80,6 +80,14 @@ const ANNUAL_EXPENSE_CATEGORY_OPTIONS: Array<{ value: AnnualExpenseCategory; lab
   { value: 'custom', label: 'Custom' },
 ];
 
+type InputCadence = 'monthly' | 'annual' | 'daily';
+
+const INPUT_CADENCE_LABELS: Record<InputCadence, string> = {
+  monthly: 'Monthly',
+  annual: 'Annual',
+  daily: 'Daily',
+};
+
 function SelectField<T extends string>({
   label,
   value,
@@ -94,13 +102,13 @@ function SelectField<T extends string>({
   const selectId = React.useId();
 
   return (
-    <div className="flex items-center gap-2 py-2 px-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200">
-      <label htmlFor={selectId} className="flex-1 text-sm text-gray-700">{label}</label>
+    <div className="flex items-center gap-2 py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg hover:border-gray-200 dark:hover:border-gray-600">
+      <label htmlFor={selectId} className="flex-1 text-sm text-gray-700 dark:text-gray-200">{label}</label>
       <select
         id={selectId}
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        className="text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -183,10 +191,10 @@ function NumberSlider({
   const sliderId = React.useId();
 
   return (
-    <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+    <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
       <div className="flex justify-between mb-1">
-        <label htmlFor={sliderId} className="text-sm text-gray-700">{label}</label>
-        <span className="text-sm font-medium text-gray-900">{value}{suffix}</span>
+        <label htmlFor={sliderId} className="text-sm text-gray-700 dark:text-gray-200">{label}</label>
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{value}{suffix}</span>
       </div>
       <input
         id={sliderId}
@@ -198,7 +206,7 @@ function NumberSlider({
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-blue-600"
       />
-      <div className="flex justify-between text-xs text-gray-500 mt-0.5">
+      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         <span>{min}{suffix}</span>
         <span>{max}{suffix}</span>
       </div>
@@ -213,6 +221,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
   } | null>(null);
   const annualSalaryId = React.useId();
   const numberOfPetsId = React.useId();
+  const [displayCadence, setDisplayCadence] = React.useState<InputCadence>('monthly');
 
   function handleStateChange(newState: StateOfResidence) {
     const fromState = inputs.state;
@@ -277,7 +286,13 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
     );
   }
 
-  const field = (id: keyof BudgetInputs, label: string, description?: string) => (
+  const field = (
+    id: keyof BudgetInputs,
+    label: string,
+    description?: string,
+    baseCadence: InputCadence = 'monthly',
+    termDefinition?: string
+  ) => (
     <BudgetFieldInput
       key={id}
       id={id}
@@ -287,6 +302,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       onChange={(v) => onChange({ [id]: v })}
       onToggleLock={onToggleLock}
       description={description}
+      baseCadence={baseCadence}
+      displayCadence={displayCadence}
+      termDefinition={termDefinition}
     />
   );
 
@@ -392,23 +410,54 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
   return (
     <div className="space-y-2">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-gray-600 dark:text-gray-300">
+            Input timing: most expense fields are monthly unless labeled otherwise.
+          </p>
+          <div className="flex items-center gap-1" role="group" aria-label="Input cadence helper">
+            {(Object.keys(INPUT_CADENCE_LABELS) as InputCadence[]).map((cadence) => (
+              <button
+                key={cadence}
+                type="button"
+                onClick={() => setDisplayCadence(cadence)}
+                aria-pressed={displayCadence === cadence}
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  displayCadence === cadence
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                {INPUT_CADENCE_LABELS[cadence]}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* ── Income & Tax ─────────────────────────────────────────────── */}
       <BudgetSection title="Income & Taxes" icon="💰">
-        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-          <label htmlFor={annualSalaryId} className="text-sm text-gray-700 block mb-1">Annual Gross Salary</label>
+        <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
+          <label htmlFor={annualSalaryId} className="text-sm text-gray-700 dark:text-gray-200 block mb-1">Annual Gross Salary</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">$</span>
             <input
               id={annualSalaryId}
               type="number"
               value={inputs.annualSalary}
               onChange={(e) => onChange({ annualSalary: Math.max(0, Number(e.target.value)) })}
-              className="w-full pl-7 pr-4 py-2 text-lg font-bold border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full pl-7 pr-4 py-2 text-lg font-bold border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
               step="1000"
               min="0"
             />
           </div>
+          <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
+            {displayCadence === 'annual'
+              ? `${inputs.annualSalary.toLocaleString('en-US')} per year`
+              : displayCadence === 'monthly'
+                ? `≈ ${(inputs.annualSalary / 12).toLocaleString('en-US', { maximumFractionDigits: 2 })} per month`
+                : `≈ ${(inputs.annualSalary / 365).toLocaleString('en-US', { maximumFractionDigits: 2 })} per day`}
+          </p>
         </div>
 
         <SelectField
@@ -476,7 +525,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           onChange={(v) => onChange({ userAge: v })}
         />
 
-        {field('bonusIncome', 'Annual Bonus Income')}
+        {field('bonusIncome', 'Annual Bonus Income', undefined, 'annual', 'One-time or periodic cash compensation outside base salary, often paid quarterly or annually.')}
         <ToggleField
           label={`Bonus Tax Modeling: ${BONUS_TAX_MODE_LABELS[inputs.bonusTaxMode]}`}
           value={inputs.bonusTaxMode === 'lump_sum_withholding'}
@@ -485,9 +534,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           }
           description="Toggle between federal flat 22% bonus withholding and blended annual tax treatment"
         />
-        {field('esppIncome', 'Annual ESPP Income')}
-        {field('rsuVestingIncome', 'Annual RSU Vesting Income')}
-        {field('otherMonthlyIncome', 'Other Monthly Income')}
+        {field('esppIncome', 'Annual ESPP Income', undefined, 'annual', 'Employee Stock Purchase Plan proceeds expected from discounted company stock purchases.')}
+        {field('rsuVestingIncome', 'Annual RSU Vesting Income', undefined, 'annual', 'Estimated value of Restricted Stock Units that vest and become taxable this year.')}
+        {field('otherMonthlyIncome', 'Other Monthly Income', undefined, 'monthly', 'Recurring side income such as freelance, rental, or part-time earnings.')}
 
         <NumberSlider
           label="Monthly Income Variability"
@@ -506,7 +555,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           </p>
         )}
 
-        {field('iraContribution', 'Monthly IRA Contribution', inputs.userAge >= 50 ? 'Capped at $8,000/year' : 'Capped at $7,000/year')}
+        {field('iraContribution', 'Monthly IRA Contribution', inputs.userAge >= 50 ? 'Capped at $8,000/year' : 'Capped at $7,000/year', 'monthly', 'Amount you personally contribute to an Individual Retirement Account each month.')}
 
         <SelectField
           label="Pay Frequency"
@@ -528,23 +577,30 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
           {inputs.partnerEnabled && (
             <>
-              <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-                <label htmlFor="partnerAnnualSalaryInput" className="text-sm text-gray-700 block mb-1">Partner Annual Gross Salary</label>
+              <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
+                <label htmlFor="partnerAnnualSalaryInput" className="text-sm text-gray-700 dark:text-gray-200 block mb-1">Partner Annual Gross Salary</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">$</span>
                   <input
                     id="partnerAnnualSalaryInput"
                     type="number"
                     value={inputs.partnerAnnualSalary}
                     onChange={(e) => onChange({ partnerAnnualSalary: Math.max(0, Number(e.target.value)) })}
-                    className="w-full pl-7 pr-4 py-2 text-lg font-bold border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full pl-7 pr-4 py-2 text-lg font-bold border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                     step="1000"
                     min="0"
                   />
                 </div>
+                <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
+                  {displayCadence === 'annual'
+                    ? `${inputs.partnerAnnualSalary.toLocaleString('en-US')} per year`
+                    : displayCadence === 'monthly'
+                      ? `≈ ${(inputs.partnerAnnualSalary / 12).toLocaleString('en-US', { maximumFractionDigits: 2 })} per month`
+                      : `≈ ${(inputs.partnerAnnualSalary / 365).toLocaleString('en-US', { maximumFractionDigits: 2 })} per day`}
+                </p>
               </div>
 
-              {field('partnerBonusIncome', 'Partner Annual Bonus Income')}
+              {field('partnerBonusIncome', 'Partner Annual Bonus Income', undefined, 'annual', 'One-time or periodic cash compensation your partner receives beyond base salary.')}
 
               <ToggleField
                 label="Partner Max Out 401(k)"
@@ -690,14 +746,14 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         />
         {inputs.petsEnabled && (
           <>
-            <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
-              <label htmlFor={numberOfPetsId} className="text-sm text-gray-700 block mb-1">Number of Pets</label>
+            <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
+              <label htmlFor={numberOfPetsId} className="text-sm text-gray-700 dark:text-gray-200 block mb-1">Number of Pets</label>
               <input
                 id={numberOfPetsId}
                 type="number"
                 value={inputs.numberOfPets}
                 onChange={(e) => onChange({ numberOfPets: Math.max(0, Number(e.target.value)) })}
-                className="w-20 text-center border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                className="w-20 text-center border border-gray-200 dark:border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                 min="0"
                 max="10"
               />
@@ -774,12 +830,12 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       </BudgetSection>
 
       <BudgetSection title="Sinking Funds & Annual Expenses" icon="🗓️" defaultOpen={false}>
-        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-1">
-          <p className="text-sm text-gray-700">Reserve monthly cash for known non-monthly bills like car registration, vacations, insurance, and holiday spending.</p>
-          <p className="text-xs text-gray-500">These set-asides reduce your monthly buffer now so the annual bill does not become a surprise later.</p>
+        <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg space-y-1">
+          <p className="text-sm text-gray-700 dark:text-gray-200">Reserve monthly cash for known non-monthly bills like car registration, vacations, insurance, and holiday spending.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">These set-asides reduce your monthly buffer now so the annual bill does not become a surprise later.</p>
         </div>
 
-        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+        <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
           <button
             type="button"
             onClick={addAnnualExpense}
@@ -790,12 +846,12 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         </div>
 
         {inputs.annualExpenses.length === 0 ? (
-          <p className="text-xs text-gray-500 px-2">No annual expenses yet. Add recurring costs to build sinking funds automatically.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 px-2">No annual expenses yet. Add recurring costs to build sinking funds automatically.</p>
         ) : (
           inputs.annualExpenses.map((expense) => (
-            <div key={expense.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+            <div key={expense.id} className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <label htmlFor={`annual-expense-name-${expense.id}`} className="text-sm text-gray-700">Expense Name</label>
+                <label htmlFor={`annual-expense-name-${expense.id}`} className="text-sm text-gray-700 dark:text-gray-200">Expense Name</label>
                 <button
                   type="button"
                   onClick={() => removeAnnualExpense(expense.id)}
@@ -809,16 +865,16 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 type="text"
                 value={expense.name}
                 onChange={(e) => updateAnnualExpense(expense.id, { name: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label htmlFor={`annual-expense-category-${expense.id}`} className="text-xs text-gray-500 block mb-1">Category</label>
+                  <label htmlFor={`annual-expense-category-${expense.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Category</label>
                   <select
                     id={`annual-expense-category-${expense.id}`}
                     value={expense.category}
                     onChange={(e) => updateAnnualExpense(expense.id, { category: e.target.value as AnnualExpenseCategory })}
-                    className="w-full text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     {ANNUAL_EXPENSE_CATEGORY_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -826,12 +882,12 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   </select>
                 </div>
                 <div>
-                  <label htmlFor={`annual-expense-due-${expense.id}`} className="text-xs text-gray-500 block mb-1">Due Month</label>
+                  <label htmlFor={`annual-expense-due-${expense.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Due Month</label>
                   <select
                     id={`annual-expense-due-${expense.id}`}
                     value={expense.dueMonth}
                     onChange={(e) => updateAnnualExpense(expense.id, { dueMonth: Number(e.target.value) })}
-                    className="w-full text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     {ANNUAL_EXPENSE_MONTH_LABELS.map((label, index) => (
                       <option key={label} value={index + 1}>{label}</option>
@@ -841,7 +897,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label htmlFor={`annual-expense-amount-${expense.id}`} className="text-xs text-gray-500 block mb-1">Annual Amount</label>
+                  <label htmlFor={`annual-expense-amount-${expense.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Annual Amount</label>
                   <input
                     id={`annual-expense-amount-${expense.id}`}
                     type="number"
@@ -849,11 +905,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                     step="50"
                     value={expense.annualAmount}
                     onChange={(e) => updateAnnualExpense(expense.id, { annualAmount: Math.max(0, Number(e.target.value)) })}
-                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label htmlFor={`annual-expense-saved-${expense.id}`} className="text-xs text-gray-500 block mb-1">Already Saved</label>
+                  <label htmlFor={`annual-expense-saved-${expense.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Already Saved</label>
                   <input
                     id={`annual-expense-saved-${expense.id}`}
                     type="number"
@@ -861,7 +917,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                     step="50"
                     value={expense.currentSaved}
                     onChange={(e) => updateAnnualExpense(expense.id, { currentSaved: Math.max(0, Number(e.target.value)) })}
-                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
@@ -878,12 +934,12 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       </BudgetSection>
 
       <BudgetSection title="Long-Term Goals" icon="🎯" defaultOpen={false}>
-        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-1">
-          <p className="text-sm text-gray-700">Track major goals and compare them against your current savings plan.</p>
-          <p className="text-xs text-gray-500">House goals use your house fund, retirement goals use retirement contributions, and all other goals compare against General Cash Savings.</p>
+        <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg space-y-1">
+          <p className="text-sm text-gray-700 dark:text-gray-200">Track major goals and compare them against your current savings plan.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">House goals use your house fund, retirement goals use retirement contributions, and all other goals compare against General Cash Savings.</p>
         </div>
 
-        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+        <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
           <button
             type="button"
             onClick={addGoal}
@@ -894,9 +950,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         </div>
 
         {inputs.longTermGoals.map((goal) => (
-          <div key={goal.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+          <div key={goal.id} className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <label htmlFor={`goal-name-${goal.id}`} className="text-sm text-gray-700">Goal Name</label>
+              <label htmlFor={`goal-name-${goal.id}`} className="text-sm text-gray-700 dark:text-gray-200">Goal Name</label>
               <button
                 type="button"
                 onClick={() => removeGoal(goal.id)}
@@ -910,16 +966,16 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
               type="text"
               value={goal.name}
               onChange={(e) => updateGoal(goal.id, { name: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label htmlFor={`goal-category-${goal.id}`} className="text-xs text-gray-500 block mb-1">Category</label>
+                <label htmlFor={`goal-category-${goal.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Category</label>
                 <select
                   id={`goal-category-${goal.id}`}
                   value={goal.category}
                   onChange={(e) => updateGoal(goal.id, { category: e.target.value as LongTermGoalCategory })}
-                  className="w-full text-sm border border-gray-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   {LONG_TERM_GOAL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -927,19 +983,19 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 </select>
               </div>
               <div>
-                <label htmlFor={`goal-date-${goal.id}`} className="text-xs text-gray-500 block mb-1">Target Month</label>
+                <label htmlFor={`goal-date-${goal.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Target Month</label>
                 <input
                   id={`goal-date-${goal.id}`}
                   type="month"
                   value={goal.targetDate}
                   onChange={(e) => updateGoal(goal.id, { targetDate: e.target.value })}
-                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label htmlFor={`goal-target-${goal.id}`} className="text-xs text-gray-500 block mb-1">Target Amount</label>
+                <label htmlFor={`goal-target-${goal.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Target Amount</label>
                 <input
                   id={`goal-target-${goal.id}`}
                   type="number"
@@ -947,11 +1003,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   step="100"
                   value={goal.targetAmount}
                   onChange={(e) => updateGoal(goal.id, { targetAmount: Math.max(0, Number(e.target.value)) })}
-                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
-                <label htmlFor={`goal-current-${goal.id}`} className="text-xs text-gray-500 block mb-1">Saved So Far</label>
+                <label htmlFor={`goal-current-${goal.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Saved So Far</label>
                 <input
                   id={`goal-current-${goal.id}`}
                   type="number"
@@ -959,7 +1015,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   step="100"
                   value={goal.currentAmount}
                   onChange={(e) => updateGoal(goal.id, { currentAmount: Math.max(0, Number(e.target.value)) })}
-                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -980,9 +1036,9 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
 
       {/* ── Debt Accounts ─────────────────────────────────────────────── */}
       <BudgetSection title="Debt Accounts" icon="💳" defaultOpen={false}>
-        <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg">
+        <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-gray-700">Track balances to project payoff timing</p>
+            <p className="text-sm text-gray-700 dark:text-gray-200">Track balances to project payoff timing</p>
             <button
               type="button"
               onClick={addDebt}
@@ -994,12 +1050,12 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         </div>
 
         {inputs.debts.length === 0 ? (
-          <p className="text-xs text-gray-500 px-2">No debt accounts yet.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 px-2">No debt accounts yet.</p>
         ) : (
           inputs.debts.map((debt) => (
-            <div key={debt.id} className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
+            <div key={debt.id} className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <label htmlFor={`debt-name-${debt.id}`} className="text-sm text-gray-700">Debt Name</label>
+                <label htmlFor={`debt-name-${debt.id}`} className="text-sm text-gray-700 dark:text-gray-200">Debt Name</label>
                 <button
                   type="button"
                   onClick={() => removeDebt(debt.id)}
@@ -1013,11 +1069,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 type="text"
                 value={debt.name}
                 onChange={(e) => updateDebt(debt.id, { name: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
               />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div>
-                  <label htmlFor={`debt-balance-${debt.id}`} className="text-xs text-gray-500 block mb-1">Balance</label>
+                  <label htmlFor={`debt-balance-${debt.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Balance</label>
                   <input
                     id={`debt-balance-${debt.id}`}
                     type="number"
@@ -1027,11 +1083,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                     onChange={(e) =>
                       updateDebt(debt.id, { balance: Math.max(0, Number(e.target.value)) })
                     }
-                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label htmlFor={`debt-apr-${debt.id}`} className="text-xs text-gray-500 block mb-1">APR %</label>
+                  <label htmlFor={`debt-apr-${debt.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">APR %</label>
                   <input
                     id={`debt-apr-${debt.id}`}
                     type="number"
@@ -1041,11 +1097,11 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                     onChange={(e) =>
                       updateDebt(debt.id, { interestRate: Math.max(0, Number(e.target.value)) })
                     }
-                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label htmlFor={`debt-min-${debt.id}`} className="text-xs text-gray-500 block mb-1">Min Payment</label>
+                  <label htmlFor={`debt-min-${debt.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Min Payment</label>
                   <input
                     id={`debt-min-${debt.id}`}
                     type="number"
@@ -1055,7 +1111,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                     onChange={(e) =>
                       updateDebt(debt.id, { minimumPayment: Math.max(0, Number(e.target.value)) })
                     }
-                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-2.5 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
@@ -1064,8 +1120,8 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         )}
 
         {inputs.debts.length > 0 && (
-          <div className="py-2 px-3 bg-white border border-gray-100 rounded-lg space-y-2">
-            <p className="text-xs font-medium text-gray-700">Payoff Strategy</p>
+          <div className="py-2 px-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg space-y-2">
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Payoff Strategy</p>
             <div className="flex gap-2">
               {(['avalanche', 'snowball'] as const).map((strat) => (
                 <button
@@ -1076,7 +1132,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-colors ${
                     inputs.debtPayoffStrategy === strat
                       ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                     : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   {strat === 'avalanche' ? '📉 Avalanche (highest APR first)' : '❄️ Snowball (smallest balance first)'}
