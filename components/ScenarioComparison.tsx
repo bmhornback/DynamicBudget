@@ -20,6 +20,8 @@ interface ScenarioComparisonProps {
   activePresetId?: string;
   onSelectionChange: (scenarioIds: string[]) => void;
   onApplyScenario: (scenarioId: string) => void;
+  normalizeSalary: boolean;
+  onNormalizeSalaryChange: (enabled: boolean) => void;
 }
 
 const METRIC_ROWS: Array<{
@@ -58,6 +60,8 @@ export default function ScenarioComparison({
   activePresetId,
   onSelectionChange,
   onApplyScenario,
+  normalizeSalary,
+  onNormalizeSalaryChange,
 }: ScenarioComparisonProps) {
   const handleToggleScenario = (scenarioId: string) => {
     const parsed = parseComparisonId(scenarioId);
@@ -82,6 +86,15 @@ export default function ScenarioComparison({
             <p className="mt-1 text-xs text-gray-500">
               Load any compared scenario into the main editor when you want to continue from it.
             </p>
+            <label className="mt-2 inline-flex items-center gap-2 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={normalizeSalary}
+                onChange={(event) => onNormalizeSalaryChange(event.target.checked)}
+                className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Use current annual salary for all comparison scenarios
+            </label>
           </div>
           <div className="space-y-2">
             <div className="flex flex-wrap gap-2" role="group" aria-label="Scenario comparison presets">

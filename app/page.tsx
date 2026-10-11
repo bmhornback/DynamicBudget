@@ -21,7 +21,7 @@ const FEATURES = [
     icon: '⚖️',
     title: 'Multi-Scenario Comparison',
     description:
-      'Compare your live budget side-by-side with built-in presets like San Diego, Atlanta, or Living with Parents — or build your own.',
+      'Compare your live budget side-by-side with built-in presets like Saver Mode and Parents Mode — or build your own.',
   },
   {
     icon: '💳',

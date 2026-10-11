@@ -95,14 +95,15 @@ export default function DynamicBudgetPage() {
     return loadNamedBudgets();
   });
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
-  const [activePreset, setActivePreset] = useState<string | undefined>('san_diego_baseline');
+  const [activePreset, setActivePreset] = useState<string | undefined>('aggressive_saver');
   const [showForm, setShowForm] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>('budget');
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [printHeaderDate, setPrintHeaderDate] = useState<string | null>(null);
   const [comparisonPresetIds, setComparisonPresetIds] = useState<string[]>(
-    () => getDefaultComparisonPresetIds('san_diego_baseline')
+    () => getDefaultComparisonPresetIds('aggressive_saver')
   );
+  const [normalizeComparisonSalary, setNormalizeComparisonSalary] = useState(true);
   const [undoState, setUndoState] = useState<UndoState | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   // Track client-side hydration so we can show the skeleton during SSR/initial paint
@@ -188,8 +189,11 @@ export default function DynamicBudgetPage() {
     [inputs, breakdown]
   );
   const comparisonItems = useMemo(
-    () => buildScenarioComparisonItems(inputs, comparisonPresetIds, activePreset, savedBudgets),
-    [inputs, comparisonPresetIds, activePreset, savedBudgets]
+    () =>
+      buildScenarioComparisonItems(inputs, comparisonPresetIds, activePreset, savedBudgets, {
+        normalizeAnnualSalary: normalizeComparisonSalary,
+      }),
+    [inputs, comparisonPresetIds, activePreset, savedBudgets, normalizeComparisonSalary]
   );
   const debtProjection = useMemo(
     () => calculateDebtPayoffProjection(inputs.debts, inputs.extraDebtPayoff, inputs.debtPayoffStrategy),
@@ -300,8 +304,8 @@ export default function DynamicBudgetPage() {
     rememberUndoState('Reset to default budget.');
     setInputs(DEFAULT_INPUTS);
     setRebalanceResult(null);
-    setActivePreset('san_diego_baseline');
-    setComparisonPresetIds(getDefaultComparisonPresetIds('san_diego_baseline'));
+    setActivePreset('aggressive_saver');
+    setComparisonPresetIds(getDefaultComparisonPresetIds('aggressive_saver'));
   }, [rememberUndoState]);
 
   const handleImport = useCallback((newInputs: BudgetInputs) => {
@@ -628,6 +632,8 @@ export default function DynamicBudgetPage() {
                     setComparisonPresetIds(normalizeComparisonPresetIds(scenarioIds, activePreset, savedBudgets))
                   }
                   onApplyScenario={handleApplyComparisonScenario}
+                  normalizeSalary={normalizeComparisonSalary}
+                  onNormalizeSalaryChange={setNormalizeComparisonSalary}
                 />
               </div>
 

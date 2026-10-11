@@ -17,6 +17,11 @@ interface BudgetFieldInputProps {
   disabled?: boolean;
   /** Optional validation: returns a warning message or null */
   validate?: (value: number) => string | null;
+  baseCadence?: 'monthly' | 'annual' | 'daily';
+  displayCadence?: 'monthly' | 'annual' | 'daily';
+  termDefinition?: string;
+  showCadenceHint?: boolean;
+  allowCadenceConversion?: boolean;
 }
 
 export default function BudgetFieldInput({
@@ -33,12 +38,19 @@ export default function BudgetFieldInput({
   description,
   disabled = false,
   validate,
+  baseCadence = 'monthly',
+  displayCadence = 'monthly',
+  termDefinition,
+  showCadenceHint = true,
+  allowCadenceConversion = true,
 }: BudgetFieldInputProps) {
   const [raw, setRaw] = React.useState(value.toString());
   const [focused, setFocused] = React.useState(false);
   const [prevValue, setPrevValue] = React.useState(value);
+  const [showDefinition, setShowDefinition] = React.useState(false);
   const descriptionId = description ? `${id}-description` : undefined;
   const validationId = validationMessageId(id);
+  const definitionId = termDefinition ? `${id}-definition` : undefined;
 
   // Keep raw in sync when value changes from outside (e.g., rebalance)
   if (!focused && prevValue !== value) {
@@ -74,6 +86,9 @@ export default function BudgetFieldInput({
   const describedBy = [descriptionId, validationMessage ? validationId : undefined]
     .filter(Boolean)
     .join(' ') || undefined;
+  const cadenceHint = showCadenceHint && allowCadenceConversion
+    ? getCadenceHint(value, baseCadence, displayCadence)
+    : null;
 
   return (
     <div className={`flex flex-col rounded-lg transition-colors ${
@@ -99,12 +114,38 @@ export default function BudgetFieldInput({
         </button>
 
         {/* Label */}
-        <label
-          htmlFor={id}
-          className={`flex-1 text-sm ${isLocked ? 'text-slate-600 dark:text-slate-400 font-medium' : 'text-gray-700 dark:text-gray-300'} cursor-pointer min-w-0`}
-          title={description}
-        >
-          {label}
+        <div className="flex-1 min-w-0">
+          <div className="relative flex items-center gap-1">
+            <label
+              htmlFor={id}
+              className={`text-sm ${isLocked ? 'text-slate-600 dark:text-slate-400 font-medium' : 'text-gray-700 dark:text-gray-300'} cursor-pointer min-w-0`}
+              title={description}
+            >
+              {label}
+            </label>
+            {termDefinition && (
+              <>
+                <button
+                  type="button"
+                  aria-label={`${label} definition: ${termDefinition}`}
+                  aria-expanded={showDefinition}
+                  aria-controls={definitionId}
+                  onFocus={() => setShowDefinition(true)}
+                  onBlur={() => setShowDefinition(false)}
+                  onMouseEnter={() => setShowDefinition(true)}
+                  onMouseLeave={() => setShowDefinition(false)}
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300"
+                >
+                  ?
+                </button>
+                {showDefinition && (
+                  <span id={definitionId} role="tooltip" className="absolute z-10 mt-1 rounded bg-gray-900 px-2 py-1 text-[10px] text-white shadow-lg">
+                    {termDefinition}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
           {description && (
             <span
               id={descriptionId}
@@ -113,7 +154,12 @@ export default function BudgetFieldInput({
               {description}
             </span>
           )}
-        </label>
+          {cadenceHint && (
+            <span className="block text-xs text-blue-600 dark:text-blue-300">
+              {cadenceHint}
+            </span>
+          )}
+        </div>
 
         {/* Input */}
         <div className="relative flex items-center">
@@ -162,4 +208,35 @@ export default function BudgetFieldInput({
 
 function validationMessageId(id: string) {
   return `${id}-validation`;
+}
+
+export function getCadenceLabel(cadence: 'monthly' | 'annual' | 'daily') {
+  return cadence === 'annual' ? 'year' : cadence === 'monthly' ? 'month' : 'day';
+}
+
+export function getCadenceHint(
+  value: number,
+  baseCadence: 'monthly' | 'annual' | 'daily',
+  displayCadence: 'monthly' | 'annual' | 'daily',
+  alwaysShow = false
+) {
+  if (baseCadence === displayCadence) return null;
+  if ((!Number.isFinite(value) || value === 0) && !alwaysShow) return null;
+
+  const annual = toAnnual(value, baseCadence);
+  const converted = fromAnnual(annual, displayCadence);
+  const cadenceLabel = getCadenceLabel(displayCadence);
+  return `≈ ${converted.toLocaleString('en-US', { maximumFractionDigits: 2 })} per ${cadenceLabel}`;
+}
+
+function toAnnual(value: number, cadence: 'monthly' | 'annual' | 'daily') {
+  if (cadence === 'annual') return value;
+  if (cadence === 'monthly') return value * 12;
+  return value * 365;
+}
+
+function fromAnnual(annualValue: number, cadence: 'monthly' | 'annual' | 'daily') {
+  if (cadence === 'annual') return annualValue;
+  if (cadence === 'monthly') return annualValue / 12;
+  return annualValue / 365;
 }
