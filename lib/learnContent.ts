@@ -93,7 +93,7 @@ export const LEARN_GLOSSARY_TERMS: GlossaryTerm[] = [
   },
   {
     term: 'Roth contribution',
-    definition: 'After-tax contribution now, typically tax-free qualified withdrawals in retirement.',
+    definition: 'After-tax contribution now, with typically tax-free qualified withdrawals in retirement.',
   },
   {
     term: 'Traditional contribution',

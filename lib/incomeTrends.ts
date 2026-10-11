@@ -30,6 +30,7 @@ export function addIncomeEntry(
     note,
     createdAt: new Date().toISOString(),
   };
+  // Invariant: one income entry per month. Submitting again replaces that month.
   const filtered = history.entries.filter((existing) => existing.month !== month);
 
   return {
@@ -47,16 +48,21 @@ export interface MonthlyIncomeSummary {
 }
 
 export function getMonthlyIncomeSummary(history: IncomeHistory): MonthlyIncomeSummary[] {
-  const byMonth: Record<string, MonthlyIncomeSummary> = {};
+  const byMonth = new Map<string, IncomeEntry>();
 
   history.entries.forEach((entry) => {
-    if (!byMonth[entry.month]) {
-      byMonth[entry.month] = { month: entry.month, basePay: 0, commission: 0, totalPay: 0 };
+    const current = byMonth.get(entry.month);
+    if (!current || new Date(entry.createdAt).getTime() >= new Date(current.createdAt).getTime()) {
+      byMonth.set(entry.month, entry);
     }
-    byMonth[entry.month].basePay += entry.basePay;
-    byMonth[entry.month].commission += entry.commission;
-    byMonth[entry.month].totalPay += entry.totalPay;
   });
 
-  return Object.values(byMonth).sort((a, b) => a.month.localeCompare(b.month));
+  return Array.from(byMonth.values())
+    .map((entry) => ({
+      month: entry.month,
+      basePay: entry.basePay,
+      commission: entry.commission,
+      totalPay: entry.totalPay,
+    }))
+    .sort((a, b) => a.month.localeCompare(b.month));
 }
