@@ -1132,7 +1132,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-colors ${
                     inputs.debtPayoffStrategy === strat
                       ? 'bg-blue-600 border-blue-600 text-white'
-                     : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   {strat === 'avalanche' ? '📉 Avalanche (highest APR first)' : '❄️ Snowball (smallest balance first)'}

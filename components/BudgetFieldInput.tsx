@@ -114,15 +114,15 @@ export default function BudgetFieldInput({
           <span className="inline-flex items-center gap-1">
             {label}
             {termDefinition && (
-              <span
-                tabIndex={0}
-                role="note"
+              <button
+                type="button"
+                onClick={(event) => event.preventDefault()}
                 aria-label={`${label} definition: ${termDefinition}`}
                 title={termDefinition}
                 className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300"
               >
                 ?
-              </span>
+              </button>
             )}
           </span>
           {description && (
@@ -194,9 +194,21 @@ function getCadenceHint(
   baseCadence: 'monthly' | 'annual' | 'daily',
   displayCadence: 'monthly' | 'annual' | 'daily'
 ) {
-  if (!Number.isFinite(value) || baseCadence === displayCadence) return null;
-  const annual = baseCadence === 'annual' ? value : baseCadence === 'monthly' ? value * 12 : value * 365;
-  const converted = displayCadence === 'annual' ? annual : displayCadence === 'monthly' ? annual / 12 : annual / 365;
+  if (!Number.isFinite(value) || value === 0 || baseCadence === displayCadence) return null;
+  const annual = toAnnual(value, baseCadence);
+  const converted = fromAnnual(annual, displayCadence);
   const cadenceLabel = displayCadence === 'annual' ? 'year' : displayCadence === 'monthly' ? 'month' : 'day';
   return `≈ ${converted.toLocaleString('en-US', { maximumFractionDigits: 2 })} per ${cadenceLabel}`;
+}
+
+function toAnnual(value: number, cadence: 'monthly' | 'annual' | 'daily') {
+  if (cadence === 'annual') return value;
+  if (cadence === 'monthly') return value * 12;
+  return value * 365;
+}
+
+function fromAnnual(annualValue: number, cadence: 'monthly' | 'annual' | 'daily') {
+  if (cadence === 'annual') return annualValue;
+  if (cadence === 'monthly') return annualValue / 12;
+  return annualValue / 365;
 }

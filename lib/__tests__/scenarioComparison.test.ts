@@ -9,20 +9,21 @@ import {
 
 describe('scenarioComparison', () => {
   it('normalizes preset ids by removing duplicates, invalid ids, and the active preset', () => {
-    expect(
-      normalizeComparisonPresetIds(
-        [
-          buildPresetComparisonId('living_with_parents'),
-          buildPresetComparisonId('aggressive_saver'),
-          buildPresetComparisonId('living_with_parents'),
-          'missing',
-          buildPresetComparisonId('aggressive_saver'),
-        ],
-        'aggressive_saver'
-      )
-    ).toEqual([
+    const normalized = normalizeComparisonPresetIds(
+      [
+        buildPresetComparisonId('living_with_parents'),
+        buildPresetComparisonId('aggressive_saver'),
+        buildPresetComparisonId('living_with_parents'),
+        'missing',
+        buildPresetComparisonId('aggressive_saver'),
+      ],
+      'aggressive_saver'
+    );
+
+    expect(normalized).toEqual([
       buildPresetComparisonId('living_with_parents'),
     ]);
+    expect(normalized).not.toContain(buildPresetComparisonId('aggressive_saver'));
   });
 
   it('returns default comparison preset ids excluding the active preset', () => {
