@@ -77,13 +77,6 @@ export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps)
             sub={`${formatCurrency(supplementalIncomeAnnual)}/yr`}
           />
         )}
-        {inputs.annualCommissionIncome > 0 && (
-          <Row
-            label="Commission Income"
-            value={formatCurrency(inputs.annualCommissionIncome / 12)}
-            sub={`${formatCurrency(inputs.annualCommissionIncome)}/yr`}
-          />
-        )}
         <Row
           label="Bonus Tax Modeling"
           value={bonusTaxModeLabel}
