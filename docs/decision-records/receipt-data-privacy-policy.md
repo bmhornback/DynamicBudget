@@ -22,11 +22,13 @@ Ship receipt ingestion as an optional feature with explicit confirmation before 
 - Full manual correction before commit
 - Duplicate detection using merchant/date/amount heuristics
 - User-visible source metadata (receipt ID, ingest timestamp)
+- Per-user or per-tenant segmentation for any receipt storage enabled in shared or multi-user setups
 
 ## Retention and Deletion
 - Users can delete individual receipt assets and derived entries
 - Export and deletion behavior must be documented alongside provider policies
 - No silent retention beyond declared product behavior
+- Receipt export, retention, and purge operations must be scoped to the authenticated owner and documented for compliance review
 
 ## Consequences
 - Adds UX steps before write operations, reducing accidental bad data

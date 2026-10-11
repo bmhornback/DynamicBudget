@@ -30,8 +30,10 @@ Use a provider-agnostic connector security baseline for all accounting integrati
 - Approved-only write-back
 - Reconciliation reports and exception workflows
 - Additional connector onboarding through the same security baseline
+- Per-user segmentation and tenant-scoped access controls for shared or multi-user deployments
 
 ## Consequences
 - Slower initial integration pace due to stronger controls
 - Better compliance posture and lower risk from connector expansion
 - Reusable security posture across managed and self-hosted backend options
+- Explicit user boundaries reduce cross-user leakage and support GDPR/data-governance review requirements

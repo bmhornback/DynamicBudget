@@ -14,6 +14,19 @@ export const SHARE_PARAM_KEY = 'b';
 const STORAGE_VERSION = 1;
 export const SHARE_PAYLOAD_VERSION = 2;
 
+export interface StorageScope {
+  userId?: string;
+}
+
+export function getScopedStorageKey(baseKey: string, userId?: string): string {
+  const normalizedUserId = userId?.trim();
+  if (!normalizedUserId) {
+    return baseKey;
+  }
+
+  return `${baseKey}__user_${encodeURIComponent(normalizedUserId)}`;
+}
+
 const VALID_PAY_FREQUENCIES = new Set<PayFrequency>(['weekly', 'biweekly', 'semimonthly', 'monthly']);
 
 // Legacy keys used before the DynamicBudget rename — kept for one-time migration only
@@ -24,16 +37,17 @@ const LEGACY_CUSTOM_PRESETS_KEY = 'movemath_custom_presets';
 /**
  * Save budget inputs to localStorage
  */
-export function saveBudgetInputs(inputs: BudgetInputs): void {
+export function saveBudgetInputs(inputs: BudgetInputs, scope: StorageScope = {}): void {
   if (typeof window === 'undefined') return;
 
   try {
+    const storageKey = getScopedStorageKey(STORAGE_KEY, scope.userId);
     const data = {
       version: STORAGE_VERSION,
       inputs,
       timestamp: new Date().toISOString(),
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(storageKey, JSON.stringify(data));
   } catch (error) {
     console.warn('Failed to save budget inputs:', error);
   }
@@ -44,17 +58,17 @@ export function saveBudgetInputs(inputs: BudgetInputs): void {
  * Falls back to the legacy movemath_* key on first run after the rename,
  * migrating the data to the new key automatically.
  */
-export function loadBudgetInputs(): BudgetInputs | null {
+export function loadBudgetInputs(scope: StorageScope = {}): BudgetInputs | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    let stored = localStorage.getItem(STORAGE_KEY);
+    const storageKey = getScopedStorageKey(STORAGE_KEY, scope.userId);
+    let stored = localStorage.getItem(storageKey);
 
-    // One-time migration from legacy key
-    if (stored === null) {
+    if (stored === null && !scope.userId) {
       const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacy !== null) {
-        localStorage.setItem(STORAGE_KEY, legacy);
+        localStorage.setItem(storageKey, legacy);
         localStorage.removeItem(LEGACY_STORAGE_KEY);
         stored = legacy;
       }
@@ -64,7 +78,6 @@ export function loadBudgetInputs(): BudgetInputs | null {
 
     const data = JSON.parse(stored);
 
-    // Validate version
     if (data.version !== STORAGE_VERSION) {
       console.warn(
         `Storage version mismatch: expected ${STORAGE_VERSION}, got ${data.version}`
@@ -82,11 +95,18 @@ export function loadBudgetInputs(): BudgetInputs | null {
 /**
  * Clear all stored data
  */
-export function clearBudgetStorage(): void {
+export function clearBudgetStorage(scope: StorageScope = {}): void {
   if (typeof window === 'undefined') return;
 
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(getScopedStorageKey(STORAGE_KEY, scope.userId));
+    localStorage.removeItem(getScopedStorageKey(NAMED_BUDGETS_KEY, scope.userId));
+    localStorage.removeItem(getScopedStorageKey(CUSTOM_PRESETS_KEY, scope.userId));
+    if (!scope.userId) {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_NAMED_BUDGETS_KEY);
+      localStorage.removeItem(LEGACY_CUSTOM_PRESETS_KEY);
+    }
   } catch (error) {
     console.warn('Failed to clear storage:', error);
   }
@@ -577,14 +597,15 @@ export function loadBudgetInputsFromShareUrl(currentUrl: string): BudgetInputs |
 /**
  * Load all named budgets from localStorage.
  */
-export function loadNamedBudgets(): NamedBudget[] {
+export function loadNamedBudgets(scope: StorageScope = {}): NamedBudget[] {
   if (typeof window === 'undefined') return [];
   try {
-    let stored = localStorage.getItem(NAMED_BUDGETS_KEY);
-    if (stored === null) {
+    const storageKey = getScopedStorageKey(NAMED_BUDGETS_KEY, scope.userId);
+    let stored = localStorage.getItem(storageKey);
+    if (stored === null && !scope.userId) {
       const legacy = localStorage.getItem(LEGACY_NAMED_BUDGETS_KEY);
       if (legacy !== null) {
-        localStorage.setItem(NAMED_BUDGETS_KEY, legacy);
+        localStorage.setItem(storageKey, legacy);
         localStorage.removeItem(LEGACY_NAMED_BUDGETS_KEY);
         stored = legacy;
       }
@@ -599,10 +620,11 @@ export function loadNamedBudgets(): NamedBudget[] {
 /**
  * Save a new named budget (or overwrite one with the same id).
  */
-export function saveNamedBudget(budget: NamedBudget): void {
+export function saveNamedBudget(budget: NamedBudget, scope: StorageScope = {}): void {
   if (typeof window === 'undefined') return;
   try {
-    const existing = loadNamedBudgets();
+    const storageKey = getScopedStorageKey(NAMED_BUDGETS_KEY, scope.userId);
+    const existing = loadNamedBudgets(scope);
     const normalizedBudget: NamedBudget = {
       ...budget,
       note: budget.note?.trim() || undefined,
@@ -614,7 +636,7 @@ export function saveNamedBudget(budget: NamedBudget): void {
     } else {
       existing.push(normalizedBudget);
     }
-    localStorage.setItem(NAMED_BUDGETS_KEY, JSON.stringify(existing));
+    localStorage.setItem(storageKey, JSON.stringify(existing));
   } catch (error) {
     console.warn('Failed to save named budget:', error);
   }
@@ -623,11 +645,12 @@ export function saveNamedBudget(budget: NamedBudget): void {
 /**
  * Delete a named budget by id.
  */
-export function deleteNamedBudget(id: string): void {
+export function deleteNamedBudget(id: string, scope: StorageScope = {}): void {
   if (typeof window === 'undefined') return;
   try {
-    const existing = loadNamedBudgets().filter((b) => b.id !== id);
-    localStorage.setItem(NAMED_BUDGETS_KEY, JSON.stringify(existing));
+    const storageKey = getScopedStorageKey(NAMED_BUDGETS_KEY, scope.userId);
+    const existing = loadNamedBudgets(scope).filter((b) => b.id !== id);
+    localStorage.setItem(storageKey, JSON.stringify(existing));
   } catch (error) {
     console.warn('Failed to delete named budget:', error);
   }
@@ -654,14 +677,15 @@ function normalizeNamedBudgets(rawBudgets: unknown): NamedBudget[] {
 /**
  * Load all custom presets from localStorage.
  */
-export function loadCustomPresets(): CustomPreset[] {
+export function loadCustomPresets(scope: StorageScope = {}): CustomPreset[] {
   if (typeof window === 'undefined') return [];
   try {
-    let stored = localStorage.getItem(CUSTOM_PRESETS_KEY);
-    if (stored === null) {
+    const storageKey = getScopedStorageKey(CUSTOM_PRESETS_KEY, scope.userId);
+    let stored = localStorage.getItem(storageKey);
+    if (stored === null && !scope.userId) {
       const legacy = localStorage.getItem(LEGACY_CUSTOM_PRESETS_KEY);
       if (legacy !== null) {
-        localStorage.setItem(CUSTOM_PRESETS_KEY, legacy);
+        localStorage.setItem(storageKey, legacy);
         localStorage.removeItem(LEGACY_CUSTOM_PRESETS_KEY);
         stored = legacy;
       }
@@ -676,17 +700,18 @@ export function loadCustomPresets(): CustomPreset[] {
 /**
  * Save a new custom preset (or overwrite one with the same id).
  */
-export function saveCustomPreset(preset: CustomPreset): void {
+export function saveCustomPreset(preset: CustomPreset, scope: StorageScope = {}): void {
   if (typeof window === 'undefined') return;
   try {
-    const existing = loadCustomPresets();
+    const storageKey = getScopedStorageKey(CUSTOM_PRESETS_KEY, scope.userId);
+    const existing = loadCustomPresets(scope);
     const idx = existing.findIndex((p) => p.id === preset.id);
     if (idx >= 0) {
       existing[idx] = preset;
     } else {
       existing.push(preset);
     }
-    localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(existing));
+    localStorage.setItem(storageKey, JSON.stringify(existing));
   } catch (error) {
     console.warn('Failed to save custom preset:', error);
   }
@@ -695,11 +720,12 @@ export function saveCustomPreset(preset: CustomPreset): void {
 /**
  * Delete a custom preset by id.
  */
-export function deleteCustomPreset(id: string): void {
+export function deleteCustomPreset(id: string, scope: StorageScope = {}): void {
   if (typeof window === 'undefined') return;
   try {
-    const existing = loadCustomPresets().filter((p) => p.id !== id);
-    localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(existing));
+    const storageKey = getScopedStorageKey(CUSTOM_PRESETS_KEY, scope.userId);
+    const existing = loadCustomPresets(scope).filter((p) => p.id !== id);
+    localStorage.setItem(storageKey, JSON.stringify(existing));
   } catch (error) {
     console.warn('Failed to delete custom preset:', error);
   }
