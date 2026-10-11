@@ -26,7 +26,13 @@ Create a provider scorecard with weighted criteria and issue a recommendation fo
 2. Growth
 3. Enterprise
 
+## Multi-User Segmentation Requirements
+- Storage and access boundaries must be keyed by authenticated user or tenant identity before data is shared beyond a single device
+- Provider selection must support row-level security, scoped tokens, and explicit user/tenant ACLs in managed backends
+- Local-only mode remains the default fallback until per-user governance controls are in place
+
 ## Consequences
 - Delays implementation-specific coupling until architecture is validated
 - Reduces migration risk when scale or compliance requirements change
 - Requires a connector/adapter interface before auth/storage/sync implementation proceeds
+- Creates a clear governance path for compliant multi-user segmentation and privacy controls

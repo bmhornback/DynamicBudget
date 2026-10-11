@@ -176,6 +176,17 @@ All calculations and data are processed entirely in your browser. No data is sen
 - ✅ Tax estimates use current 2026 rates (federal + all 50 US states + DC)
 - ✅ You own all your data
 
+### Multi-user segmentation and governance
+
+Future multi-user / shared-device scenarios should segment data by authenticated user identity before any browser storage or cloud sync is used. The storage layer keeps a user-scoped key namespace (`getScopedStorageKey(...)`) so each user can have isolated budget, preset, and named-budget records without mixing data across accounts.
+
+- User data must be keyed by a stable userId or tenantId, not by a shared global key
+- Local-only fallbacks remain the default safe state until a provider has explicit data-access policies
+- Any cloud sync or connector flow must enforce least-privilege access, per-user ACLs, and audit logs
+- Deletion/export/privacy workflows should be per-user and documented before enabling multi-user support
+
+This preserves the current privacy-first static model while providing a clear path for compliant user segmentation in later releases.
+
 ## Documentation
 
 - **[DEV_PLAN.md](./DEV_PLAN.md)** — Development roadmap, feature status, and remaining milestones

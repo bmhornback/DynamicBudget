@@ -5,8 +5,12 @@ import {
   decodeBudgetInputsFromShare,
   encodeBudgetInputsForShare,
   exportBudgetQuickSummary,
-  loadNamedBudgets,
+  loadBudgetInputs,
   loadBudgetInputsFromShareUrl,
+  loadCustomPresets,
+  loadNamedBudgets,
+  saveBudgetInputs,
+  saveCustomPreset,
   saveNamedBudget,
   SHARE_PAYLOAD_VERSION,
 } from '../storage';
@@ -176,5 +180,24 @@ describe('shareable budget URL helpers', () => {
     expect(saved[0].note).toBe('Keep daycare and boost the house fund.');
     expect(saved[0].inputs.annualSalary).toBe(200000);
     expect(saved[0].inputs.payFrequency).toBe(DEFAULT_INPUTS.payFrequency);
+  });
+
+  it('keeps each user in a separate localStorage namespace', () => {
+    saveBudgetInputs(DEFAULT_INPUTS, { userId: 'alice' });
+    saveBudgetInputs({ ...DEFAULT_INPUTS, annualSalary: 220000 }, { userId: 'bob' });
+    saveCustomPreset({ id: 'preset-a', name: 'Alice preset', inputs: DEFAULT_INPUTS }, { userId: 'alice' });
+    saveNamedBudget({
+      id: 'budget-a',
+      name: 'Alice budget',
+      inputs: DEFAULT_INPUTS,
+      createdAt: '2026-09-15T00:00:00.000Z',
+    }, { userId: 'alice' });
+
+    expect(loadBudgetInputs({ userId: 'alice' })).toMatchObject({ annualSalary: DEFAULT_INPUTS.annualSalary });
+    expect(loadBudgetInputs({ userId: 'bob' })).toMatchObject({ annualSalary: 220000 });
+    expect(loadNamedBudgets({ userId: 'alice' })).toHaveLength(1);
+    expect(loadNamedBudgets({ userId: 'bob' })).toEqual([]);
+    expect(loadCustomPresets({ userId: 'alice' })).toHaveLength(1);
+    expect(loadCustomPresets({ userId: 'bob' })).toEqual([]);
   });
 });
