@@ -4,7 +4,6 @@ import {
   buildSavedBudgetComparisonId,
   buildScenarioComparisonItems,
   getDefaultComparisonPresetIds,
-  MAX_COMPARISON_PRESETS,
   normalizeComparisonPresetIds,
 } from '../scenarioComparison';
 
