@@ -51,6 +51,46 @@ describe('accountingConnectors', () => {
     expect(mapped.confidence).toBeGreaterThan(0.5);
   });
 
+  it('keeps the read-only import snapshot null until a configured QuickBooks sync populates it', async () => {
+    const unconfigured = createAccountingConnectorAdapter('quickbooks', { configured: false });
+    const quickbooks = createAccountingConnectorAdapter('quickbooks', { configured: true });
+    const csvConnector = createAccountingConnectorAdapter('csv', { configured: true });
+
+    expect(unconfigured.getReadOnlySnapshot()).toBeNull();
+    expect(quickbooks.getReadOnlySnapshot()).toBeNull();
+    expect(csvConnector.getReadOnlySnapshot()).toBeNull();
+
+    await unconfigured.syncNow();
+    expect(unconfigured.getReadOnlySnapshot()).toBeNull();
+
+    await quickbooks.syncNow();
+
+    const snapshot = quickbooks.getReadOnlySnapshot();
+    expect(snapshot).not.toBeNull();
+    expect(snapshot).toMatchObject({
+      importer: 'quickbooks',
+      reviewRequired: true,
+      syncedAt: expect.any(String),
+      accounts: [
+        { id: 'qb-asset', accountId: 'banking-001', accountName: 'Bank Account', category: 'Cash & Bank', type: 'account', connectedTo: 'banking' },
+        { id: 'qb-credit', accountId: 'liability-001', accountName: 'Credit Card', category: 'Liabilities', type: 'account', connectedTo: 'credit' },
+      ],
+      categories: [
+        { id: 'qb-cat-groceries', accountId: 'expense-001', accountName: 'Groceries', category: 'Food & Dining', type: 'expense', connectedTo: 'food' },
+        { id: 'qb-cat-utilities', accountId: 'expense-002', accountName: 'Utilities', category: 'Utilities', type: 'expense', connectedTo: 'utilities' },
+      ],
+      expenses: [
+        { id: 'qb-expense-1', accountId: 'txn-001', accountName: 'Whole Foods', category: 'Groceries', type: 'expense', amount: 128.45, currency: 'USD', connectedTo: 'food' },
+        { id: 'qb-expense-2', accountId: 'txn-002', accountName: 'NV Energy', category: 'Utilities', type: 'expense', amount: 96.2, currency: 'USD', connectedTo: 'utilities' },
+      ],
+      transactions: [
+        { id: 'qb-txn-1', accountId: 'txn-101', accountName: 'Whole Foods', category: 'Groceries', type: 'transaction', amount: 128.45, currency: 'USD', connectedTo: 'banking' },
+        { id: 'qb-txn-2', accountId: 'txn-102', accountName: 'NV Energy', category: 'Utilities', type: 'transaction', amount: 96.2, currency: 'USD', connectedTo: 'banking' },
+      ],
+    });
+    expect(csvConnector.getReadOnlySnapshot()).toBeNull();
+  });
+
   it('returns a human readable summary for the connector recommendation', () => {
     const summary = buildAccountingConnectorRecommendationSummary();
     expect(summary).toContain('QuickBooks');

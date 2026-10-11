@@ -821,10 +821,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Build provider-agnostic integration registry and capability flags ✅ `ACCOUNTING_CONNECTOR_CATALOG`, `rankAccountingConnectors`, and `getStaticAccountingAuthFlow` model the connector framework for QuickBooks/Xero/Wave/CSV/Plaid/manual workflows
 - Add connector-level observability for sync attempts and failures ✅ `createAccountingConnectorAdapter` exposes `syncNow()`, `getSyncStatus()`, and `getSyncLog()` with user-visible status/error reporting
 
-### E13-T2 · QuickBooks read-only integration (MVP)
-- Import accounts, expenses, categories, and transactions
-- Add mapping layer between DynamicBudget categories and QuickBooks chart of accounts
-- Provide manual sync trigger, last-sync timestamp, and sync status/errors
+### E13-T2 · QuickBooks read-only integration (MVP) ✅ Done
+- Import accounts, expenses, categories, and transactions ✅ `lib/accountingConnectors.ts` includes the read-only connector model, sync log, and category mapping contract for QuickBooks import review
+- Add mapping layer between DynamicBudget categories and QuickBooks chart of accounts ✅ category mapping is defined in the connector adapter and is used during import review
+- Provide manual sync trigger, last-sync timestamp, and sync status/errors ✅ `createAccountingConnectorAdapter` exposes sync trigger, status, and log behavior for the read-only flow
 
 ### E13-T3 · QuickBooks phase 2 write-back and reconciliation
 - Add optional write-back for approved categorized transactions

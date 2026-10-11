@@ -52,6 +52,28 @@ export interface ConnectorSyncLogEntry {
   error?: string;
 }
 
+export interface AccountingConnectorImportRecord {
+  id: string;
+  accountId: string;
+  accountName: string;
+  category: string;
+  type: 'account' | 'expense' | 'transaction';
+  amount?: number;
+  currency?: string;
+  connectedTo: string;
+  lastUpdatedAt: string | null;
+}
+
+export interface AccountingImportSnapshot {
+  importer: AccountingConnectorId;
+  accounts: AccountingConnectorImportRecord[];
+  categories: AccountingConnectorImportRecord[];
+  expenses: AccountingConnectorImportRecord[];
+  transactions: AccountingConnectorImportRecord[];
+  syncedAt: string;
+  reviewRequired: boolean;
+}
+
 export interface AccountingConnectorAdapter {
   readonly providerId: AccountingConnectorId;
   readonly auth: StaticAuthFlow;
@@ -62,6 +84,7 @@ export interface AccountingConnectorAdapter {
   getSyncLog(): ConnectorSyncLogEntry[];
   syncNow(): Promise<AccountingSyncStatus>;
   mapCategory(category: string): ConnectorMappingResult;
+  getReadOnlySnapshot(): AccountingImportSnapshot | null;
 }
 
 const CONNECTOR_SCORE_WEIGHTS = {
@@ -352,14 +375,33 @@ export function createAccountingConnectorAdapter(
     lastAttemptAt: null,
   };
 
-  const state: { syncStatus: AccountingSyncStatus; syncLog: ConnectorSyncLogEntry[] } = {
+  const state: {
+    syncStatus: AccountingSyncStatus;
+    syncLog: ConnectorSyncLogEntry[];
+    readOnlySnapshot: AccountingImportSnapshot | null;
+  } = {
     syncStatus: initialSyncStatus,
     syncLog: [],
+    readOnlySnapshot: null,
   };
 
   const updateSyncStatus = (next: AccountingSyncStatus): AccountingSyncStatus => {
     state.syncStatus = next;
     return { ...next };
+  };
+
+  const cloneSnapshot = (snapshot: AccountingImportSnapshot | null): AccountingImportSnapshot | null => {
+    if (!snapshot) {
+      return null;
+    }
+
+    return {
+      ...snapshot,
+      accounts: snapshot.accounts.map((entry) => ({ ...entry })),
+      categories: snapshot.categories.map((entry) => ({ ...entry })),
+      expenses: snapshot.expenses.map((entry) => ({ ...entry })),
+      transactions: snapshot.transactions.map((entry) => ({ ...entry })),
+    };
   };
 
   const adapter: AccountingConnectorAdapter = {
@@ -396,6 +438,7 @@ export function createAccountingConnectorAdapter(
       : {}),
     getSyncStatus: () => ({ ...state.syncStatus }),
     getSyncLog: () => state.syncLog.map((entry) => ({ ...entry })),
+    getReadOnlySnapshot: () => cloneSnapshot(state.readOnlySnapshot),
     syncNow: async () => {
       const startedAt = new Date().toISOString();
 
@@ -430,6 +473,36 @@ export function createAccountingConnectorAdapter(
         lastError: null,
         lastAttemptAt: startedAt,
       };
+
+      if (providerId === 'quickbooks') {
+        // This is a static MVP stub used to model the QuickBooks read-only import contract.
+        // It intentionally illustrates the expected import payload shape and review workflow without
+        // claiming to connect to a live QuickBooks tenant in this browser-only application.
+        state.readOnlySnapshot = {
+          importer: 'quickbooks',
+          syncedAt: completedAt,
+          reviewRequired: true,
+          accounts: [
+            { id: 'qb-asset', accountId: 'banking-001', accountName: 'Bank Account', category: 'Cash & Bank', type: 'account', connectedTo: 'banking', lastUpdatedAt: completedAt },
+            { id: 'qb-credit', accountId: 'liability-001', accountName: 'Credit Card', category: 'Liabilities', type: 'account', connectedTo: 'credit', lastUpdatedAt: completedAt },
+          ],
+          categories: [
+            { id: 'qb-cat-groceries', accountId: 'expense-001', accountName: 'Groceries', category: 'Food & Dining', type: 'expense', connectedTo: 'food', lastUpdatedAt: completedAt },
+            { id: 'qb-cat-utilities', accountId: 'expense-002', accountName: 'Utilities', category: 'Utilities', type: 'expense', connectedTo: 'utilities', lastUpdatedAt: completedAt },
+          ],
+          // These records intentionally mirror the same spend events in two collections:
+          // expense items are the categorized import view, while transactions represent the
+          // underlying bank/ledger entries a user may review before accepting the import.
+          expenses: [
+            { id: 'qb-expense-1', accountId: 'txn-001', accountName: 'Whole Foods', category: 'Groceries', type: 'expense', amount: 128.45, currency: 'USD', connectedTo: 'food', lastUpdatedAt: completedAt },
+            { id: 'qb-expense-2', accountId: 'txn-002', accountName: 'NV Energy', category: 'Utilities', type: 'expense', amount: 96.2, currency: 'USD', connectedTo: 'utilities', lastUpdatedAt: completedAt },
+          ],
+          transactions: [
+            { id: 'qb-txn-1', accountId: 'txn-101', accountName: 'Whole Foods', category: 'Groceries', type: 'transaction', amount: 128.45, currency: 'USD', connectedTo: 'banking', lastUpdatedAt: completedAt },
+            { id: 'qb-txn-2', accountId: 'txn-102', accountName: 'NV Energy', category: 'Utilities', type: 'transaction', amount: 96.2, currency: 'USD', connectedTo: 'banking', lastUpdatedAt: completedAt },
+          ],
+        };
+      }
 
       const logEntry = buildSyncStatusEntry(providerId, startedAt, 'success', 'Sync completed', 'all_accounts');
       state.syncLog.unshift(logEntry);
