@@ -116,6 +116,7 @@ const COMPLETED_TASKS = {
   'E12-T3': 'Receipt-to-budget category mapping and confirmed spending-entry insertion with source metadata and receipt traceability',
   'E12-T4': 'Receipt quality controls: confidence thresholds, duplicate detection heuristics, and merge/review/ignore decision flow',
   'E12-T5': 'Receipt data privacy policy covering local-only and encrypted cloud storage, retention, deletion, and export behavior',
+  'E13-T1': 'Accounting connector framework in lib/accountingConnectors.ts with provider registry, auth flow, sync status, mapping, and observability',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',

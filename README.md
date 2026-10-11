@@ -59,6 +59,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 ### Current Roadmap Status
 - ✅ GitHub Pages deployment workflow added for static export publishing
 - ✅ MCP server package metadata prepared for public distribution
+- ✅ Accounting connector framework added for provider-agnostic sync registry, category mapping, and sync status/error surfacing
 - ✅ Documentation refresh completed for MCP/Pages setup and remaining integration tasks
 - 🌐 Support for 2027 tax year (once IRS publishes brackets)
 

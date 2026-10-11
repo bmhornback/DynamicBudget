@@ -816,10 +816,10 @@ States to add (in priority order based on population and no-income-tax interest)
 
 **Goal:** Provide an integration framework for accounting systems and accountant-ready exports.
 
-### E13-T1 · Integration connector framework
-- Define connector contract (auth, sync trigger, mapping, status, error surface)
-- Build provider-agnostic integration registry and capability flags
-- Add connector-level observability for sync attempts and failures
+### E13-T1 · Integration connector framework ✅ Done
+- Define connector contract (auth, sync trigger, mapping, status, error surface) ✅ `lib/accountingConnectors.ts` defines the provider-agnostic connector registry, capability flags, sync log, and category mapping contract
+- Build provider-agnostic integration registry and capability flags ✅ `ACCOUNTING_CONNECTOR_CATALOG`, `rankAccountingConnectors`, and `getStaticAccountingAuthFlow` model the connector framework for QuickBooks/Xero/Wave/CSV/Plaid/manual workflows
+- Add connector-level observability for sync attempts and failures ✅ `createAccountingConnectorAdapter` exposes `syncNow()`, `getSyncStatus()`, and `getSyncLog()` with user-visible status/error reporting
 
 ### E13-T2 · QuickBooks read-only integration (MVP)
 - Import accounts, expenses, categories, and transactions
