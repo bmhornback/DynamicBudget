@@ -55,7 +55,7 @@ export default function BudgetFieldInput({
   const definitionId = termDefinition ? `${id}-definition` : undefined;
 
   React.useEffect(() => {
-    if (!termDefinition) return;
+    if (!termDefinition || !showDefinition) return;
 
     const closeDefinition = () => {
       setShowDefinition(false);
@@ -80,7 +80,7 @@ export default function BudgetFieldInput({
       document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [termDefinition]);
+  }, [showDefinition, termDefinition]);
 
   // Keep raw in sync when value changes from outside (e.g., rebalance)
   if (!focused && prevValue !== value) {
