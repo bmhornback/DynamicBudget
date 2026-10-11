@@ -12,6 +12,7 @@ describe('accountingConnectors', () => {
     const ranked = rankAccountingConnectors();
     expect(ranked.length).toBe(ACCOUNTING_CONNECTOR_CATALOG.length);
     expect(ranked[0].id).toBe('quickbooks');
+    expect(ranked[1].id).toBe('csv');
     expect(ranked[ranked.length - 1].id).toBe('manual');
   });
 
@@ -19,6 +20,7 @@ describe('accountingConnectors', () => {
     const recommendation = getDefaultAccountingConnectorRecommendation();
     expect(recommendation.id).toBe('quickbooks');
     expect(getStaticAccountingAuthFlow('quickbooks').mode).toBe('oauth');
+    expect(getStaticAccountingAuthFlow('csv').mode).toBe('none');
     expect(getStaticAccountingAuthFlow('manual').mode).toBe('none');
   });
 
@@ -37,7 +39,7 @@ describe('accountingConnectors', () => {
 
     const mapped = configured.mapCategory('Groceries');
     expect(mapped.matched).toBe(true);
-    expect(mapped.targetCategory).toBe('food_and_beverage');
+    expect(mapped.targetCategory).toBe('groceries');
     expect(mapped.confidence).toBeGreaterThan(0.5);
   });
 

@@ -1,3 +1,4 @@
+import type { TrackableCategory } from '@/types/budget';
 import type { AuthResult, OAuthProviderId, StaticAuthFlow } from './backendProviders';
 
 export type AccountingConnectorId = 'quickbooks' | 'xero' | 'wave' | 'csv' | 'plaid' | 'manual';
@@ -35,7 +36,7 @@ export interface AccountingSyncStatus {
 
 export interface ConnectorMappingResult {
   sourceCategory: string;
-  targetCategory: string;
+  targetCategory: TrackableCategory;
   matched: boolean;
   confidence: number;
 }
@@ -74,32 +75,35 @@ const CONNECTOR_SCORE_WEIGHTS = {
   accounts: 0.1,
 } as const;
 
-const DEFAULT_CATEGORY_MAP: Record<string, string> = {
-  housing: 'real_estate',
-  rent: 'real_estate',
-  mortgage: 'real_estate',
-  utilities: 'utilities',
-  electric: 'utilities',
-  gas: 'utilities',
-  water: 'utilities',
-  internet: 'utilities',
-  phone: 'utilities',
-  transportation: 'transportation',
-  fuel: 'transportation',
-  commute: 'transportation',
-  groceries: 'food_and_beverage',
-  food: 'food_and_beverage',
-  dining: 'food_and_beverage',
-  health: 'healthcare',
-  insurance: 'healthcare',
-  pets: 'pet_expenses',
-  travel: 'travel',
+// This mapping intentionally targets DynamicBudget's actual TrackableCategory union.
+// Several provider-side buckets do not have a 1:1 app category today, so they map to
+// the neutral fallback 'other' until the taxonomy expands further.
+const DEFAULT_CATEGORY_MAP: Record<string, TrackableCategory> = {
+  housing: 'other',
+  rent: 'other',
+  mortgage: 'other',
+  utilities: 'other',
+  electric: 'electricity',
+  gas: 'gas_utility',
+  water: 'water',
+  internet: 'internet',
+  phone: 'phone',
+  transportation: 'other',
+  fuel: 'gasoline',
+  commute: 'other',
+  groceries: 'groceries',
+  food: 'other',
+  dining: 'dining_out',
+  health: 'other',
+  insurance: 'other',
+  pets: 'other',
+  travel: 'other',
   subscriptions: 'subscriptions',
-  debt: 'debt_service',
-  savings: 'cash_savings',
-  lifestyle: 'miscellaneous',
-  misc: 'miscellaneous',
-  other: 'miscellaneous',
+  debt: 'other',
+  savings: 'other',
+  lifestyle: 'other',
+  misc: 'other',
+  other: 'other',
 };
 
 export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
@@ -283,13 +287,15 @@ export function buildAccountingConnectorRecommendationSummary(): string {
 export function getStaticAccountingAuthFlow(providerId: AccountingConnectorId): StaticAuthFlow {
   const provider = ACCOUNTING_CONNECTOR_CATALOG.find((candidate) => candidate.id === providerId);
 
-  if (!provider || provider.id === 'manual') {
+  if (!provider || !provider.capabilities.oauth) {
     return {
       mode: 'none',
       providers: ['none'],
       fallbackMode: 'local_storage',
       requiresUserInteraction: false,
-      notes: 'Manual review keeps all imported accounting data in a user-confirmed local workflow.',
+      notes: provider
+        ? `Use a local ${provider.name} import flow and keep the data in a user-confirmed local review until the import is approved.`
+        : 'This accounting connector is unavailable in the current environment.',
     };
   }
 
@@ -310,10 +316,12 @@ function buildSyncStatusEntry(
   accountScope: string,
   error?: string,
 ): ConnectorSyncLogEntry {
-  const randomHex = Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+  const randomHex = (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID().slice(0, 8)
+    : Math.random().toString(16).slice(2, 10);
 
   return {
-    id: `${connectorId}-${startedAt.replace(/[:.]/g, '-')}-${Date.now()}-${randomHex}`,
+    id: `${connectorId}-${startedAt.replace(/[:.]/g, '-')}-${randomHex}`,
     connectorId,
     startedAt,
     completedAt: status === 'pending' ? null : new Date().toISOString(),
@@ -358,6 +366,14 @@ export function createAccountingConnectorAdapter(
     isConfigured: () => configured,
     getCapabilities: () => definition.capabilities,
     signInWithOAuth: async (provider: OAuthProviderId) => {
+      if (!definition.capabilities.oauth) {
+        return {
+          provider,
+          status: 'skipped',
+          reason: `${definition.name} does not support OAuth sign-in; use the local import review workflow instead.`,
+        };
+      }
+
       if (!configured) {
         return {
           provider,
@@ -366,11 +382,11 @@ export function createAccountingConnectorAdapter(
         };
       }
 
-      if (provider !== 'github' && provider !== 'google') {
+      if (!definition.authProviders.includes(provider)) {
         return {
           provider,
           status: 'skipped',
-          reason: `Only GitHub and Google OAuth are supported for ${definition.name}.`,
+          reason: `${definition.name} does not support ${provider} OAuth sign-in. Supported providers: ${definition.authProviders.join(', ') || 'none'}.`,
         };
       }
 
@@ -425,10 +441,10 @@ export function createAccountingConnectorAdapter(
       const normalized = category.trim().toLowerCase();
       const directMatch = DEFAULT_CATEGORY_MAP[normalized];
       const fallbackMatch = DEFAULT_CATEGORY_MAP[normalized.replace(/[^a-z]/g, '')];
-      const targetCategory = directMatch ?? fallbackMatch ?? 'miscellaneous';
+      const targetCategory = directMatch ?? fallbackMatch ?? 'other';
       const normalizedWords = normalized.split(/[^a-z]+/).filter(Boolean);
       const containsGenericFallback = normalizedWords.some((word) => word === 'misc' || word === 'other' || word === 'general');
-      const matched = Boolean(directMatch || fallbackMatch);
+      const matched = Boolean((directMatch || fallbackMatch) && targetCategory !== 'other');
       const fallbackOnly = !matched && containsGenericFallback;
       const confidence = matched ? 0.9 : fallbackOnly ? 0.55 : 0.4;
 

@@ -6,7 +6,15 @@ export type BackendProviderId =
   | 'postgres'
   | 'local_only';
 
-export type OAuthProviderId = 'github' | 'google' | 'none';
+export type OAuthProviderId =
+  | 'github'
+  | 'google'
+  | 'quickbooks'
+  | 'xero'
+  | 'wave'
+  | 'plaid'
+  | 'csv'
+  | 'none';
 export type ProviderStage = 'MVP' | 'Growth' | 'Enterprise';
 
 export interface ProviderCriterionScore {
