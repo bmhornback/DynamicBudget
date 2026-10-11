@@ -67,7 +67,7 @@ export default function LearnPage() {
         </section>
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Glossary (Income Terms)</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Glossary (Planner Terms)</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-gray-300">
             Definitions for the income fields and tax settings used throughout the planner.
           </p>

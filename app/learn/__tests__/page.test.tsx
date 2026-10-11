@@ -12,7 +12,7 @@ describe('Learn page', () => {
     expect(screen.getByRole('link', { name: 'Open the planner' }).getAttribute('href')).toBe('/app');
     expect(screen.getByText('How much should rent cost?')).toBeTruthy();
     expect(screen.getByText('How should you pick a 401(k) contribution rate?')).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Glossary (Income Terms)' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Glossary (Planner Terms)' })).toBeTruthy();
     expect(screen.getByText('ESPP income')).toBeTruthy();
     expect(screen.getByText('Employee Stock Purchase Plan gains from buying company stock at a discount.')).toBeTruthy();
   });

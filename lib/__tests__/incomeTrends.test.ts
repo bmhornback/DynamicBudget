@@ -11,7 +11,7 @@ describe('incomeTrends', () => {
   it('adds entries and aggregates monthly totals', () => {
     let history = initializeIncomeHistory();
     history = addIncomeEntry(history, '2026-10', 8000, 2000);
-    history = addIncomeEntry(history, '2026-10', 1000, 500, 'Late-close adjustment');
+    history = addIncomeEntry(history, '2026-10', 9000, 2500, 'Updated month totals');
     history = addIncomeEntry(history, '2026-11', 8200, 1500);
 
     const summary = getMonthlyIncomeSummary(history);
@@ -31,4 +31,3 @@ describe('incomeTrends', () => {
     ]);
   });
 });
-

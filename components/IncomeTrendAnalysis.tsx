@@ -19,7 +19,7 @@ export default function IncomeTrendAnalysis({ incomeHistory, inputs }: IncomeTre
   if (!incomeHistory || monthlySummary.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">📉 Income Trends</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-3">📊 Income Trends</h2>
         <p className="text-sm text-gray-500">
           Start logging base pay and commission to track actual monthly earnings.
         </p>
@@ -36,7 +36,7 @@ export default function IncomeTrendAnalysis({ incomeHistory, inputs }: IncomeTre
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-      <h2 className="text-lg font-bold text-gray-900">📉 Income Trends</h2>
+      <h2 className="text-lg font-bold text-gray-900">📊 Income Trends</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded bg-gray-50 p-3">
@@ -81,4 +81,3 @@ export default function IncomeTrendAnalysis({ incomeHistory, inputs }: IncomeTre
     </div>
   );
 }
-

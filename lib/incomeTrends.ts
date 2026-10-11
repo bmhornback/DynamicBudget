@@ -30,10 +30,11 @@ export function addIncomeEntry(
     note,
     createdAt: new Date().toISOString(),
   };
+  const filtered = history.entries.filter((existing) => existing.month !== month);
 
   return {
     ...history,
-    entries: [...history.entries, entry],
+    entries: [...filtered, entry],
     lastUpdated: new Date().toISOString(),
   };
 }
@@ -59,4 +60,3 @@ export function getMonthlyIncomeSummary(history: IncomeHistory): MonthlyIncomeSu
 
   return Object.values(byMonth).sort((a, b) => a.month.localeCompare(b.month));
 }
-
