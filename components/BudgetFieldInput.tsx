@@ -20,6 +20,7 @@ interface BudgetFieldInputProps {
   baseCadence?: 'monthly' | 'annual' | 'daily';
   displayCadence?: 'monthly' | 'annual' | 'daily';
   termDefinition?: string;
+  showCadenceHint?: boolean;
 }
 
 export default function BudgetFieldInput({
@@ -39,6 +40,7 @@ export default function BudgetFieldInput({
   baseCadence = 'monthly',
   displayCadence = 'monthly',
   termDefinition,
+  showCadenceHint = true,
 }: BudgetFieldInputProps) {
   const [raw, setRaw] = React.useState(value.toString());
   const [focused, setFocused] = React.useState(false);
@@ -80,7 +82,7 @@ export default function BudgetFieldInput({
   const describedBy = [descriptionId, validationMessage ? validationId : undefined]
     .filter(Boolean)
     .join(' ') || undefined;
-  const cadenceHint = getCadenceHint(value, baseCadence, displayCadence);
+  const cadenceHint = showCadenceHint ? getCadenceHint(value, baseCadence, displayCadence) : null;
 
   return (
     <div className={`flex flex-col rounded-lg transition-colors ${
@@ -114,15 +116,13 @@ export default function BudgetFieldInput({
           <span className="inline-flex items-center gap-1">
             {label}
             {termDefinition && (
-              <button
-                type="button"
-                onClick={(event) => event.preventDefault()}
+              <span
                 aria-label={`${label} definition: ${termDefinition}`}
                 title={termDefinition}
                 className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300"
               >
                 ?
-              </button>
+              </span>
             )}
           </span>
           {description && (
@@ -189,7 +189,7 @@ function validationMessageId(id: string) {
   return `${id}-validation`;
 }
 
-function getCadenceHint(
+export function getCadenceHint(
   value: number,
   baseCadence: 'monthly' | 'annual' | 'daily',
   displayCadence: 'monthly' | 'annual' | 'daily'
