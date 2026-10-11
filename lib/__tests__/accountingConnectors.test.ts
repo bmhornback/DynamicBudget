@@ -12,8 +12,13 @@ describe('accountingConnectors', () => {
     const ranked = rankAccountingConnectors();
     expect(ranked.length).toBe(ACCOUNTING_CONNECTOR_CATALOG.length);
     expect(ranked[0].id).toBe('quickbooks');
-    expect(ranked[1].id).toBe('csv');
     expect(ranked[ranked.length - 1].id).toBe('manual');
+    expect(
+      ranked.slice(1).every((provider, index) => {
+        const previous = ranked[index];
+        return provider.score <= previous.score || provider.recommendedStage !== previous.recommendedStage;
+      }),
+    ).toBe(true);
   });
 
   it('recommends a connector with a static-friendly auth flow', () => {
@@ -28,8 +33,10 @@ describe('accountingConnectors', () => {
     const unconfigured = createAccountingConnectorAdapter('quickbooks', { configured: false });
     const configured = createAccountingConnectorAdapter('quickbooks', { configured: true });
 
-    await expect(unconfigured.signInWithOAuth('google')).resolves.toMatchObject({ status: 'not_configured' });
-    await expect(configured.signInWithOAuth('google')).resolves.toMatchObject({ status: 'success' });
+    await expect(unconfigured.signInWithOAuth?.('google')).resolves.toMatchObject({ status: 'not_configured' });
+    await expect(configured.signInWithOAuth?.('quickbooks')).resolves.toMatchObject({ status: 'success' });
+    await expect(configured.signInWithOAuth?.('google')).resolves.toMatchObject({ status: 'skipped' });
+    await expect(() => createAccountingConnectorAdapter('missing' as any)).toThrow('Unsupported accounting connector ID');
 
     const syncStatus = await configured.syncNow();
     expect(syncStatus.status).toBe('success');

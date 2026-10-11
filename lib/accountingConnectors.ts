@@ -57,7 +57,7 @@ export interface AccountingConnectorAdapter {
   readonly auth: StaticAuthFlow;
   isConfigured(): boolean;
   getCapabilities(): AccountingConnectorCapabilityFlags;
-  signInWithOAuth(provider: OAuthProviderId): Promise<AuthResult>;
+  signInWithOAuth?: (provider: OAuthProviderId) => Promise<AuthResult>;
   getSyncStatus(): AccountingSyncStatus;
   getSyncLog(): ConnectorSyncLogEntry[];
   syncNow(): Promise<AccountingSyncStatus>;
@@ -122,7 +122,7 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
       categories: true,
       accounts: true,
     },
-    authProviders: ['google', 'github'],
+    authProviders: ['quickbooks'],
     bestFor: ['read-only import', 'account mapping', 'manual sync review'],
     score: 0,
   },
@@ -141,7 +141,7 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
       categories: true,
       accounts: true,
     },
-    authProviders: ['google', 'github'],
+    authProviders: ['xero'],
     bestFor: ['ledger imports', 'multi-account reporting'],
     score: 0,
   },
@@ -160,8 +160,8 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
       categories: true,
       accounts: false,
     },
-    authProviders: ['google'],
-    bestFor: ['small business expense feeds', 'CSV-first import'],
+    authProviders: ['wave'],
+    bestFor: ['small business expense feeds', 'spreadsheet-based onboarding'],
     score: 0,
   },
   {
@@ -173,14 +173,14 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
       oauth: false,
       read: true,
       write: false,
-      reconcile: true,
+      reconcile: false,
       fileImport: true,
       transactions: true,
       categories: true,
       accounts: true,
     },
     authProviders: [],
-    bestFor: ['import/export workflows', 'fallback onboarding'],
+    bestFor: ['spreadsheet import', 'fallback onboarding'],
     score: 0,
   },
   {
@@ -198,7 +198,7 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
       categories: true,
       accounts: true,
     },
-    authProviders: ['google', 'github'],
+    authProviders: ['plaid'],
     bestFor: ['bank feeds', 'transaction aggregation'],
     score: 0,
   },
@@ -287,7 +287,7 @@ export function buildAccountingConnectorRecommendationSummary(): string {
 export function getStaticAccountingAuthFlow(providerId: AccountingConnectorId): StaticAuthFlow {
   const provider = ACCOUNTING_CONNECTOR_CATALOG.find((candidate) => candidate.id === providerId);
 
-  if (!provider || !provider.capabilities.oauth) {
+  if (!provider || !provider.capabilities.oauth || provider.authProviders.length === 0) {
     return {
       mode: 'none',
       providers: ['none'],
@@ -365,37 +365,33 @@ export function createAccountingConnectorAdapter(
     auth: getStaticAccountingAuthFlow(providerId),
     isConfigured: () => configured,
     getCapabilities: () => definition.capabilities,
-    signInWithOAuth: async (provider: OAuthProviderId) => {
-      if (!definition.capabilities.oauth) {
-        return {
-          provider,
-          status: 'skipped',
-          reason: `${definition.name} does not support OAuth sign-in; use the local import review workflow instead.`,
-        };
-      }
+    ...(definition.capabilities.oauth
+      ? {
+          signInWithOAuth: async (provider: OAuthProviderId) => {
+            if (!configured) {
+              return {
+                provider,
+                status: 'not_configured',
+                reason: 'This accounting connector is not configured. Local review remains available.',
+              };
+            }
 
-      if (!configured) {
-        return {
-          provider,
-          status: 'not_configured',
-          reason: 'This accounting connector is not configured. Local review remains available.',
-        };
-      }
+            if (!definition.authProviders.includes(provider)) {
+              return {
+                provider,
+                status: 'skipped',
+                reason: `${definition.name} does not support ${provider} OAuth sign-in. Supported providers: ${definition.authProviders.join(', ') || 'none'}.`,
+              };
+            }
 
-      if (!definition.authProviders.includes(provider)) {
-        return {
-          provider,
-          status: 'skipped',
-          reason: `${definition.name} does not support ${provider} OAuth sign-in. Supported providers: ${definition.authProviders.join(', ') || 'none'}.`,
-        };
-      }
-
-      return {
-        provider,
-        status: 'success',
-        userId: `${definition.id}-session`,
-      };
-    },
+            return {
+              provider,
+              status: 'success',
+              userId: `${definition.id}-session`,
+            };
+          },
+        }
+      : {}),
     getSyncStatus: () => ({ ...state.syncStatus }),
     getSyncLog: () => state.syncLog.map((entry) => ({ ...entry })),
     syncNow: async () => {

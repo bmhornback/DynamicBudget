@@ -13,7 +13,6 @@ export type OAuthProviderId =
   | 'xero'
   | 'wave'
   | 'plaid'
-  | 'csv'
   | 'none';
 export type ProviderStage = 'MVP' | 'Growth' | 'Enterprise';
 
