@@ -33,7 +33,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 🗓️ **Sinking funds & recurring annual expenses** — Plan ahead for non-monthly bills like registration, insurance, travel, home maintenance, and holidays with automatic monthly reserve guidance
 - 💬 **In-app feedback widget** — Open a prefilled GitHub issue directly from the app, with optional plain-text budget context for faster triage
-- 📚 **Learn hub** — Browse short budgeting guides plus an income-term glossary tied to housing, retirement, rule-of-thumb budgeting, and cost-of-living planning
+- 📚 **Learn hub** — Browse short budgeting guides plus a planner-terms glossary covering housing, retirement, rule-of-thumb budgeting, and cost-of-living planning
 - 🔍 **Discovery metadata** — Rich Open Graph metadata, sitemap, robots rules, and app JSON-LD improve sharing and search discovery
 - 📱 **Responsive design** — Works great on desktop and mobile
 
