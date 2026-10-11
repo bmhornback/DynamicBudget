@@ -24,12 +24,7 @@ export function getScopedStorageKey(baseKey: string, userId?: string): string {
     return baseKey;
   }
 
-  let hash = 0;
-  for (let index = 0; index < normalizedUserId.length; index += 1) {
-    hash = (hash * 31 + normalizedUserId.charCodeAt(index)) >>> 0;
-  }
-
-  return `${baseKey}__user_${hash.toString(36)}`;
+  return `${baseKey}__user_${encodeURIComponent(normalizedUserId)}`;
 }
 
 const VALID_PAY_FREQUENCIES = new Set<PayFrequency>(['weekly', 'biweekly', 'semimonthly', 'monthly']);
@@ -51,7 +46,6 @@ export function saveBudgetInputs(inputs: BudgetInputs, scope: StorageScope = {})
       version: STORAGE_VERSION,
       inputs,
       timestamp: new Date().toISOString(),
-      userId: scope.userId ?? null,
     };
     localStorage.setItem(storageKey, JSON.stringify(data));
   } catch (error) {
@@ -106,6 +100,13 @@ export function clearBudgetStorage(scope: StorageScope = {}): void {
 
   try {
     localStorage.removeItem(getScopedStorageKey(STORAGE_KEY, scope.userId));
+    localStorage.removeItem(getScopedStorageKey(NAMED_BUDGETS_KEY, scope.userId));
+    localStorage.removeItem(getScopedStorageKey(CUSTOM_PRESETS_KEY, scope.userId));
+    if (!scope.userId) {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_NAMED_BUDGETS_KEY);
+      localStorage.removeItem(LEGACY_CUSTOM_PRESETS_KEY);
+    }
   } catch (error) {
     console.warn('Failed to clear storage:', error);
   }
