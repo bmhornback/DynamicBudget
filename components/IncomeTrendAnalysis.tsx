@@ -7,7 +7,7 @@ import { formatCurrency } from '@/lib/formatters';
 
 interface IncomeTrendAnalysisProps {
   incomeHistory: IncomeHistory | undefined;
-  inputs: BudgetInputs;
+  inputs: Pick<BudgetInputs, 'annualSalary' | 'annualCommissionIncome'>;
 }
 
 export default function IncomeTrendAnalysis({ incomeHistory, inputs }: IncomeTrendAnalysisProps) {

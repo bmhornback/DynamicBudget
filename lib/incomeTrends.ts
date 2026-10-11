@@ -52,6 +52,7 @@ export function getMonthlyIncomeSummary(history: IncomeHistory): MonthlyIncomeSu
 
   history.entries.forEach((entry) => {
     const current = byMonth.get(entry.month);
+    // Defensive guard for any legacy/imported data that might contain duplicates.
     if (!current || new Date(entry.createdAt).getTime() >= new Date(current.createdAt).getTime()) {
       byMonth.set(entry.month, entry);
     }
