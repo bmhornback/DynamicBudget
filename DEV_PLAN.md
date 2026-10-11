@@ -831,10 +831,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Produce reconciliation reports with mismatch resolution workflows ✅ generated reconciliation reports surface review-only mismatches and track status before any write-back is allowed
 - Add exception handling for permission and schema drift issues ✅ adapter guardrails block impossible writes and require manual review when account/category drift or permissions are insufficient
 
-### E13-T4 · Additional accounting and finance connectors
-- Prioritize Xero, Wave, CSV import/export, and Plaid transaction feeds
-- Reuse common connector framework instead of bespoke one-off integrations
-- Define phased rollout by connector readiness and user demand
+### E13-T4 · Additional accounting and finance connectors ✅ Done
+- Prioritize Xero, Wave, CSV import/export, and Plaid transaction feeds ✅ `lib/accountingConnectors.ts` defines the shared connector registry and capability model for Xero, Wave, CSV, Plaid, and manual review flows
+- Reuse common connector framework instead of bespoke one-off integrations ✅ the catalog + adapter pattern centralizes auth and sync behavior across providers
+- Define phased rollout by connector readiness and user demand ✅ recommendedStage tiers and ranking logic guide staged rollout decisions
 
 ### E13-T5 · Accountant-facing outputs
 - Add "accountant package" export including:
