@@ -70,13 +70,13 @@ export default function RebalanceControls({
 
         {/* Deficit strategy */}
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
             When over budget, reduce:
           </label>
           <select
             value={inputs.rebalanceStrategy}
             onChange={(e) => onStrategyChange(e.target.value as RebalanceStrategy)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+            className="w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             {STRATEGY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -86,13 +86,13 @@ export default function RebalanceControls({
 
         {/* Surplus allocation */}
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
             When surplus available, put it toward:
           </label>
           <select
             value={inputs.surplusAllocation}
             onChange={(e) => onSurplusAllocationChange(e.target.value as SurplusAllocation)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+            className="w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             {SURPLUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
