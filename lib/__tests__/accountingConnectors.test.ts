@@ -107,4 +107,21 @@ describe('accountingConnectors', () => {
     expect(summary).toContain('QuickBooks');
     expect(summary).toContain('static-first');
   });
+
+  it('builds an accountant package export with period summary, receipts, adjustment log, and tax reminders', async () => {
+    const quickbooks = createAccountingConnectorAdapter('quickbooks', { configured: true });
+    await quickbooks.syncNow();
+
+    const packageExport = quickbooks.generateAccountantPackage('Q4 2026');
+
+    expect(packageExport.connectorId).toBe('quickbooks');
+    expect(packageExport.periodLabel).toBe('Q4 2026');
+    expect(packageExport.summary.totalTransactions).toBeGreaterThan(0);
+    expect(packageExport.summary.totalExpenseAmount).toBeGreaterThan(0);
+    expect(packageExport.categorizedExpenses.length).toBeGreaterThan(0);
+    expect(packageExport.supportingReceiptReferences.length).toBeGreaterThan(0);
+    expect(packageExport.adjustmentLog[0].status).toMatch(/review|resolved/);
+    expect(packageExport.readinessChecklist.some((item) => item.title.includes('Review imported transactions'))).toBe(true);
+    expect(packageExport.taxDocumentReminders.length).toBeGreaterThan(0);
+  });
 });

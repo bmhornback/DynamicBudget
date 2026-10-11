@@ -836,13 +836,13 @@ States to add (in priority order based on population and no-income-tax interest)
 - Reuse common connector framework instead of bespoke one-off integrations ✅ the catalog + adapter pattern centralizes auth and sync behavior across providers
 - Define phased rollout by connector readiness and user demand ✅ recommendedStage tiers and ranking logic guide staged rollout decisions
 
-### E13-T5 · Accountant-facing outputs
+### E13-T5 · Accountant-facing outputs ✅ Done
 - Add "accountant package" export including:
-  - period summary
-  - categorized expenses
-  - supporting receipt references
-  - adjustment log
-- Add year-end readiness checklist and tax-document reminder workflow
+  - period summary ✅ `lib/accountingConnectors.ts` generates a structured accountant package package with totals, categorized expense rollups, and supporting receipt references
+  - categorized expenses ✅ `generateAccountantPackage()` groups imported expense records by DynamicBudget category and calculates percentage share
+  - supporting receipt references ✅ the package exposes transaction-linked receipt references for review and export
+  - adjustment log ✅ package export includes review/resolution notes for approval and reconciliation status
+- Add year-end readiness checklist and tax-document reminder workflow ✅ `generateAccountantPackage()` includes readiness checklist items plus tax-document reminders for year-end prep
 
 ---
 
