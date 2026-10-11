@@ -838,7 +838,7 @@ States to add (in priority order based on population and no-income-tax interest)
 
 ### E13-T5 · Accountant-facing outputs ✅ Done
 - Add "accountant package" export including:
-  - period summary ✅ `lib/accountingConnectors.ts` generates a structured accountant package package with totals, categorized expense rollups, and supporting receipt references
+  - period summary ✅ `lib/accountingConnectors.ts` generates a structured accountant package with totals, categorized expense rollups, and supporting receipt references
   - categorized expenses ✅ `generateAccountantPackage()` groups imported expense records by DynamicBudget category and calculates percentage share
   - supporting receipt references ✅ the package exposes transaction-linked receipt references for review and export
   - adjustment log ✅ package export includes review/resolution notes for approval and reconciliation status
