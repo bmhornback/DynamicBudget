@@ -6,6 +6,11 @@ export interface LearnGuide {
   cta: string;
 }
 
+export interface GlossaryTerm {
+  term: string;
+  definition: string;
+}
+
 export const LEARN_GUIDES: LearnGuide[] = [
   {
     id: 'rent-rule',
@@ -50,5 +55,28 @@ export const LEARN_GUIDES: LearnGuide[] = [
       'Review the COLI card and the remaining monthly buffer, not only gross pay.',
     ],
     cta: 'Save one budget per city, then compare them.',
+  },
+];
+
+export const LEARN_GLOSSARY_TERMS: GlossaryTerm[] = [
+  {
+    term: 'ESPP income',
+    definition: 'Employee Stock Purchase Plan gains from buying company stock at a discount.',
+  },
+  {
+    term: 'RSU vesting income',
+    definition: 'Stock compensation that becomes yours and taxable when shares vest.',
+  },
+  {
+    term: 'Employer match',
+    definition: 'Company retirement contribution based on your own 401(k) contribution rate.',
+  },
+  {
+    term: 'Catch-up contributions',
+    definition: 'Extra retirement contributions allowed after age 50 above standard annual limits.',
+  },
+  {
+    term: 'Blended bonus tax rate',
+    definition: 'Model that combines flat supplemental withholding with annual tax reconciliation effects.',
   },
 ];

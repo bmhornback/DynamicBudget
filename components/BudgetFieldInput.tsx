@@ -48,9 +48,33 @@ export default function BudgetFieldInput({
   const [focused, setFocused] = React.useState(false);
   const [prevValue, setPrevValue] = React.useState(value);
   const [showDefinition, setShowDefinition] = React.useState(false);
+  const definitionContainerRef = React.useRef<HTMLDivElement | null>(null);
   const descriptionId = description ? `${id}-description` : undefined;
   const validationId = validationMessageId(id);
   const definitionId = termDefinition ? `${id}-definition` : undefined;
+
+  React.useEffect(() => {
+    if (!termDefinition) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!definitionContainerRef.current?.contains(event.target as Node)) {
+        setShowDefinition(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowDefinition(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [termDefinition]);
 
   // Keep raw in sync when value changes from outside (e.g., rebalance)
   if (!focused && prevValue !== value) {
@@ -124,14 +148,19 @@ export default function BudgetFieldInput({
               {label}
             </label>
             {termDefinition && (
-              <>
+              <div ref={definitionContainerRef} className="relative">
                 <button
                   type="button"
                   aria-label={`${label} definition: ${termDefinition}`}
                   aria-expanded={showDefinition}
                   aria-controls={definitionId}
+                  onClick={() => setShowDefinition((prev) => !prev)}
                   onFocus={() => setShowDefinition(true)}
-                  onBlur={() => setShowDefinition(false)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.parentElement?.contains(event.relatedTarget as Node)) {
+                      setShowDefinition(false);
+                    }
+                  }}
                   onMouseEnter={() => setShowDefinition(true)}
                   onMouseLeave={() => setShowDefinition(false)}
                   className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300"
@@ -139,11 +168,15 @@ export default function BudgetFieldInput({
                   ?
                 </button>
                 {showDefinition && (
-                  <span id={definitionId} role="tooltip" className="absolute z-10 mt-1 rounded bg-gray-900 px-2 py-1 text-[10px] text-white shadow-lg">
+                  <span
+                    id={definitionId}
+                    role="tooltip"
+                    className="absolute left-0 top-full z-10 mt-1 w-56 rounded bg-gray-900 px-2 py-1 text-[10px] text-white shadow-lg"
+                  >
                     {termDefinition}
                   </span>
                 )}
-              </>
+              </div>
             )}
           </div>
           {description && (

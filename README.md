@@ -33,7 +33,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 - 💎 **Flexible savings modes** — Save fixed amounts or a percentage of net income
 - 🗓️ **Sinking funds & recurring annual expenses** — Plan ahead for non-monthly bills like registration, insurance, travel, home maintenance, and holidays with automatic monthly reserve guidance
 - 💬 **In-app feedback widget** — Open a prefilled GitHub issue directly from the app, with optional plain-text budget context for faster triage
-- 📚 **Learn hub** — Browse short budgeting guides tied to housing, retirement, rule-of-thumb budgeting, and cost-of-living planning
+- 📚 **Learn hub** — Browse short budgeting guides plus an income-term glossary tied to housing, retirement, rule-of-thumb budgeting, and cost-of-living planning
 - 🔍 **Discovery metadata** — Rich Open Graph metadata, sitemap, robots rules, and app JSON-LD improve sharing and search discovery
 - 📱 **Responsive design** — Works great on desktop and mobile
 
@@ -215,7 +215,7 @@ This preserves the current privacy-first static model while providing a clear pa
 - **[docs/decision-records/receipt-data-privacy-policy.md](./docs/decision-records/receipt-data-privacy-policy.md)** — Receipt OCR data handling and privacy controls
 - **[docs/decision-records/integration-security-model.md](./docs/decision-records/integration-security-model.md)** — Security model for accounting integrations and sync workflows
 - **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application
-- **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Short educational guides tied to in-app planning decisions
+- **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Educational guides plus a glossary for planner income terms
 
 ## Development
 
