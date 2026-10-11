@@ -118,6 +118,7 @@ const COMPLETED_TASKS = {
   'E12-T5': 'Receipt data privacy policy covering local-only and encrypted cloud storage, retention, deletion, and export behavior',
   'E13-T1': 'Accounting connector framework in lib/accountingConnectors.ts with provider registry, auth flow, sync status, mapping, and observability',
   'E13-T2': 'QuickBooks read-only connector MVP in lib/accountingConnectors.ts with sync trigger, category mapping, and import review metadata',
+  'E13-T3': 'QuickBooks phase-2 write-back guardrails and reconciliation report generation in lib/accountingConnectors.ts with approved-only queueing and mismatch review gating',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',

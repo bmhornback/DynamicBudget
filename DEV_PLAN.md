@@ -826,10 +826,10 @@ States to add (in priority order based on population and no-income-tax interest)
 - Add mapping layer between DynamicBudget categories and QuickBooks chart of accounts ✅ category mapping is defined in the connector adapter and is used during import review
 - Provide manual sync trigger, last-sync timestamp, and sync status/errors ✅ `createAccountingConnectorAdapter` exposes sync trigger, status, and log behavior for the read-only flow
 
-### E13-T3 · QuickBooks phase 2 write-back and reconciliation
-- Add optional write-back for approved categorized transactions
-- Produce reconciliation reports with mismatch resolution workflows
-- Add exception handling for permission and schema drift issues
+### E13-T3 · QuickBooks phase 2 write-back and reconciliation ✅ Done
+- Add optional write-back for approved categorized transactions ✅ `lib/accountingConnectors.ts` adds an approved-only write-back flow with reconciliation checks before queueing transactions
+- Produce reconciliation reports with mismatch resolution workflows ✅ generated reconciliation reports surface review-only mismatches and track status before any write-back is allowed
+- Add exception handling for permission and schema drift issues ✅ adapter guardrails block impossible writes and require manual review when account/category drift or permissions are insufficient
 
 ### E13-T4 · Additional accounting and finance connectors
 - Prioritize Xero, Wave, CSV import/export, and Plaid transaction feeds
