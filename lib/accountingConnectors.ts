@@ -155,6 +155,20 @@ const CONNECTOR_SCORE_WEIGHTS = {
 // This mapping intentionally targets DynamicBudget's actual TrackableCategory union.
 // Several provider-side buckets do not have a 1:1 app category today, so they map to
 // the neutral fallback 'other' until the taxonomy expands further.
+const TRACKABLE_CATEGORIES: readonly TrackableCategory[] = [
+  'dining_out',
+  'gasoline',
+  'electricity',
+  'water',
+  'online_shopping',
+  'groceries',
+  'subscriptions',
+  'gas_utility',
+  'internet',
+  'phone',
+  'other',
+] as const;
+
 const DEFAULT_CATEGORY_MAP: Record<string, TrackableCategory> = {
   housing: 'other',
   rent: 'other',
@@ -182,6 +196,31 @@ const DEFAULT_CATEGORY_MAP: Record<string, TrackableCategory> = {
   misc: 'other',
   other: 'other',
 };
+
+function normalizeTrackableCategory(value: string | null | undefined, fallback: TrackableCategory = 'other'): TrackableCategory {
+  const candidate = value?.trim();
+  if (!candidate) {
+    return fallback;
+  }
+
+  const normalized = candidate.toLowerCase().replace(/\s+/g, '_');
+  if (TRACKABLE_CATEGORIES.includes(normalized as TrackableCategory)) {
+    return normalized as TrackableCategory;
+  }
+
+  const directMatch = DEFAULT_CATEGORY_MAP[normalized];
+  if (directMatch) {
+    return directMatch;
+  }
+
+  const compact = normalized.replace(/[^a-z]/g, '');
+  const compactMatch = DEFAULT_CATEGORY_MAP[compact];
+  if (compactMatch) {
+    return compactMatch;
+  }
+
+  return fallback;
+}
 
 export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
   {
@@ -467,29 +506,38 @@ export function createAccountingConnectorAdapter(
 
     for (const transaction of transactions) {
       const mapped = adapter.mapCategory(transaction.category ?? 'other');
-      const originalCategory = (transaction.category ?? 'other') as TrackableCategory;
-      const expectedAmount = typeof transaction.amount === 'number' ? transaction.amount : undefined;
+      const originalCategory = normalizeTrackableCategory(transaction.category, 'other');
+      const expectedAmount = typeof transaction.amount === 'number' && Number.isFinite(transaction.amount)
+        ? transaction.amount
+        : undefined;
+      const hasPositiveAmount = expectedAmount !== undefined && expectedAmount > 0;
 
-      if (mapped.matched && expectedAmount !== undefined) {
+      const resolvedCategory = mapped.targetCategory ?? originalCategory;
+
+      if (mapped.matched && hasPositiveAmount) {
         matchedTransactions += 1;
-      } else if (expectedAmount !== undefined) {
+      } else if (hasPositiveAmount) {
         mismatches.push({
           transactionId: transaction.id,
           accountId: transaction.accountId,
           expectedCategory: originalCategory,
-          actualCategory: mapped.targetCategory,
+          actualCategory: resolvedCategory,
           expectedAmount,
           reason: `Category mapping could not be confirmed for ${transaction.accountName || transaction.id}; manual review is required before write-back.`,
           resolution: 'review',
         });
       } else {
+        const reason = mapped.matched
+          ? 'Amount is missing or invalid for a mapped category; manual review is required before write-back.'
+          : 'Amount or category metadata is missing; manual review is required before write-back.';
+
         mismatches.push({
           transactionId: transaction.id,
           accountId: transaction.accountId,
           expectedCategory: originalCategory,
-          actualCategory: mapped.targetCategory,
+          actualCategory: resolvedCategory,
           expectedAmount,
-          reason: 'Amount or category metadata is missing; manual review is required before write-back.',
+          reason,
           resolution: 'review',
         });
       }
@@ -560,30 +608,36 @@ export function createAccountingConnectorAdapter(
     generateReconciliationReport: () => buildReconciliationReport(),
     writeBackApprovedTransactions: async (transactions: AccountingWritebackTransaction[]) => {
       if (!configured) {
+        const rejected = transactions.map((entry) => ({
+          id: entry.id,
+          reason: 'Connector is not configured for write-back.',
+        }));
+
         return {
           status: 'skipped',
           message: `${definition.name} is not configured for write-back.`,
           submittedCount: 0,
           rejectedCount: transactions.length,
           transactionIds: transactions.map((entry) => entry.id),
-          rejectedTransactions: transactions.map((entry) => ({
-            id: entry.id,
-            reason: 'Connector is not configured for write-back.',
-          })),
+          rejectedTransactions: rejected,
         };
       }
 
       if (!definition.capabilities.write) {
+        const rejected = transactions.map((entry) => ({
+          id: entry.id,
+          reason: 'Connector capability does not allow write-back.',
+        }));
+        const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'failed', 'Write-back blocked by connector capability', 'reviewed_transactions');
+        state.syncLog.unshift(logEntry);
+
         return {
           status: 'skipped',
           message: `${definition.name} does not support approved write-back in this static MVP flow.`,
           submittedCount: 0,
           rejectedCount: transactions.length,
           transactionIds: transactions.map((entry) => entry.id),
-          rejectedTransactions: transactions.map((entry) => ({
-            id: entry.id,
-            reason: 'Connector capability does not allow write-back.',
-          })),
+          rejectedTransactions: rejected,
         };
       }
 
@@ -610,8 +664,9 @@ export function createAccountingConnectorAdapter(
           rejectedTransactions.push({ id: entry.id, reason: 'Amount must be a finite number greater than zero.' });
           return false;
         }
-        if (!entry.category) {
-          rejectedTransactions.push({ id: entry.id, reason: 'Category is required.' });
+        const normalizedCategory = normalizeTrackableCategory(entry.category, 'other');
+        if (normalizedCategory === 'other' && entry.category !== 'other') {
+          rejectedTransactions.push({ id: entry.id, reason: 'Category must map to a supported DynamicBudget TrackableCategory.' });
           return false;
         }
         if (!entry.merchant.trim()) {
@@ -633,9 +688,31 @@ export function createAccountingConnectorAdapter(
         reconciliationId: report.id,
       };
 
+      if (approvedTransactions.length === 0) {
+        const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'failed', 'Write-back validation rejected all transactions', 'reviewed_transactions');
+        state.syncLog.unshift(logEntry);
+        return result;
+      }
+
+      const nextReportId = `recon-${providerId}-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+      const nextReport: AccountingReconciliationReport = {
+        ...report,
+        id: nextReportId,
+        generatedAt: new Date().toISOString(),
+        totalTransactions: approvedTransactions.length,
+        matchedTransactions: approvedTransactions.length,
+        mismatches: [],
+        unresolvedCount: 0,
+        approvedWritebackCount: approvedTransactions.length,
+        reviewRequired: false,
+        status: 'clean',
+        summary: `${definition.name} approved ${approvedTransactions.length} transaction(s) for write-back after review.`,
+      };
+
       const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'success', 'Approved write-back queued', 'reviewed_transactions');
       state.syncLog.unshift(logEntry);
-      return result;
+      state.reconciliationReport = nextReport;
+      return { ...result, reconciliationId: nextReportId };
     },
     syncNow: async () => {
       const startedAt = new Date().toISOString();
