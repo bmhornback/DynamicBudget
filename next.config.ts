@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   // GitHub Pages, Netlify, S3, or opened directly in a browser — the same
   // self-hosted static pattern used by the FirstTimeFitness app.
   output: "export",
+  basePath: "/dynamicbudget",
+  images: { unoptimized: true },
   ...buildStaticSitePathConfig(),
 };
 
