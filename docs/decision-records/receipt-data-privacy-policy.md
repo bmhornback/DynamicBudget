@@ -1,7 +1,7 @@
 # Decision Record: Receipt Data & Privacy Policy
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 Receipt OCR is planned to accelerate spending entry. This introduces image handling, extracted financial data, and potential duplicates that require explicit user controls and privacy-safe defaults.

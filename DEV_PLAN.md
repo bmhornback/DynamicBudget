@@ -804,7 +804,7 @@ States to add (in priority order based on population and no-income-tax interest)
 - Detect potential duplicate receipts (merchant/date/amount heuristic) ✅ `evaluateReceiptDuplicateRisk` flags likely duplicates and returns `merge`/`review`/`ignore` actions
 - Provide merge/ignore choices for duplicate candidates ✅ the duplicate decision contract exposes deterministic `action` and `isDuplicate` metadata for UI handling
 
-### E12-T5 · Receipt data policy
+### E12-T5 · Receipt data policy ✅ Done
 - Document storage modes:
   - local-only image/data mode
   - encrypted cloud receipt storage mode (if cloud sync enabled)
