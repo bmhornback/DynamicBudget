@@ -48,6 +48,7 @@ export default function BudgetFieldInput({
   const [focused, setFocused] = React.useState(false);
   const [prevValue, setPrevValue] = React.useState(value);
   const [showDefinition, setShowDefinition] = React.useState(false);
+  const [definitionPinned, setDefinitionPinned] = React.useState(false);
   const definitionContainerRef = React.useRef<HTMLDivElement | null>(null);
   const descriptionId = description ? `${id}-description` : undefined;
   const validationId = validationMessageId(id);
@@ -56,15 +57,20 @@ export default function BudgetFieldInput({
   React.useEffect(() => {
     if (!termDefinition) return;
 
+    const closeDefinition = () => {
+      setShowDefinition(false);
+      setDefinitionPinned(false);
+    };
+
     const handlePointerDown = (event: PointerEvent) => {
       if (!definitionContainerRef.current?.contains(event.target as Node)) {
-        setShowDefinition(false);
+        closeDefinition();
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setShowDefinition(false);
+        closeDefinition();
       }
     };
 
@@ -154,15 +160,26 @@ export default function BudgetFieldInput({
                   aria-label={`${label} definition: ${termDefinition}`}
                   aria-expanded={showDefinition}
                   aria-controls={definitionId}
-                  onClick={() => setShowDefinition((prev) => !prev)}
+                  onClick={() => {
+                    setDefinitionPinned((prev) => {
+                      const nextPinned = !prev;
+                      setShowDefinition(nextPinned);
+                      return nextPinned;
+                    });
+                  }}
                   onFocus={() => setShowDefinition(true)}
                   onBlur={(event) => {
-                    if (!event.currentTarget.parentElement?.contains(event.relatedTarget as Node)) {
+                    if (!definitionContainerRef.current?.contains(event.relatedTarget as Node)) {
                       setShowDefinition(false);
+                      setDefinitionPinned(false);
                     }
                   }}
-                  onMouseEnter={() => setShowDefinition(true)}
-                  onMouseLeave={() => setShowDefinition(false)}
+                  onMouseEnter={() => {
+                    if (!definitionPinned) setShowDefinition(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (!definitionPinned) setShowDefinition(false);
+                  }}
                   className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300"
                 >
                   ?
