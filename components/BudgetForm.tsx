@@ -16,7 +16,7 @@ import type {
 import { DEFAULT_INPUTS } from '@/lib/defaultScenarios';
 import { ANNUAL_EXPENSE_MONTH_LABELS } from '@/lib/annualExpenses';
 import BudgetSection from './BudgetSection';
-import BudgetFieldInput, { getCadenceHint } from './BudgetFieldInput';
+import BudgetFieldInput, { getCadenceHint, getCadenceLabel } from './BudgetFieldInput';
 import { STATE_LABELS, get401kLimit, ANNUAL_401K_CATCHUP_LIMIT } from '@/lib/taxCalculations';
 import { adjustExpensesForColi, getColiIndex, getColiTierLabel } from '@/lib/coliData';
 import { PAY_FREQUENCY_LABELS } from '@/lib/paycheckCalculations';
@@ -292,7 +292,8 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
     description?: string,
     baseCadence: InputCadence = 'monthly',
     termDefinition?: string,
-    showCadenceHint = true
+    showCadenceHint = true,
+    allowCadenceConversion = true
   ) => (
     <BudgetFieldInput
       key={id}
@@ -307,6 +308,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
       displayCadence={displayCadence}
       termDefinition={termDefinition}
       showCadenceHint={showCadenceHint}
+      allowCadenceConversion={allowCadenceConversion}
     />
   );
 
@@ -411,8 +413,10 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
   };
 
   const getCadenceSummary = (value: number, baseCadence: InputCadence = 'monthly') => {
-    if (baseCadence === displayCadence) return `${value.toLocaleString('en-US')} per ${displayCadence === 'annual' ? 'year' : displayCadence === 'monthly' ? 'month' : 'day'}`;
-    return getCadenceHint(value, baseCadence, displayCadence);
+    if (displayCadence === baseCadence) {
+      return `${value.toLocaleString('en-US')} per ${getCadenceLabel(displayCadence)}`;
+    }
+    return getCadenceHint(value, baseCadence, displayCadence, true);
   };
 
   return (
@@ -459,7 +463,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
             />
           </div>
           <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
-            {getCadenceSummary(inputs.annualSalary, 'annual') ?? `${inputs.annualSalary.toLocaleString('en-US')} per year`}
+            {getCadenceSummary(inputs.annualSalary, 'annual')}
           </p>
         </div>
 
@@ -507,7 +511,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           description="After-tax contributions; no tax deduction now, tax-free in retirement"
         />
 
-        {field('employerMatchPercent', 'Employer Match %', undefined, 'monthly', undefined, false)}
+        {field('employerMatchPercent', 'Employer Match %', undefined, 'monthly', undefined, false, false)}
 
         <NumberSlider
           label="Employer Match Cap %"
@@ -595,7 +599,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                   />
                 </div>
                 <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
-                  {getCadenceSummary(inputs.partnerAnnualSalary, 'annual') ?? `${inputs.partnerAnnualSalary.toLocaleString('en-US')} per year`}
+                  {getCadenceSummary(inputs.partnerAnnualSalary, 'annual')}
                 </p>
               </div>
 
@@ -627,7 +631,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
                 description="After-tax 401(k) for partner"
               />
 
-              {field('partnerEmployerMatchPercent', 'Partner Employer Match %', undefined, 'monthly', undefined, false)}
+              {field('partnerEmployerMatchPercent', 'Partner Employer Match %', undefined, 'monthly', undefined, false, false)}
 
               <NumberSlider
                 label="Partner Employer Match Cap %"

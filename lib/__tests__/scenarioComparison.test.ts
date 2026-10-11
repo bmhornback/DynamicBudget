@@ -100,14 +100,30 @@ describe('scenarioComparison', () => {
 
   it('can normalize comparison salaries to match the current budget salary', () => {
     const currentInputs = { ...DEFAULT_INPUTS, annualSalary: 180000 };
-    const items = buildScenarioComparisonItems(
+    const savedBudget = {
+      id: 'saved-salary-match',
+      name: 'Saved Salary Match',
+      note: 'Saved scenario for salary normalization.',
+      createdAt: '2026-09-15T00:00:00.000Z',
+      inputs: { ...DEFAULT_INPUTS, annualSalary: 200000 },
+    };
+
+    const presetItems = buildScenarioComparisonItems(
       currentInputs,
       [buildPresetComparisonId('living_with_parents')],
       undefined,
       [],
       { normalizeAnnualSalary: true }
     );
+    const savedItems = buildScenarioComparisonItems(
+      currentInputs,
+      [buildSavedBudgetComparisonId(savedBudget.id)],
+      undefined,
+      [savedBudget],
+      { normalizeAnnualSalary: true }
+    );
 
-    expect(items[1].annualSalary).toBe(180000);
+    expect(presetItems[1].annualSalary).toBe(180000);
+    expect(savedItems[1].annualSalary).toBe(180000);
   });
 });
