@@ -167,7 +167,9 @@ export default function BudgetFieldInput({
                       return nextPinned;
                     });
                   }}
-                  onFocus={() => setShowDefinition(true)}
+                  onFocus={() => {
+                    if (!definitionPinned) setShowDefinition(true);
+                  }}
                   onBlur={(event) => {
                     if (!definitionContainerRef.current?.contains(event.relatedTarget as Node)) {
                       setShowDefinition(false);
