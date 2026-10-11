@@ -490,6 +490,9 @@ export function createAccountingConnectorAdapter(
             { id: 'qb-cat-groceries', accountId: 'expense-001', accountName: 'Groceries', category: 'Food & Dining', type: 'expense', connectedTo: 'food', lastUpdatedAt: completedAt },
             { id: 'qb-cat-utilities', accountId: 'expense-002', accountName: 'Utilities', category: 'Utilities', type: 'expense', connectedTo: 'utilities', lastUpdatedAt: completedAt },
           ],
+          // These records intentionally mirror the same spend events in two collections:
+          // expense items are the categorized import view, while transactions represent the
+          // underlying bank/ledger entries a user may review before accepting the import.
           expenses: [
             { id: 'qb-expense-1', accountId: 'txn-001', accountName: 'Whole Foods', category: 'Groceries', type: 'expense', amount: 128.45, currency: 'USD', connectedTo: 'food', lastUpdatedAt: completedAt },
             { id: 'qb-expense-2', accountId: 'txn-002', accountName: 'NV Energy', category: 'Utilities', type: 'expense', amount: 96.2, currency: 'USD', connectedTo: 'utilities', lastUpdatedAt: completedAt },

@@ -60,6 +60,9 @@ describe('accountingConnectors', () => {
     expect(quickbooks.getReadOnlySnapshot()).toBeNull();
     expect(csvConnector.getReadOnlySnapshot()).toBeNull();
 
+    await unconfigured.syncNow();
+    expect(unconfigured.getReadOnlySnapshot()).toBeNull();
+
     await quickbooks.syncNow();
 
     const snapshot = quickbooks.getReadOnlySnapshot();
@@ -85,10 +88,6 @@ describe('accountingConnectors', () => {
         { id: 'qb-txn-2', accountId: 'txn-102', accountName: 'NV Energy', category: 'Utilities', type: 'transaction', amount: 96.2, currency: 'USD', connectedTo: 'banking' },
       ],
     });
-    expect(snapshot!.accounts).toHaveLength(2);
-    expect(snapshot!.categories).toHaveLength(2);
-    expect(snapshot!.expenses).toHaveLength(2);
-    expect(snapshot!.transactions).toHaveLength(2);
     expect(csvConnector.getReadOnlySnapshot()).toBeNull();
   });
 
