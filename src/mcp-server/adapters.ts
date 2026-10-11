@@ -94,6 +94,7 @@ export function buildBudgetInputs(params: McpCoreBudgetParams): BudgetInputs {
     employerMatchCapPercent: 100,
     userAge: params.age ?? 30,
     bonusIncome: 0,
+    annualCommissionIncome: 0,
     bonusTaxMode: 'blended_annual',
     esppIncome: 0,
     rsuVestingIncome: 0,
