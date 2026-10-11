@@ -344,15 +344,17 @@ export function createAccountingConnectorAdapter(
   }
 
   const definition = matchingDefinition;
-  const state = {
-    syncStatus: {
-      status: 'idle',
-      message: 'No sync has been attempted yet.',
-      lastSyncAt: null,
-      lastError: null,
-      lastAttemptAt: null,
-    } satisfies AccountingSyncStatus,
-    syncLog: [] as ConnectorSyncLogEntry[],
+  const initialSyncStatus: AccountingSyncStatus = {
+    status: 'idle',
+    message: 'No sync has been attempted yet.',
+    lastSyncAt: null,
+    lastError: null,
+    lastAttemptAt: null,
+  };
+
+  const state: { syncStatus: AccountingSyncStatus; syncLog: ConnectorSyncLogEntry[] } = {
+    syncStatus: initialSyncStatus,
+    syncLog: [],
   };
 
   const updateSyncStatus = (next: AccountingSyncStatus): AccountingSyncStatus => {
