@@ -8,6 +8,17 @@ describe('incomeTrends', () => {
     expect(history.lastUpdated).toBeTruthy();
   });
 
+  it('rejects invalid month values', () => {
+    const history = initializeIncomeHistory();
+
+    expect(() => addIncomeEntry(history, '2026-13', 8000, 2000)).toThrow(
+      'Month must be a valid YYYY-MM value.'
+    );
+    expect(() => addIncomeEntry(history, 'bad-month', 8000, 2000)).toThrow(
+      'Month must be a valid YYYY-MM value.'
+    );
+  });
+
   it('adds entries and aggregates monthly totals', () => {
     let history = initializeIncomeHistory();
     history = addIncomeEntry(history, '2026-10', 8000, 2000);

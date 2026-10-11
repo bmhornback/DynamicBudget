@@ -24,7 +24,7 @@ export default function IncomeTracker({ incomeHistory, onHistoryChange }: Income
     if (!incomeHistory) return false;
     const base = Number(basePay);
     const comm = Number(commission || '0');
-    return month.trim().length === 7 && base > 0 && comm >= 0;
+    return /^\d{4}-(0[1-9]|1[0-2])$/.test(month.trim()) && base > 0 && comm >= 0;
   }, [basePay, commission, incomeHistory, month]);
 
   const handleSubmit = useCallback((event: React.FormEvent) => {

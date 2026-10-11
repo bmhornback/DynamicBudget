@@ -19,24 +19,30 @@ export function addIncomeEntry(
   commission: number,
   note?: string
 ): IncomeHistory {
+  const normalizedMonth = month.trim();
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(normalizedMonth)) {
+    throw new Error('Month must be a valid YYYY-MM value.');
+  }
+
   const safeBase = Math.max(0, basePay);
   const safeCommission = Math.max(0, commission);
+  const now = new Date().toISOString();
   const entry: IncomeEntry = {
     id: generateEntryId(),
-    month,
+    month: normalizedMonth,
     basePay: safeBase,
     commission: safeCommission,
     totalPay: safeBase + safeCommission,
     note,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
   };
   // Invariant: one income entry per month. Submitting again replaces that month.
-  const filtered = history.entries.filter((existing) => existing.month !== month);
+  const filtered = history.entries.filter((existing) => existing.month !== normalizedMonth);
 
   return {
     ...history,
     entries: [...filtered, entry],
-    lastUpdated: new Date().toISOString(),
+    lastUpdated: now,
   };
 }
 

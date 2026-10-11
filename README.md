@@ -216,7 +216,7 @@ This preserves the current privacy-first static model while providing a clear pa
 - **[docs/decision-records/receipt-data-privacy-policy.md](./docs/decision-records/receipt-data-privacy-policy.md)** — Receipt OCR data handling and privacy controls
 - **[docs/decision-records/integration-security-model.md](./docs/decision-records/integration-security-model.md)** — Security model for accounting integrations and sync workflows
 - **[/app](https://bmhornback.github.io/DynamicBudget/app)** — The budget planner application
-- **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Educational guides plus a glossary for planner income terms
+- **[/learn](https://bmhornback.github.io/DynamicBudget/learn)** — Educational guides plus a glossary of planner terms
 
 ## Development
 

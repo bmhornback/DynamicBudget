@@ -166,7 +166,7 @@ export default function BudgetFieldInput({
                     setShowDefinition(nextPinned);
                   }}
                   onBlur={(event) => {
-                    if (!definitionContainerRef.current?.contains(event.relatedTarget as Node)) {
+                    if (!definitionPinnedRef.current && !definitionContainerRef.current?.contains(event.relatedTarget as Node)) {
                       setShowDefinition(false);
                       definitionPinnedRef.current = false;
                     }
