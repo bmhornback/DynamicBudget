@@ -74,6 +74,51 @@ export interface AccountingImportSnapshot {
   reviewRequired: boolean;
 }
 
+export interface AccountingWritebackTransaction {
+  id: string;
+  merchant: string;
+  amount: number;
+  date: string;
+  category: TrackableCategory;
+  accountId?: string;
+  externalId?: string;
+  note?: string;
+}
+
+export interface AccountingWritebackResult {
+  status: 'success' | 'skipped' | 'rejected';
+  message: string;
+  submittedCount: number;
+  rejectedCount: number;
+  transactionIds: string[];
+  reconciliationId?: string;
+}
+
+export interface AccountingReconciliationMismatch {
+  transactionId: string;
+  accountId?: string;
+  expectedCategory?: TrackableCategory;
+  actualCategory?: TrackableCategory;
+  expectedAmount?: number;
+  actualAmount?: number;
+  reason: string;
+  resolution: 'approve' | 'review' | 'ignore';
+}
+
+export interface AccountingReconciliationReport {
+  id: string;
+  connectorId: AccountingConnectorId;
+  generatedAt: string;
+  summary: string;
+  totalTransactions: number;
+  matchedTransactions: number;
+  mismatches: AccountingReconciliationMismatch[];
+  unresolvedCount: number;
+  approvedWritebackCount: number;
+  reviewRequired: boolean;
+  status: 'clean' | 'review' | 'blocked';
+}
+
 export interface AccountingConnectorAdapter {
   readonly providerId: AccountingConnectorId;
   readonly auth: StaticAuthFlow;
@@ -85,6 +130,9 @@ export interface AccountingConnectorAdapter {
   syncNow(): Promise<AccountingSyncStatus>;
   mapCategory(category: string): ConnectorMappingResult;
   getReadOnlySnapshot(): AccountingImportSnapshot | null;
+  writeBackApprovedTransactions?(transactions: AccountingWritebackTransaction[]): Promise<AccountingWritebackResult>;
+  generateReconciliationReport?(): AccountingReconciliationReport;
+  getReconciliationReport?(): AccountingReconciliationReport | null;
 }
 
 const CONNECTOR_SCORE_WEIGHTS = {
@@ -138,15 +186,15 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
     capabilities: {
       oauth: true,
       read: true,
-      write: false,
-      reconcile: false,
+      write: true,
+      reconcile: true,
       fileImport: true,
       transactions: true,
       categories: true,
       accounts: true,
     },
     authProviders: ['quickbooks'],
-    bestFor: ['read-only import', 'account mapping', 'manual sync review'],
+    bestFor: ['approved write-back', 'reconciliation review', 'account mapping'],
     score: 0,
   },
   {
@@ -379,10 +427,12 @@ export function createAccountingConnectorAdapter(
     syncStatus: AccountingSyncStatus;
     syncLog: ConnectorSyncLogEntry[];
     readOnlySnapshot: AccountingImportSnapshot | null;
+    reconciliationReport: AccountingReconciliationReport | null;
   } = {
     syncStatus: initialSyncStatus,
     syncLog: [],
     readOnlySnapshot: null,
+    reconciliationReport: null,
   };
 
   const updateSyncStatus = (next: AccountingSyncStatus): AccountingSyncStatus => {
@@ -402,6 +452,55 @@ export function createAccountingConnectorAdapter(
       expenses: snapshot.expenses.map((entry) => ({ ...entry })),
       transactions: snapshot.transactions.map((entry) => ({ ...entry })),
     };
+  };
+
+  const buildReconciliationReport = (): AccountingReconciliationReport => {
+    const transactions = state.readOnlySnapshot?.transactions ?? [];
+    const mismatches: AccountingReconciliationMismatch[] = [];
+    let matchedTransactions = 0;
+
+    for (const transaction of transactions) {
+      const mapped = adapter.mapCategory(transaction.category ?? 'other');
+      const expectedCategory = mapped.targetCategory;
+      const expectedAmount = typeof transaction.amount === 'number' ? transaction.amount : undefined;
+
+      if (mapped.matched && expectedAmount !== undefined) {
+        matchedTransactions += 1;
+      } else if (expectedAmount !== undefined) {
+        mismatches.push({
+          transactionId: transaction.id,
+          accountId: transaction.accountId,
+          expectedCategory,
+          actualCategory: mapped.targetCategory,
+          expectedAmount,
+          actualAmount: expectedAmount,
+          reason: 'Category mapping needs review before write-back.',
+          resolution: 'review',
+        });
+      }
+    }
+
+    const unresolvedCount = mismatches.filter((entry) => entry.resolution === 'review').length;
+    const reviewRequired = unresolvedCount > 0;
+
+    const report: AccountingReconciliationReport = {
+      id: `recon-${providerId}-${new Date().toISOString().replace(/[:.]/g, '-')}`,
+      connectorId: providerId,
+      generatedAt: new Date().toISOString(),
+      summary: reviewRequired
+        ? `${definition.name} reconciliation requires review before write-back.`
+        : `${definition.name} reconciliation is clean and ready for approved write-back.`,
+      totalTransactions: transactions.length,
+      matchedTransactions,
+      mismatches,
+      unresolvedCount,
+      approvedWritebackCount: 0,
+      reviewRequired,
+      status: reviewRequired ? 'review' : 'clean',
+    };
+
+    state.reconciliationReport = report;
+    return { ...report, mismatches: report.mismatches.map((entry) => ({ ...entry })) };
   };
 
   const adapter: AccountingConnectorAdapter = {
@@ -439,6 +538,59 @@ export function createAccountingConnectorAdapter(
     getSyncStatus: () => ({ ...state.syncStatus }),
     getSyncLog: () => state.syncLog.map((entry) => ({ ...entry })),
     getReadOnlySnapshot: () => cloneSnapshot(state.readOnlySnapshot),
+    getReconciliationReport: () => state.reconciliationReport ? {
+      ...state.reconciliationReport,
+      mismatches: state.reconciliationReport.mismatches.map((entry) => ({ ...entry })),
+    } : null,
+    generateReconciliationReport: () => buildReconciliationReport(),
+    writeBackApprovedTransactions: async (transactions: AccountingWritebackTransaction[]) => {
+      if (!configured) {
+        return {
+          status: 'skipped',
+          message: `${definition.name} is not configured for write-back.`,
+          submittedCount: 0,
+          rejectedCount: transactions.length,
+          transactionIds: transactions.map((entry) => entry.id),
+        };
+      }
+
+      if (!definition.capabilities.write) {
+        return {
+          status: 'skipped',
+          message: `${definition.name} does not support approved write-back in this static MVP flow.`,
+          submittedCount: 0,
+          rejectedCount: transactions.length,
+          transactionIds: transactions.map((entry) => entry.id),
+        };
+      }
+
+      const report = buildReconciliationReport();
+      const hasReviewIssues = report.reviewRequired;
+      if (hasReviewIssues) {
+        return {
+          status: 'rejected',
+          message: 'Write-back was blocked because reconciliation issues require review before approval.',
+          submittedCount: 0,
+          rejectedCount: transactions.length,
+          transactionIds: transactions.map((entry) => entry.id),
+          reconciliationId: report.id,
+        };
+      }
+
+      const approvedTransactions = transactions.filter((entry) => entry.amount > 0 && entry.category && entry.merchant.trim().length > 0);
+      const result: AccountingWritebackResult = {
+        status: 'success',
+        message: `Approved ${approvedTransactions.length} transaction(s) queued for ${definition.name} write-back.`,
+        submittedCount: approvedTransactions.length,
+        rejectedCount: Math.max(0, transactions.length - approvedTransactions.length),
+        transactionIds: approvedTransactions.map((entry) => entry.id),
+        reconciliationId: report.id,
+      };
+
+      const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'success', 'Approved write-back queued', 'reviewed_transactions');
+      state.syncLog.unshift(logEntry);
+      return result;
+    },
     syncNow: async () => {
       const startedAt = new Date().toISOString();
 
@@ -506,6 +658,7 @@ export function createAccountingConnectorAdapter(
 
       const logEntry = buildSyncStatusEntry(providerId, startedAt, 'success', 'Sync completed', 'all_accounts');
       state.syncLog.unshift(logEntry);
+      state.reconciliationReport = buildReconciliationReport();
       return updateSyncStatus(successStatus);
     },
     mapCategory: (category: string) => {

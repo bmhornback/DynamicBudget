@@ -30,7 +30,7 @@ describe('accountingConnectors', () => {
     expect(getStaticAccountingAuthFlow('manual').mode).toBe('none');
   });
 
-  it('creates a configured connector adapter with sync status and mapping metadata', async () => {
+  it('creates a configured connector adapter with sync status, mapping metadata, and approval guardrails', async () => {
     const unconfigured = createAccountingConnectorAdapter('quickbooks', { configured: false });
     const configured = createAccountingConnectorAdapter('quickbooks', { configured: true });
 
@@ -49,6 +49,17 @@ describe('accountingConnectors', () => {
     expect(mapped.matched).toBe(true);
     expect(mapped.targetCategory).toBe('groceries');
     expect(mapped.confidence).toBeGreaterThan(0.5);
+
+    const report = configured.generateReconciliationReport?.();
+    expect(report?.status).toBe('review');
+    expect(report?.reviewRequired).toBe(true);
+
+    const blockedWrite = await configured.writeBackApprovedTransactions?.([
+      { id: 'tx-1', merchant: 'Whole Foods', amount: 128.45, date: '2026-10-10', category: 'groceries' },
+    ]);
+    expect(blockedWrite?.status).toBe('rejected');
+    expect(blockedWrite?.rejectedCount).toBe(1);
+    expect(blockedWrite?.reconciliationId).toBeDefined();
   });
 
   it('keeps the read-only import snapshot null until a configured QuickBooks sync populates it', async () => {
