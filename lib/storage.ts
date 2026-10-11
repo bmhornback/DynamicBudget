@@ -1,5 +1,6 @@
 import type { BudgetInputs, NamedBudget, CustomPreset, PayFrequency } from '@/types/budget';
 import { initializeSpendingHistory } from './spendingTrends';
+import { initializeIncomeHistory } from './incomeTrends';
 import { DEFAULT_INPUTS } from './defaultScenarios';
 import { calculateBudgetBreakdown } from './budgetCalculations';
 import { calculateBudgetHealthScore } from './budgetHealthScore';
@@ -169,6 +170,7 @@ export function exportBudgetAsCSV(inputs: BudgetInputs): string {
     section('INCOME'),
     row('Gross Income', inputs.annualSalary / 12, inputs.annualSalary),
     row('Bonus Income', inputs.bonusIncome / 12, inputs.bonusIncome),
+    row('Commission Income', inputs.annualCommissionIncome / 12, inputs.annualCommissionIncome),
     row('ESPP Income', inputs.esppIncome / 12, inputs.esppIncome),
     row('RSU Vesting Income', inputs.rsuVestingIncome / 12, inputs.rsuVestingIncome),
     row('Other Monthly Income', inputs.otherMonthlyIncome, inputs.otherMonthlyIncome * 12),
@@ -414,6 +416,9 @@ function normalizeBudgetInputs(rawInputs: unknown): BudgetInputs {
   if (!mergedInputs.spendingHistory) {
     mergedInputs.spendingHistory = initializeSpendingHistory();
   }
+  if (!mergedInputs.incomeHistory) {
+    mergedInputs.incomeHistory = initializeIncomeHistory();
+  }
   if (!Array.isArray(mergedInputs.debts)) {
     mergedInputs.debts = [];
   }
@@ -549,7 +554,7 @@ function createCompactShareInputs(inputs: BudgetInputs): Partial<BudgetInputs> {
   const compact: Partial<BudgetInputs> = {};
 
   for (const key of Object.keys(DEFAULT_INPUTS) as Array<keyof BudgetInputs>) {
-    if (key === 'spendingHistory') continue;
+    if (key === 'spendingHistory' || key === 'incomeHistory') continue;
 
     const currentValue = inputs[key];
     const defaultValue = DEFAULT_INPUTS[key];

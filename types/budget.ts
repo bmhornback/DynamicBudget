@@ -234,7 +234,7 @@ export interface TaxBreakdown {
   totalTaxMonthly: number;
   /** Effective total tax rate */
   effectiveTaxRate: number;
-  /** Annual supplemental income (bonus + ESPP + RSU; plus partner bonus in dual-income mode) */
+  /** Annual supplemental income (bonus + commission + ESPP + RSU; plus partner bonus in dual-income mode) */
   supplementalIncomeAnnual: number;
 }
 
@@ -299,6 +299,7 @@ export interface BudgetInputs {
   employerMatchCapPercent: number; // Cap on employer match (default 100%)
   userAge: number; // User's current age (0 = not specified; 50+ eligible for catch-up)
   bonusIncome: number;
+  annualCommissionIncome: number;
   bonusTaxMode: BonusTaxMode;
   esppIncome: number;
   rsuVestingIncome: number;
@@ -416,6 +417,7 @@ export interface BudgetInputs {
 
   // Spending history for trend tracking
   spendingHistory?: SpendingHistory;
+  incomeHistory?: IncomeHistory;
 }
 
 export interface BudgetBreakdown {
@@ -627,6 +629,22 @@ export interface CategoryMetrics {
 
 export interface SpendingHistory {
   entries: SpendingEntry[];
+  lastUpdated: string; // ISO timestamp
+  version: number;
+}
+
+export interface IncomeEntry {
+  id: string;
+  month: string; // YYYY-MM
+  basePay: number;
+  commission: number;
+  totalPay: number;
+  note?: string;
+  createdAt: string; // ISO timestamp
+}
+
+export interface IncomeHistory {
+  entries: IncomeEntry[];
   lastUpdated: string; // ISO timestamp
   version: number;
 }

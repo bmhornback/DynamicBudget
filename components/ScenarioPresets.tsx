@@ -29,6 +29,7 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset, currentI
     if (!trimmed) return;
     const scenarioInputs: Partial<BudgetInputs> = { ...currentInputs };
     delete scenarioInputs.spendingHistory;
+    delete scenarioInputs.incomeHistory;
     delete scenarioInputs.lockedFields;
 
     const preset: CustomPreset = {
@@ -143,4 +144,3 @@ export default function ScenarioPresets({ onApplyPreset, currentPreset, currentI
     </div>
   );
 }
-

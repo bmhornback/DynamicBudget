@@ -16,6 +16,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   employerMatchCapPercent: 100,
   userAge: 0,
   bonusIncome: 0,
+  annualCommissionIncome: 0,
   bonusTaxMode: 'blended_annual',
   esppIncome: 0,
   rsuVestingIncome: 0,
@@ -166,6 +167,7 @@ export const DEFAULT_INPUTS: BudgetInputs = {
   surplusAllocation: 'house_fund',
   payFrequency: 'semimonthly',
   spendingHistory: { entries: [], lastUpdated: '', version: 1 },
+  incomeHistory: { entries: [], lastUpdated: '', version: 1 },
 };
 
 export const SCENARIO_PRESETS: ScenarioPreset[] = [

@@ -41,7 +41,7 @@ export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps)
           <>
             <Row
               label="Your Gross Annual Salary"
-              value={formatCurrency(inputs.annualSalary + inputs.bonusIncome)}
+              value={formatCurrency(inputs.annualSalary + inputs.bonusIncome + inputs.annualCommissionIncome)}
             />
             <Row
               label="Partner Gross Annual Salary"
@@ -75,6 +75,13 @@ export default function IncomeSummary({ breakdown, inputs }: IncomeSummaryProps)
             label="Supplemental Income (included in gross)"
             value={formatCurrency(supplementalIncomeMonthly)}
             sub={`${formatCurrency(supplementalIncomeAnnual)}/yr`}
+          />
+        )}
+        {inputs.annualCommissionIncome > 0 && (
+          <Row
+            label="Commission Income"
+            value={formatCurrency(inputs.annualCommissionIncome / 12)}
+            sub={`${formatCurrency(inputs.annualCommissionIncome)}/yr`}
           />
         )}
         <Row

@@ -60,6 +60,14 @@ export const LEARN_GUIDES: LearnGuide[] = [
 
 export const LEARN_GLOSSARY_TERMS: GlossaryTerm[] = [
   {
+    term: 'Take-home pay',
+    definition: 'Income left after taxes and payroll deductions are taken out.',
+  },
+  {
+    term: 'Commission income',
+    definition: 'Variable pay earned from sales or performance, usually on top of base salary.',
+  },
+  {
     term: 'ESPP income',
     definition: 'Employee Stock Purchase Plan gains from buying company stock at a discount.',
   },
@@ -72,11 +80,47 @@ export const LEARN_GLOSSARY_TERMS: GlossaryTerm[] = [
     definition: 'Company retirement contribution based on your own 401(k) contribution rate.',
   },
   {
+    term: '401(k)',
+    definition: 'Employer-sponsored retirement account that lets you save from payroll contributions.',
+  },
+  {
+    term: 'IRA',
+    definition: 'Individual Retirement Account that you contribute to outside your employer plan.',
+  },
+  {
+    term: 'HSA',
+    definition: 'Health Savings Account for eligible high-deductible health plans, with tax advantages.',
+  },
+  {
+    term: 'Roth contribution',
+    definition: 'After-tax contribution now, typically tax-free qualified withdrawals in retirement.',
+  },
+  {
+    term: 'Traditional contribution',
+    definition: 'Pre-tax contribution that lowers taxable income now, taxed when withdrawn later.',
+  },
+  {
     term: 'Catch-up contributions',
     definition: 'Extra retirement contributions allowed after age 50 above standard annual limits.',
   },
   {
+    term: 'Tax withholding',
+    definition: 'Taxes taken from each paycheck before you receive the remaining pay.',
+  },
+  {
     term: 'Blended bonus tax rate',
     definition: 'Model that combines flat supplemental withholding with annual tax reconciliation effects.',
+  },
+  {
+    term: 'COLI',
+    definition: 'Cost of Living Index; compares how expensive one location is versus another.',
+  },
+  {
+    term: 'HOA',
+    definition: 'Homeowners Association fee for shared building/community maintenance and services.',
+  },
+  {
+    term: 'P25 / P50 / P75',
+    definition: 'Percentile scenarios used for income variability: bad month, typical month, and good month.',
   },
 ];

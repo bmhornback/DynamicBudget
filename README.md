@@ -39,6 +39,7 @@ Take your overall salary, subtract taxes, ensure savings, and dynamically alloca
 
 ### Spending Trends & Analytics
 - 📉 **Track Actual Spending** — Log your expenses in real-time by category (dining out, gasoline, utilities, online shopping, etc.)
+- 💵 **Track Actual Income** — Log monthly base pay and commission to compare actual earnings versus projected income
 - 📊 **View Trends** — See how your actual spending compares to your budget over 6 months
 - 📈 **Visual Charts** — Monthly spending trends with budget vs. actual comparisons (powered by Recharts)
 - 💡 **Smart Insights** — Get alerts when you're overspending or when spending is trending upward

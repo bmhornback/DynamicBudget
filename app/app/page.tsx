@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import type { BudgetInputs, NamedBudget, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory } from '@/types/budget';
+import type { BudgetInputs, NamedBudget, RebalanceStrategy, SurplusAllocation, RebalanceResult, SpendingHistory, IncomeHistory } from '@/types/budget';
 import { DEFAULT_INPUTS, SCENARIO_PRESETS, applyScenarioPreset } from '@/lib/defaultScenarios';
 import { calculateBudgetBreakdown } from '@/lib/budgetCalculations';
 import { calculateBudgetHealthScore } from '@/lib/budgetHealthScore';
@@ -17,6 +17,7 @@ import {
 } from '@/lib/scenarioComparison';
 import { calculateDebtPayoffProjection } from '@/lib/debtPayoff';
 import { initializeSpendingHistory } from '@/lib/spendingTrends';
+import { initializeIncomeHistory } from '@/lib/incomeTrends';
 import {
   saveBudgetInputs,
   loadBudgetInputs,
@@ -32,7 +33,9 @@ import ScenarioPresets from '@/components/ScenarioPresets';
 import RebalanceControls from '@/components/RebalanceControls';
 import ScenarioComparison from '@/components/ScenarioComparison';
 import SpendingTracker from '@/components/SpendingTracker';
+import IncomeTracker from '@/components/IncomeTracker';
 import TrendAnalysis from '@/components/TrendAnalysis';
+import IncomeTrendAnalysis from '@/components/IncomeTrendAnalysis';
 import BusinessExpensesGuide from '@/components/BusinessExpensesGuide';
 import MyBudgets from '@/components/MyBudgets';
 import OnboardingCard from '@/components/OnboardingCard';
@@ -86,6 +89,9 @@ export default function DynamicBudgetPage() {
     const defaults = { ...DEFAULT_INPUTS };
     if (!defaults.spendingHistory) {
       defaults.spendingHistory = initializeSpendingHistory();
+    }
+    if (!defaults.incomeHistory) {
+      defaults.incomeHistory = initializeIncomeHistory();
     }
     return { sharedInputs: null, initialInputs: defaults };
   });
@@ -377,6 +383,16 @@ export default function DynamicBudgetPage() {
       setInputs((prev) => ({
         ...prev,
         spendingHistory: history,
+      }));
+    },
+    []
+  );
+
+  const handleIncomeHistoryChange = useCallback(
+    (history: IncomeHistory) => {
+      setInputs((prev) => ({
+        ...prev,
+        incomeHistory: history,
       }));
     },
     []
@@ -696,6 +712,10 @@ export default function DynamicBudgetPage() {
             >
               <aside className={`w-full md:w-96 md:shrink-0 ${showForm ? 'block' : 'hidden md:block'}`}>
                 <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                  <IncomeTracker
+                    incomeHistory={inputs.incomeHistory}
+                    onHistoryChange={handleIncomeHistoryChange}
+                  />
                   <SpendingTracker
                     spendingHistory={inputs.spendingHistory}
                     onHistoryChange={handleSpendingHistoryChange}
@@ -704,6 +724,12 @@ export default function DynamicBudgetPage() {
               </aside>
 
               <div className={`flex-1 min-w-0 ${!showForm ? 'block' : 'hidden md:block'}`}>
+                <div className="mb-4">
+                  <IncomeTrendAnalysis
+                    incomeHistory={inputs.incomeHistory}
+                    inputs={inputs}
+                  />
+                </div>
                 <TrendAnalysis
                   spendingHistory={inputs.spendingHistory}
                   inputs={inputs}
