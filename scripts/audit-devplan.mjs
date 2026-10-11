@@ -120,6 +120,7 @@ const COMPLETED_TASKS = {
   'E13-T2': 'QuickBooks read-only connector MVP in lib/accountingConnectors.ts with sync trigger, category mapping, and import review metadata',
   'E13-T3': 'QuickBooks phase-2 write-back guardrails and reconciliation report generation in lib/accountingConnectors.ts with approved-only queueing and mismatch review gating',
   'E13-T4': 'Additional accounting connector expansion in lib/accountingConnectors.ts for Xero, Wave, CSV, and Plaid with a shared static-first adapter framework',
+  'E13-T5': 'Accountant package export in lib/accountingConnectors.ts with period summary, categorized expenses, receipt references, adjustment log, and year-end readiness checklist',
   'E8-T1': 'provider catalog, scorecard weights, and default recommendation in lib/backendProviders.ts',
   'E8-T2': 'provider-aware auth adapter contract and local-only fallback documented in code and DEV_PLAN; OAuth flow remains design-only and not implemented',
   'E8-T3': 'provider-backed budget CRUD + adapter contract coverage for named budget saves and lookups',

@@ -125,6 +125,70 @@ export interface AccountingReconciliationReport {
   status: 'clean' | 'review' | 'blocked';
 }
 
+export interface AccountingPackageExpenseSummary {
+  category: TrackableCategory;
+  label: string;
+  total: number;
+  transactionCount: number;
+  percentOfTotal: number;
+}
+
+export interface AccountingPackageReceiptReference {
+  id: string;
+  merchant: string;
+  date: string;
+  amount: number;
+  category: TrackableCategory;
+  receiptId?: string;
+  source: 'quickbooks' | 'manual' | 'csv';
+  note?: string;
+}
+
+export interface AccountingPackageAdjustmentEntry {
+  id: string;
+  type: 'category' | 'amount' | 'review' | 'receipt';
+  description: string;
+  amount?: number;
+  status: 'pending' | 'review' | 'resolved';
+  createdAt: string;
+}
+
+export interface AccountingReadinessChecklistItem {
+  id: string;
+  title: string;
+  description: string;
+  status: 'done' | 'pending' | 'review';
+  dueDate: string;
+  owner: 'bookkeeper' | 'accountant' | 'tax-preparer' | 'owner';
+}
+
+export interface AccountingTaxDocumentReminder {
+  id: string;
+  title: string;
+  dueDate: string;
+  status: 'pending' | 'received' | 'review';
+  summary: string;
+}
+
+export interface AccountingPackageExport {
+  id: string;
+  connectorId: AccountingConnectorId;
+  generatedAt: string;
+  periodLabel: string;
+  summary: {
+    totalTransactions: number;
+    totalExpenseAmount: number;
+    reviewRequired: boolean;
+    matchedTransactions: number;
+    unresolvedMismatches: number;
+  };
+  categorizedExpenses: AccountingPackageExpenseSummary[];
+  supportingReceiptReferences: AccountingPackageReceiptReference[];
+  adjustmentLog: AccountingPackageAdjustmentEntry[];
+  readinessChecklist: AccountingReadinessChecklistItem[];
+  taxDocumentReminders: AccountingTaxDocumentReminder[];
+}
+
 export interface AccountingConnectorAdapter {
   readonly providerId: AccountingConnectorId;
   readonly auth: StaticAuthFlow;
@@ -139,6 +203,7 @@ export interface AccountingConnectorAdapter {
   writeBackApprovedTransactions: (transactions: AccountingWritebackTransaction[]) => Promise<AccountingWritebackResult>;
   generateReconciliationReport: () => Promise<AccountingReconciliationReport>;
   getReconciliationReport: () => AccountingReconciliationReport | null;
+  generateAccountantPackage: (periodLabel?: string) => AccountingPackageExport;
 }
 
 const CONNECTOR_SCORE_WEIGHTS = {
@@ -607,6 +672,106 @@ export function createAccountingConnectorAdapter(
       mismatches: state.reconciliationReport.mismatches.map((entry) => ({ ...entry })),
     } : null,
     generateReconciliationReport: async () => buildReconciliationReport(),
+    generateAccountantPackage: (periodLabel = 'Year-to-date') => {
+      const snapshot = state.readOnlySnapshot;
+      const transactions = snapshot?.transactions ?? [];
+      const expenseRecords = snapshot?.expenses ?? [];
+      const totalExpenseAmount = expenseRecords.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+
+      const groupedExpenses = expenseRecords.reduce<Record<string, { total: number; transactionCount: number }>>((acc, entry) => {
+        const category = normalizeTrackableCategory(entry.category ?? 'other', 'other');
+        const current = acc[category] ?? { total: 0, transactionCount: 0 };
+        acc[category] = {
+          total: current.total + (Number(entry.amount) || 0),
+          transactionCount: current.transactionCount + 1,
+        };
+        return acc;
+      }, {});
+
+      const categorized: AccountingPackageExpenseSummary[] = Object.entries(groupedExpenses).map(([category, totals]) => ({
+        category: category as TrackableCategory,
+        label: category.replace(/_/g, ' '),
+        total: totals.total,
+        transactionCount: totals.transactionCount,
+        percentOfTotal: totalExpenseAmount > 0 ? (totals.total / totalExpenseAmount) * 100 : 0,
+      }));
+
+      const receiptReferences: AccountingPackageReceiptReference[] = [...transactions].slice(0, 4).map((transaction, index) => ({
+        id: `${transaction.id}-receipt`,
+        merchant: transaction.accountName || `Transaction ${index + 1}`,
+        date: transaction.lastUpdatedAt ?? new Date().toISOString().slice(0, 10),
+        amount: Number(transaction.amount) || 0,
+        category: normalizeTrackableCategory(transaction.category ?? 'other', 'other'),
+        receiptId: transaction.id,
+        source: providerId === 'quickbooks' ? 'quickbooks' : 'manual',
+        note: transaction.connectedTo ? `Linked to ${transaction.connectedTo}` : undefined,
+      }));
+
+      const adjustmentLog: AccountingPackageAdjustmentEntry[] = [
+        {
+          id: `${providerId}-adj-1`,
+          type: 'review',
+          description: `${definition.name} sync review required before write-back is approved.`,
+          status: state.reconciliationReport?.reviewRequired ? 'review' : 'resolved',
+          createdAt: state.reconciliationReport?.generatedAt ?? new Date().toISOString(),
+        },
+      ];
+
+      const readinessChecklist: AccountingReadinessChecklistItem[] = [
+        {
+          id: `${providerId}-check-1`,
+          title: 'Review imported transactions',
+          description: 'Confirm the mapped categories and any missing account metadata before closing the period.',
+          status: state.reconciliationReport?.reviewRequired ? 'review' : 'done',
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 21).toISOString().slice(0, 10),
+          owner: 'accountant',
+        },
+        {
+          id: `${providerId}-check-2`,
+          title: 'Attach receipt references',
+          description: 'Include supporting transaction receipts or source documents for large or unusual expenses.',
+          status: receiptReferences.length > 0 ? 'done' : 'pending',
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString().slice(0, 10),
+          owner: 'owner',
+        },
+      ];
+
+      const taxDocumentReminders: AccountingTaxDocumentReminder[] = [
+        {
+          id: `${providerId}-tax-1`,
+          title: '1099 / tax document packet',
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45).toISOString().slice(0, 10),
+          status: 'pending',
+          summary: 'Collect year-end statements, brokerage or lender documents, and any large transaction memos for tax prep.',
+        },
+        {
+          id: `${providerId}-tax-2`,
+          title: 'Expense categorization memo',
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60).toISOString().slice(0, 10),
+          status: 'review',
+          summary: 'Review material changes to business or personal expense categories before filing.',
+        },
+      ];
+
+      return {
+        id: `accountant-package-${providerId}-${Date.now()}`,
+        connectorId: providerId,
+        generatedAt: new Date().toISOString(),
+        periodLabel,
+        summary: {
+          totalTransactions: transactions.length,
+          totalExpenseAmount,
+          reviewRequired: Boolean(state.reconciliationReport?.reviewRequired),
+          matchedTransactions: state.reconciliationReport?.matchedTransactions ?? 0,
+          unresolvedMismatches: state.reconciliationReport?.unresolvedCount ?? 0,
+        },
+        categorizedExpenses: categorized,
+        supportingReceiptReferences: receiptReferences,
+        adjustmentLog,
+        readinessChecklist,
+        taxDocumentReminders,
+      } satisfies AccountingPackageExport;
+    },
     writeBackApprovedTransactions: async (transactions: AccountingWritebackTransaction[]) => {
       if (!configured) {
         const rejected = transactions.map((entry) => ({
