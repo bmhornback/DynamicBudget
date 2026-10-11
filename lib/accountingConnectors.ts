@@ -98,7 +98,7 @@ export interface AccountingWritebackResult {
 export interface AccountingReconciliationMismatch {
   transactionId: string;
   accountId?: string;
-  expectedCategory?: TrackableCategory;
+  expectedCategory?: string;
   actualCategory?: TrackableCategory;
   expectedAmount?: number;
   actualAmount?: number;
@@ -506,13 +506,14 @@ export function createAccountingConnectorAdapter(
 
     for (const transaction of transactions) {
       const mapped = adapter.mapCategory(transaction.category ?? 'other');
-      const originalCategory = normalizeTrackableCategory(transaction.category, 'other');
+      const originalCategory = transaction.category?.trim() ? transaction.category.trim() : 'other';
+      const canonicalCategory = normalizeTrackableCategory(transaction.category, 'other');
       const expectedAmount = typeof transaction.amount === 'number' && Number.isFinite(transaction.amount)
         ? transaction.amount
         : undefined;
       const hasPositiveAmount = expectedAmount !== undefined && expectedAmount > 0;
 
-      const resolvedCategory = mapped.targetCategory ?? originalCategory;
+      const resolvedCategory = mapped.targetCategory ?? canonicalCategory;
 
       if (mapped.matched && hasPositiveAmount) {
         matchedTransactions += 1;
@@ -557,7 +558,7 @@ export function createAccountingConnectorAdapter(
       matchedTransactions,
       mismatches,
       unresolvedCount,
-      approvedWritebackCount: 0,
+      approvedWritebackCount: Math.max(0, transactions.length - unresolvedCount),
       reviewRequired,
       status: reviewRequired ? 'review' : 'clean',
     };
@@ -689,8 +690,17 @@ export function createAccountingConnectorAdapter(
       };
 
       if (approvedTransactions.length === 0) {
+        const failedReport: AccountingReconciliationReport = {
+          ...report,
+          generatedAt: new Date().toISOString(),
+          approvedWritebackCount: 0,
+          reviewRequired: true,
+          status: 'blocked',
+          summary: `${definition.name} blocked all write-back transactions because validation rejected them.`,
+        };
         const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'failed', 'Write-back validation rejected all transactions', 'reviewed_transactions');
         state.syncLog.unshift(logEntry);
+        state.reconciliationReport = failedReport;
         return result;
       }
 
@@ -709,7 +719,7 @@ export function createAccountingConnectorAdapter(
         summary: `${definition.name} approved ${approvedTransactions.length} transaction(s) for write-back after review.`,
       };
 
-      const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'success', 'Approved write-back queued', 'reviewed_transactions');
+      const logEntry = buildSyncStatusEntry(providerId, new Date().toISOString(), 'success', result.message, 'reviewed_transactions');
       state.syncLog.unshift(logEntry);
       state.reconciliationReport = nextReport;
       return { ...result, reconciliationId: nextReportId };
