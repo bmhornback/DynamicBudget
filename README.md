@@ -106,7 +106,7 @@ The app is fully local-first and stores data in the browser (`localStorage`), so
 npm run build
 
 # Serve the built app locally (preview the production output)
-npm run start
+npx serve out
 ```
 
 The generated app is static and can be hosted on GitHub Pages, Netlify, or any static host. In production builds, the app applies the `/DynamicBudget` base path used for GitHub Pages.
