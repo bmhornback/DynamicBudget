@@ -136,8 +136,8 @@ export interface AccountingConnectorAdapter {
   syncNow(): Promise<AccountingSyncStatus>;
   mapCategory(category: string): ConnectorMappingResult;
   getReadOnlySnapshot(): AccountingImportSnapshot | null;
-  writeBackApprovedTransactions?: (transactions: AccountingWritebackTransaction[]) => Promise<AccountingWritebackResult>;
-  generateReconciliationReport: () => AccountingReconciliationReport;
+  writeBackApprovedTransactions: (transactions: AccountingWritebackTransaction[]) => Promise<AccountingWritebackResult>;
+  generateReconciliationReport: () => Promise<AccountingReconciliationReport>;
   getReconciliationReport: () => AccountingReconciliationReport | null;
 }
 
@@ -558,7 +558,7 @@ export function createAccountingConnectorAdapter(
       matchedTransactions,
       mismatches,
       unresolvedCount,
-      approvedWritebackCount: Math.max(0, transactions.length - unresolvedCount),
+      approvedWritebackCount: matchedTransactions,
       reviewRequired,
       status: reviewRequired ? 'review' : 'clean',
     };
@@ -606,7 +606,7 @@ export function createAccountingConnectorAdapter(
       ...state.reconciliationReport,
       mismatches: state.reconciliationReport.mismatches.map((entry) => ({ ...entry })),
     } : null,
-    generateReconciliationReport: () => buildReconciliationReport(),
+    generateReconciliationReport: async () => buildReconciliationReport(),
     writeBackApprovedTransactions: async (transactions: AccountingWritebackTransaction[]) => {
       if (!configured) {
         const rejected = transactions.map((entry) => ({
@@ -709,7 +709,7 @@ export function createAccountingConnectorAdapter(
         ...report,
         id: nextReportId,
         generatedAt: new Date().toISOString(),
-        totalTransactions: approvedTransactions.length,
+        totalTransactions: report.totalTransactions,
         matchedTransactions: approvedTransactions.length,
         mismatches: [],
         unresolvedCount: 0,

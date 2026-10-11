@@ -50,9 +50,9 @@ describe('accountingConnectors', () => {
     expect(mapped.targetCategory).toBe('groceries');
     expect(mapped.confidence).toBeGreaterThan(0.5);
 
-    const report = configured.generateReconciliationReport?.();
-    expect(report?.status).toBe('review');
-    expect(report?.reviewRequired).toBe(true);
+    const report = await configured.generateReconciliationReport();
+    expect(report.status).toBe('review');
+    expect(report.reviewRequired).toBe(true);
 
     const blockedWrite = await configured.writeBackApprovedTransactions?.([
       { id: 'tx-1', merchant: 'Whole Foods', amount: 128.45, date: '2026-10-10', category: 'groceries' },
