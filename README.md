@@ -71,6 +71,11 @@ Visit the landing page at: https://bmhornback.github.io/DynamicBudget
 Open the budget planner directly at: https://bmhornback.github.io/DynamicBudget/app
 
 ### Run Locally
+
+Prerequisites:
+- Node.js 20+ recommended
+- npm (included with Node.js)
+
 ```bash
 # Clone the repository
 git clone https://github.com/bmhornback/DynamicBudget.git
@@ -79,21 +84,32 @@ cd DynamicBudget
 # Install dependencies
 npm install
 
-# Start the development server
+# Start the local development server
 npm run dev
-
-# Open http://localhost:3000 in your browser
 ```
 
-### Build for Production
+Then open:
+- http://localhost:3000
+
+If port 3000 is already in use, start on a different port:
+
 ```bash
-# Create a static export
+PORT=3001 npm run dev
+```
+
+The app is fully local-first and stores data in the browser (`localStorage`), so no backend or database setup is required for local use.
+
+### Preview a Production Build Locally
+
+```bash
+# Build the static export
 npm run build
 
-# The app is ready in the `out/` directory
-# GitHub Pages project-site paths are prefixed for /DynamicBudget in production builds
-# Can be hosted on GitHub Pages, Netlify, or any static host
+# Serve the built app locally (preview the production output)
+npm run start
 ```
+
+The generated app is static and can be hosted on GitHub Pages, Netlify, or any static host. In production builds, the app applies the `/DynamicBudget` base path used for GitHub Pages.
 
 ## How It Works
 
