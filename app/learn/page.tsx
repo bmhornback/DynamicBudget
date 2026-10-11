@@ -69,7 +69,7 @@ export default function LearnPage() {
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Glossary (Planner Terms)</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-gray-300">
-            Definitions for the key planner terms used across housing, retirement, taxes, and cost-of-living decisions.
+            Definitions for the key planner terms used across income, housing, retirement, taxes, and cost-of-living decisions.
           </p>
           <dl className="mt-4 space-y-3">
             {LEARN_GLOSSARY_TERMS.map((entry) => (

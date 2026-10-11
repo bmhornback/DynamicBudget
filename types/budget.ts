@@ -640,7 +640,7 @@ export interface IncomeEntry {
   commission: number;
   totalPay: number;
   note?: string;
-  createdAt: string; // ISO timestamp
+  createdAt?: string; // ISO timestamp; optional for legacy/imported data
 }
 
 export interface IncomeHistory {

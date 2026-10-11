@@ -19,12 +19,14 @@ export default function IncomeTracker({ incomeHistory, onHistoryChange }: Income
   const [commission, setCommission] = useState('');
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const canSubmit = useMemo(() => {
     if (!incomeHistory) return false;
     const base = Number(basePay);
     const comm = Number(commission || '0');
-    return /^\d{4}-(0[1-9]|1[0-2])$/.test(month.trim()) && base > 0 && comm >= 0;
+    const monthIsValid = /^\d{4}-(0[1-9]|1[0-2])$/.test(month.trim());
+    return monthIsValid && !Number.isNaN(base) && base > 0 && !Number.isNaN(comm) && comm >= 0;
   }, [basePay, commission, incomeHistory, month]);
 
   const handleSubmit = useCallback((event: React.FormEvent) => {
@@ -32,6 +34,7 @@ export default function IncomeTracker({ incomeHistory, onHistoryChange }: Income
     if (!incomeHistory || !canSubmit) return;
 
     setIsSubmitting(true);
+    setErrorMessage('');
     try {
       const updated = addIncomeEntry(
         incomeHistory,
@@ -45,6 +48,8 @@ export default function IncomeTracker({ incomeHistory, onHistoryChange }: Income
       setCommission('');
       setNote('');
       setMonth(currentMonthValue());
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to save this income entry.');
     } finally {
       setIsSubmitting(false);
     }
@@ -115,6 +120,9 @@ export default function IncomeTracker({ incomeHistory, onHistoryChange }: Income
             placeholder="e.g., Enterprise close"
           />
         </div>
+        {errorMessage ? (
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+        ) : null}
         <button
           type="submit"
           disabled={!canSubmit || isSubmitting}

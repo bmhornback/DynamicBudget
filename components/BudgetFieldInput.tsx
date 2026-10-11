@@ -161,7 +161,7 @@ export default function BudgetFieldInput({
                   aria-expanded={showDefinition}
                   aria-controls={definitionId}
                   onClick={() => {
-                    const nextPinned = !definitionPinnedRef.current;
+                    const nextPinned = !definitionPinnedRef.current || !showDefinition;
                     definitionPinnedRef.current = nextPinned;
                     setShowDefinition(nextPinned);
                   }}

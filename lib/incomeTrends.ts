@@ -54,17 +54,26 @@ export interface MonthlyIncomeSummary {
 }
 
 export function getMonthlyIncomeSummary(history: IncomeHistory): MonthlyIncomeSummary[] {
-  const byMonth = new Map<string, IncomeEntry>();
+  const byMonth = new Map<string, { entry: IncomeEntry; order: number }>();
+  const FALLBACK_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 
-  history.entries.forEach((entry) => {
+  history.entries.forEach((entry, index) => {
     const current = byMonth.get(entry.month);
-    // Defensive guard for any legacy/imported data that might contain duplicates.
-    if (!current || new Date(entry.createdAt).getTime() >= new Date(current.createdAt).getTime()) {
-      byMonth.set(entry.month, entry);
+    const entryTimestamp = entry.createdAt ?? FALLBACK_TIMESTAMP;
+    const currentTimestamp = current?.entry.createdAt ?? FALLBACK_TIMESTAMP;
+
+    // Legacy/imported entries may be missing createdAt. Treat that as earliest and use the later
+    // iteration as the tiebreaker so the last-seen value wins for same-month duplicates.
+    if (
+      !current ||
+      entryTimestamp > currentTimestamp ||
+      (entryTimestamp === currentTimestamp && index > current.order)
+    ) {
+      byMonth.set(entry.month, { entry, order: index });
     }
   });
 
-  return Array.from(byMonth.values())
+  return Array.from(byMonth.values()).map(({ entry }) => entry)
     .map((entry) => ({
       month: entry.month,
       basePay: entry.basePay,
