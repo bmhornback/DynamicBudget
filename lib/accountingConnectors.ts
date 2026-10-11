@@ -91,6 +91,7 @@ export interface AccountingWritebackResult {
   submittedCount: number;
   rejectedCount: number;
   transactionIds: string[];
+  rejectedTransactions?: AccountingWritebackRejection[];
   reconciliationId?: string;
 }
 
@@ -103,6 +104,11 @@ export interface AccountingReconciliationMismatch {
   actualAmount?: number;
   reason: string;
   resolution: 'approve' | 'review' | 'ignore';
+}
+
+export interface AccountingWritebackRejection {
+  id: string;
+  reason: string;
 }
 
 export interface AccountingReconciliationReport {
@@ -130,9 +136,9 @@ export interface AccountingConnectorAdapter {
   syncNow(): Promise<AccountingSyncStatus>;
   mapCategory(category: string): ConnectorMappingResult;
   getReadOnlySnapshot(): AccountingImportSnapshot | null;
-  writeBackApprovedTransactions?(transactions: AccountingWritebackTransaction[]): Promise<AccountingWritebackResult>;
-  generateReconciliationReport?(): AccountingReconciliationReport;
-  getReconciliationReport?(): AccountingReconciliationReport | null;
+  writeBackApprovedTransactions?: (transactions: AccountingWritebackTransaction[]) => Promise<AccountingWritebackResult>;
+  generateReconciliationReport: () => AccountingReconciliationReport;
+  getReconciliationReport: () => AccountingReconciliationReport | null;
 }
 
 const CONNECTOR_SCORE_WEIGHTS = {
@@ -194,7 +200,7 @@ export const ACCOUNTING_CONNECTOR_CATALOG: AccountingConnectorDefinition[] = [
       accounts: true,
     },
     authProviders: ['quickbooks'],
-    bestFor: ['approved write-back', 'reconciliation review', 'account mapping'],
+    bestFor: ['read-only import', 'manual sync review', 'approved write-back', 'reconciliation review', 'account mapping'],
     score: 0,
   },
   {
@@ -461,7 +467,7 @@ export function createAccountingConnectorAdapter(
 
     for (const transaction of transactions) {
       const mapped = adapter.mapCategory(transaction.category ?? 'other');
-      const expectedCategory = mapped.targetCategory;
+      const originalCategory = (transaction.category ?? 'other') as TrackableCategory;
       const expectedAmount = typeof transaction.amount === 'number' ? transaction.amount : undefined;
 
       if (mapped.matched && expectedAmount !== undefined) {
@@ -470,11 +476,20 @@ export function createAccountingConnectorAdapter(
         mismatches.push({
           transactionId: transaction.id,
           accountId: transaction.accountId,
-          expectedCategory,
+          expectedCategory: originalCategory,
           actualCategory: mapped.targetCategory,
           expectedAmount,
-          actualAmount: expectedAmount,
-          reason: 'Category mapping needs review before write-back.',
+          reason: `Category mapping could not be confirmed for ${transaction.accountName || transaction.id}; manual review is required before write-back.`,
+          resolution: 'review',
+        });
+      } else {
+        mismatches.push({
+          transactionId: transaction.id,
+          accountId: transaction.accountId,
+          expectedCategory: originalCategory,
+          actualCategory: mapped.targetCategory,
+          expectedAmount,
+          reason: 'Amount or category metadata is missing; manual review is required before write-back.',
           resolution: 'review',
         });
       }
@@ -551,6 +566,10 @@ export function createAccountingConnectorAdapter(
           submittedCount: 0,
           rejectedCount: transactions.length,
           transactionIds: transactions.map((entry) => entry.id),
+          rejectedTransactions: transactions.map((entry) => ({
+            id: entry.id,
+            reason: 'Connector is not configured for write-back.',
+          })),
         };
       }
 
@@ -561,10 +580,14 @@ export function createAccountingConnectorAdapter(
           submittedCount: 0,
           rejectedCount: transactions.length,
           transactionIds: transactions.map((entry) => entry.id),
+          rejectedTransactions: transactions.map((entry) => ({
+            id: entry.id,
+            reason: 'Connector capability does not allow write-back.',
+          })),
         };
       }
 
-      const report = buildReconciliationReport();
+      const report = state.reconciliationReport ?? buildReconciliationReport();
       const hasReviewIssues = report.reviewRequired;
       if (hasReviewIssues) {
         return {
@@ -573,17 +596,40 @@ export function createAccountingConnectorAdapter(
           submittedCount: 0,
           rejectedCount: transactions.length,
           transactionIds: transactions.map((entry) => entry.id),
+          rejectedTransactions: transactions.map((entry) => ({
+            id: entry.id,
+            reason: 'Reconciliation requires manual review before approval.',
+          })),
           reconciliationId: report.id,
         };
       }
 
-      const approvedTransactions = transactions.filter((entry) => entry.amount > 0 && entry.category && entry.merchant.trim().length > 0);
+      const rejectedTransactions: AccountingWritebackRejection[] = [];
+      const approvedTransactions = transactions.filter((entry) => {
+        if (!Number.isFinite(entry.amount) || entry.amount <= 0) {
+          rejectedTransactions.push({ id: entry.id, reason: 'Amount must be a finite number greater than zero.' });
+          return false;
+        }
+        if (!entry.category) {
+          rejectedTransactions.push({ id: entry.id, reason: 'Category is required.' });
+          return false;
+        }
+        if (!entry.merchant.trim()) {
+          rejectedTransactions.push({ id: entry.id, reason: 'Merchant name is required.' });
+          return false;
+        }
+        return true;
+      });
+
       const result: AccountingWritebackResult = {
-        status: 'success',
-        message: `Approved ${approvedTransactions.length} transaction(s) queued for ${definition.name} write-back.`,
+        status: approvedTransactions.length === 0 ? 'rejected' : 'success',
+        message: approvedTransactions.length === 0
+          ? `No transactions were approved for ${definition.name} write-back because they failed validation.`
+          : `Approved ${approvedTransactions.length} transaction(s) queued for ${definition.name} write-back.`,
         submittedCount: approvedTransactions.length,
-        rejectedCount: Math.max(0, transactions.length - approvedTransactions.length),
+        rejectedCount: rejectedTransactions.length,
         transactionIds: approvedTransactions.map((entry) => entry.id),
+        rejectedTransactions,
         reconciliationId: report.id,
       };
 
