@@ -5,6 +5,7 @@ import {
   getDefaultAccountingConnectorRecommendation,
   getStaticAccountingAuthFlow,
   rankAccountingConnectors,
+  type AccountingConnectorId,
 } from '../accountingConnectors';
 
 describe('accountingConnectors', () => {
@@ -36,7 +37,7 @@ describe('accountingConnectors', () => {
     await expect(unconfigured.signInWithOAuth?.('google')).resolves.toMatchObject({ status: 'not_configured' });
     await expect(configured.signInWithOAuth?.('quickbooks')).resolves.toMatchObject({ status: 'success' });
     await expect(configured.signInWithOAuth?.('google')).resolves.toMatchObject({ status: 'skipped' });
-    await expect(() => createAccountingConnectorAdapter('missing' as any)).toThrow('Unsupported accounting connector ID');
+    await expect(() => createAccountingConnectorAdapter('missing' as AccountingConnectorId)).toThrow('Unsupported accounting connector ID');
 
     const syncStatus = await configured.syncNow();
     expect(syncStatus.status).toBe('success');
