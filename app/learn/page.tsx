@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { LEARN_GUIDES } from '@/lib/learnContent';
+import { LEARN_GLOSSARY_TERMS, LEARN_GUIDES } from '@/lib/learnContent';
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
@@ -64,6 +64,21 @@ export default function LearnPage() {
               <p className="mt-4 text-sm font-medium text-sky-700 dark:text-sky-300">{guide.cta}</p>
             </article>
           ))}
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Glossary (Planner Terms)</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-gray-300">
+            Definitions for the key planner terms used across income, housing, retirement, taxes, and cost-of-living decisions.
+          </p>
+          <dl className="mt-4 space-y-3">
+            {LEARN_GLOSSARY_TERMS.map((entry) => (
+              <div key={entry.term}>
+                <dt className="text-sm font-semibold text-slate-900 dark:text-white">{entry.term}</dt>
+                <dd className="mt-1 text-sm text-slate-600 dark:text-gray-300">{entry.definition}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
       </div>
     </main>

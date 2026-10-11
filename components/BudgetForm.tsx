@@ -533,6 +533,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         />
 
         {field('bonusIncome', 'Annual Bonus Income', undefined, 'annual', 'One-time or periodic cash compensation outside base salary, often paid quarterly or annually.')}
+        {field('annualCommissionIncome', 'Annual Commission Income', undefined, 'annual', 'Variable pay based on sales or performance results, tracked separately from base salary and bonuses.')}
         <ToggleField
           label={`Bonus Tax Modeling: ${BONUS_TAX_MODE_LABELS[inputs.bonusTaxMode]}`}
           value={inputs.bonusTaxMode === 'lump_sum_withholding'}

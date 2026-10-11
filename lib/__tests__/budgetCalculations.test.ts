@@ -49,6 +49,14 @@ describe('budgetCalculations', () => {
       expect(result.taxes.supplementalIncomeAnnual).toBeCloseTo(30000, 0);
     });
 
+    it('should include commission income in gross and supplemental totals', () => {
+      const inputs = { ...DEFAULT_INPUTS, annualCommissionIncome: 24000 };
+      const result = calculateBudgetBreakdown(inputs);
+
+      expect(result.taxes.grossAnnual).toBeCloseTo(DEFAULT_INPUTS.annualSalary + 24000, 0);
+      expect(result.taxes.supplementalIncomeAnnual).toBeCloseTo(24000, 0);
+    });
+
     it('should calculate housing expense total correctly', () => {
       const inputs = {
         ...DEFAULT_INPUTS,
