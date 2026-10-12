@@ -24,7 +24,7 @@ export default function PlanningAssumptionsCard({
     {
       label: 'Retirement treatment',
       detail: inputs.is401kRoth
-        ? 'Roth 401(k) contributions stay after-tax, while Traditional IRA and HSA contributions reduce taxable income when enabled.'
+        ? 'Roth 401(k) and Roth IRA contributions stay after-tax, while Traditional 401(k), Traditional IRA, and HSA contributions reduce taxable income when enabled.'
         : 'Traditional 401(k), Traditional IRA, and HSA contributions reduce taxable income before take-home is estimated.',
     },
     {

@@ -508,7 +508,7 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
           label="Roth 401(k)"
           value={inputs.is401kRoth}
           onChange={(v) => onChange({ is401kRoth: v })}
-          description="After-tax contributions; no tax deduction now, tax-free in retirement"
+          description="After-tax 401(k) contributions; no tax deduction now, tax-free in retirement"
         />
 
         {field('employerMatchPercent', 'Employer Match %', undefined, 'monthly', undefined, false, false)}
@@ -564,6 +564,16 @@ export default function BudgetForm({ inputs, onChange, onToggleLock }: BudgetFor
         )}
 
         {field('iraContribution', 'Monthly IRA Contribution', inputs.userAge >= 50 ? 'Capped at $8,000/year' : 'Capped at $7,000/year', 'monthly', 'Amount you personally contribute to an Individual Retirement Account each month.')}
+
+        <SelectField
+          label="IRA Type"
+          value={inputs.iraType}
+          options={[
+            { value: 'traditional', label: 'Traditional IRA' },
+            { value: 'roth', label: 'Roth IRA' },
+          ]}
+          onChange={(v) => onChange({ iraType: v as typeof inputs.iraType })}
+        />
 
         <SelectField
           label="Pay Frequency"
